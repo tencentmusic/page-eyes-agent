@@ -1,0 +1,24 @@
+[project]
+name = "ieyes-agent"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "adbutils>=2.8.10",
+    "loguru>=0.7.3",
+    "pydantic-ai>=0.2.6",
+]
+
+[[tool.uv.index]]
+# 腾讯镜像源，同步自pypi
+url = "https://mirrors.tencent.com/pypi/simple"
+name = "mirrors_pypi"
+default = true
+
+[[tool.uv.index]]
+# 腾讯镜像源，同步自pypi
+url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
+name = "tencent_pypi"
+
+
