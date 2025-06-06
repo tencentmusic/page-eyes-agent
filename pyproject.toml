@@ -7,6 +7,8 @@ requires-python = ">=3.12"
 dependencies = [
     "adbutils>=2.8.10",
     "loguru>=0.7.3",
+    "nest-asyncio>=1.6.0",
+    "playwright>=1.52.0",
     "pydantic-ai>=0.2.6",
 ]
 

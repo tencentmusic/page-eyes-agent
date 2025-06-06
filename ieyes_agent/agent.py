@@ -3,17 +3,19 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 15:31
+import asyncio
 import json
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union
 
-from pydantic_ai import Agent, ModelRetry, RunContext, Tool
+from loguru import logger
 from pydantic import BaseModel
+from pydantic_ai import Agent
 
 from .deps import AgentDeps
+from .device import WebDevice, AndroidDevice, AsyncWebDevice
 from .prompt import SYSTEM_PROMPT
-from loguru import logger
 from .tools import AndroidAgentTool, WebAgentTool, AgentTool
 
 
@@ -39,7 +41,7 @@ class UiAgent:
         self.deps = deps
         self.agent = Agent(
             model=model,
-            system_prompt=SYSTEM_PROMPT.format(**deps.device_info),
+            system_prompt=SYSTEM_PROMPT.format(**deps.device.device_info),
             deps_type=AgentDeps,
             tools=tool.tools,
             output_type=OutputType,
@@ -67,12 +69,34 @@ class UiAgent:
 
 
 class WebAgent(UiAgent):
-    def __init__(self, model: str, deps: AgentDeps):
+    def __init__(self, model: str, headless: bool = False):
+        self.device = asyncio.run(AsyncWebDevice.create(headless=headless))
+        deps = AgentDeps(self.device)
         tool = WebAgentTool()
+
         super().__init__(model, deps, tool)
+
+#
+# class WebAgent(UiAgent):
+#     def __init__(self, model: str, headless: bool = False):
+#         self.device = WebDevice(headless=headless)
+#         deps = AgentDeps(self.device)
+#         tool = WebAgentTool()
+#
+#         super().__init__(model, deps, tool)
+#
+#     async def run(self, prompt: str, system_prompt: Optional[str] = None, report_dir: str = "./report"):
+#         result = await self.agent.run(user_prompt=prompt, deps=self.deps)
+#         logger.info(result.output)
+#         self.create_report(result.output.model_dump_json(), report_dir)
+#
+#         self.device.playwright.stop()
 
 
 class MobileAgent(UiAgent):
-    def __init__(self, model: str, deps: AgentDeps):
+    def __init__(self, model: str, serial: Optional[str] = None):
+        device = AndroidDevice(serial=serial)
+
+        deps = AgentDeps(device)
         tool = AndroidAgentTool()
         super().__init__(model, deps, tool)
