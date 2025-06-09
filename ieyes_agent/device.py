@@ -3,12 +3,12 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/6 14:58
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Optional
 
 from adbutils import AdbClient, AdbDevice
-from playwright.sync_api import sync_playwright
-from playwright.async_api import async_playwright, Page as AsyncPage
+from playwright.async_api import async_playwright, Playwright, Page, Browser, BrowserContext
 from pydantic import BaseModel
 
 
@@ -25,34 +25,16 @@ class DeviceSize(BaseModel):
     height: int
 
 
+@dataclass
 class WebDevice:
-    def __init__(self, headless: bool = False):
-        self.playwright = sync_playwright().start()
-        self.browser = self.playwright.chromium.launch(channel='chrome', headless=headless, args=['--start-maximized'])
-        self.context = self.browser.new_context(no_viewport=True)
-        self.page = self.context.new_page()
-        width = self.page.evaluate('() => window.innerWidth')
-        height = self.page.evaluate('() => window.innerHeight')
-        self.device_size = DeviceSize(width=width, height=height)
-
-        self.device_info = {
-            'device_name': 'Web PC',
-            'screen_resolution': f'{self.device_size.width}x{self.device_size.height}',
-        }
-
-class AsyncWebDevice:
-    def __init__(self, browser, context, page: AsyncPage, device_size):
-        self.browser = browser
-        self.context = context
-        self.page = page
-        self.device_size = device_size
-        self.device_info = {
-            'device_name': 'Web PC',
-            'screen_resolution': f'{self.device_size.width}x{self.device_size.height}',
-        }
+    playwright: Playwright
+    browser: Browser
+    context: BrowserContext
+    page: Page
+    device_size: DeviceSize
 
     @classmethod
-    async def create(cls, headless: bool = False) -> "AsyncWebDevice":
+    async def create(cls, headless: bool = False) -> "WebDevice":
         """异步工厂方法用于创建实例"""
         playwright = await async_playwright().start()
         browser = await playwright.chromium.launch(
@@ -76,17 +58,19 @@ class AsyncWebDevice:
             height=viewport_size["height"]
         )
 
-        return cls(browser, context, page, device_size)
+        return cls(playwright, browser, context, page, device_size)
 
 
+@dataclass
 class AndroidDevice:
-    def __init__(self, serial: Optional[str] = None):
-        self.client = AdbClient()
-        self.adb_device: AdbDevice = self.client.device(serial=serial) if serial else self.client.device_list()[0]
-        window_size = self.adb_device.window_size()
-        self.device_size = DeviceSize(width=window_size.width, height=window_size.height)
+    client: AdbClient
+    adb_device: AdbDevice
+    device_size: DeviceSize
 
-        self.device_info = {
-            'device_name': 'Android',
-            'screen_resolution': f'{self.device_size.width}x{self.device_size.height}',
-        }
+    @classmethod
+    async def create(cls, serial: Optional[str] = None):
+        client = AdbClient()
+        adb_device: AdbDevice = client.device(serial=serial) if serial else client.device_list()[0]
+        window_size = adb_device.window_size()
+        device_size = DeviceSize(width=window_size.width, height=window_size.height)
+        return cls(client, adb_device, device_size)

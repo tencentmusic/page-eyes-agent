@@ -3,10 +3,13 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/30 12:34
+import json
 from pathlib import Path
-from loguru import logger
+from urllib.parse import urlencode, quote, urlparse
 
+import requests
 from adbutils import AdbDevice
+from loguru import logger
 
 
 class AdbDeviceProxy:
@@ -34,3 +37,47 @@ class AdbDeviceProxy:
 
     def input_text(self, text: str):
         self.execute_command('-keyboard', text)
+
+
+def get_wx_schema(url):
+    """
+    :param url: {tenant}://{envVersion}/{path}, eg. musician://release/pages/home/index
+    :return:
+    """
+    scheme, no_schema_url = url.split(':', 1)
+    parse_res = urlparse(no_schema_url, scheme=scheme)
+
+    payload = {
+        "tenant": parse_res.scheme,
+        "path": parse_res.path,
+        "query": parse_res.query,
+        "envVersion": parse_res.netloc or "release"
+    }
+    res = requests.post('https://y.tencentmusic.com/passport/v1/wx/generateUrlScheme', json=payload)
+    if res.status_code == 200:
+        logger.info(res.text)
+        schema = res.json().get('data')
+        return schema
+    else:
+        logger.error(res.text)
+        return ''
+
+
+# def get_client_url_schema(url, platform):
+#     """获取客户端打开指定 url schema 地址"""
+#     if platform == PageTypeEnum.QY:
+#         params = {'p': json.dumps({'url': url})}
+#         return f'qqmusic://qq.com/ui/openUrl?{urlencode(params, quote_via=quote)}'
+#     elif platform == PageTypeEnum.KG:
+#         params = {"cmd": "303", "jsonStr": {"title": "", "url": f"{url}"}, "type": 9, "action": 0}
+#         return f'kugou://start.weixin?{quote(json.dumps(params))}'
+#     elif platform == PageTypeEnum.KW:
+#         params = {'t': 27, 'u': url}
+#         return f'kwapp://open?{quote(urlencode(params, quote_via=quote))}'
+#     elif platform == PageTypeEnum.BD:
+#         params = {'t': 27, 'u': url}
+#         return f'kwapp://open?{quote(urlencode(params, quote_via=quote))}'
+#     elif platform == PageTypeEnum.MP:
+#         return get_wx_schema(url)
+#     else:
+#         return url

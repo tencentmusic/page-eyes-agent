@@ -5,11 +5,12 @@
 # @Time : 2025/5/23 17:47
 import asyncio
 import io
-import time
-from abc import ABC, abstractmethod
+import json
+from abc import ABC
 from functools import wraps
 from traceback import print_exc
 from typing import IO, Optional, TypeVar
+from urllib.parse import urlencode, quote
 
 import requests
 from loguru import logger
@@ -17,16 +18,67 @@ from pydantic import BaseModel, computed_field
 from pydantic_ai import ModelRetry, RunContext
 
 from .deps import AgentDeps
-from .device import WebDevice, AndroidDevice, AsyncWebDevice
+from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
+
+
+class ElementInfo(BaseModel):
+    element_bbox: list[float, float, float, float]
+    device_size: list[int, int]
+
+
+class ActionInfo(BaseModel):
+    step: int
+    description: str
+    action: str
+    element_bbox: Optional[list[float, float, float, float]] = []
+    device_size: list[int, int]
+    url: Optional[str] = None
+    text: Optional[str] = None
+
+    @computed_field()
+    @property
+    def coordinate(self) -> Optional[tuple[int, int]]:
+        if not self.element_bbox:
+            return None
+        x1, y1, x2, y2 = self.element_bbox
+        width, height = self.device_size
+        return int((x1 + x2) / 2 * width), int((y1 + y2) / 2 * height)
+
+
+class StepInfo(BaseModel):
+    description: Optional[str] = ''
+    action: Optional[str] = ''
+    labeled_image_url: str = ''
+    error: Optional[str] = ''
+
+
+class ToolResult(BaseModel):
+    is_success: bool
+    step_info: Optional[StepInfo]
+
+    @classmethod
+    def success(cls, step_info: StepInfo = None):
+        return cls(is_success=True, step_info=step_info)
+
+    @classmethod
+    def failed(cls, step_info: StepInfo = None):
+        return cls(is_success=False, step_info=step_info)
+
+
+T = TypeVar('T')
 
 
 def tool(func):
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
+        for arg in [*args, *kwargs.values()]:
+            if isinstance(arg, ActionInfo):
+                logger.info(arg)
+                break
         try:
-            time.sleep(1)  # 避免页面渲染慢，不稳定
-            return func(*args, **kwargs)
+            await asyncio.sleep(1)  # 避免页面渲染慢，不稳定
+            return await func(*args, **kwargs)
         except Exception as e:
             print_exc()
             logger.error(f"Error occurred in tool '{func.__name__}': {str(e)}")
@@ -34,29 +86,6 @@ def tool(func):
 
     wrapper.is_tool = True
     return wrapper
-
-
-class ActionInfo(BaseModel):
-    element_bbox: list[float, float, float, float]
-    device_size: list[int, int]
-    step: int
-    description: str
-    action: str
-
-    @computed_field()
-    @property
-    def coordinate(self) -> tuple[int, int]:
-        x1, y1, x2, y2 = self.element_bbox
-        width, height = self.device_size
-        return int((x1 + x2) / 2 * width), int((y1 + y2) / 2 * height)
-
-
-class Result:
-    success = 'success'
-    failed = 'failed'
-
-
-T = TypeVar('T')
 
 
 class AgentTool(ABC):
@@ -108,84 +137,77 @@ class AgentTool(ABC):
 
 
 class WebAgentTool(AgentTool):
-    # def screenshot(self, ctx: RunContext[AgentDeps[WebDevice]]) -> io.BytesIO:
-    #     logger.info(f'获取当前屏幕截图')
-    #     screenshot = ctx.deps.device.page.screenshot(type='jpeg', quality=80, full_page=False)
-    #     image_buffer = io.BytesIO(screenshot)
-    #     image_buffer.name = 'screen.jpeg'
-    #     return image_buffer
-    #
-    # @tool
-    # def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]]) -> str:
-    #     """
-    #     获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]）
-    #     """
-    #     data = self._parse_element(self.screenshot(ctx))
-    #     self._page_record(data, ctx)
-    #     logger.info(f'当前屏幕元素信息：{data.get("labeled_image_url")}')
-    #     return data
-    #
-    # @tool
-    # def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]]) -> dict:
-    #     """
-    #     任务完成后的清理步骤，返回步骤信息
-    #     """
-    #     logger.info(f'执行任务完成后的清理工作')
-    #     image_buffer = self.screenshot(ctx)
-    #     url = self._upload_cos(image_buffer)
-    #     logger.info(f'当前屏幕截图：{url}')
-    #     image_buffer.seek(0)
-    #     self._page_record(self._parse_element(image_buffer), ctx)
-    #     return {
-    #         'status': Result.success,
-    #         'step_info': {
-    #             'message': '任务完成',
-    #             'description': '任务完成',
-    #             'action': 'tear_down',
-    #             'element_id': -1,
-    #             'element_bbox': [0.0, 0.0, 0.0, 0.0],
-    #             'labeled_image_url': url,
-    #             'error': ''
-    #         }
-    #     }
+    @staticmethod
+    async def screenshot(ctx: RunContext[AgentDeps[WebDevice]]) -> io.BytesIO:
+        logger.info(f'获取当前屏幕截图')
+        screenshot = await ctx.deps.device.page.screenshot(type='jpeg', quality=80, full_page=False)
+        image_buffer = io.BytesIO(screenshot)
+        image_buffer.name = 'screen.jpeg'
+        return image_buffer
 
     @tool
-    def open_url(self, ctx: RunContext[AgentDeps[AsyncWebDevice]], url: str):
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]]) -> dict:
         """
-        使用设备打开指定的 url
+        获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]）
         """
-        # logger.info(action)
+        data = self._parse_element(await self.screenshot(ctx))
+        self._page_record(data, ctx)
+        logger.info(f'当前屏幕元素信息：{data.get("labeled_image_url")}')
+        return data
 
-        asyncio.run(ctx.deps.device.page.goto(url, wait_until='networkidle'))
-        return Result.success
+    @tool
+    async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]]) -> ToolResult:
+        """
+        任务完成后的清理步骤，返回步骤信息
+        """
+        logger.info(f'执行任务完成后的清理工作')
+        image_buffer = await self.screenshot(ctx)
+        url = self._upload_cos(image_buffer)
+        logger.info(f'当前屏幕截图：{url}')
+        image_buffer.seek(0)
+        self._page_record(self._parse_element(image_buffer), ctx)
+        await ctx.deps.device.context.close()
+        await ctx.deps.device.browser.close()
+        await ctx.deps.device.playwright.stop()
+        return ToolResult.success(StepInfo(description='任务完成', action='tear_down', labeled_image_url=url))
 
-    # @tool
-    # def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo):
-    #     """
-    #     点击设备屏幕指定的元素
-    #     """
-    #     logger.info(action)
-    #     x, y = action.coordinate
-    #     logger.info(f'click coordinate ({x}, {y})')
-    #     ctx.deps.device.page.mouse.click(x, y)
-    #     return Result.success
-    #
-    # @tool
-    # def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo, text: str):
-    #     """
-    #     在设备指定的元素中输入文本
-    #     """
-    #     logger.info(action)
-    #     x, y = action.coordinate
-    #     logger.info(f'Input text: ({x}, {y}) -> {text}')
-    #     ctx.deps.device.page.mouse.click(x, y)
-    #     ctx.deps.device.page.keyboard.type(text)
-    #     return Result.success
+    @tool
+    async def open_url(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+        """
+        使用设备打开URL {action.url}
+        """
+        await ctx.deps.device.page.goto(action.url)
+        screenshot = await self.screenshot(ctx)
+        url = self._upload_cos(screenshot)
+        return ToolResult.success(StepInfo(description='打开URL', action='open_url', labeled_image_url=url))
+
+    @tool
+    async def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+        """
+        点击设备屏幕指定的元素
+        """
+        x, y = action.coordinate
+        logger.info(f'click coordinate ({x}, {y})')
+        await ctx.deps.device.page.mouse.click(x, y)
+        return ToolResult.success()
+
+    @tool
+    async def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+        """
+        在设备指定的元素中输入文本 {action.text}
+        """
+        x, y = action.coordinate
+        logger.info(f'Input text: ({x}, {y}) -> {action.text}')
+        await ctx.deps.device.page.mouse.click(x, y)
+        await ctx.deps.device.page.keyboard.type(action.text)
+        await ctx.deps.device.page.keyboard.press('Enter')
+        return ToolResult.success()
 
 
 class AndroidAgentTool(AgentTool):
 
-    def screenshot(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> io.BytesIO:
+    @staticmethod
+    async def screenshot(ctx: RunContext[AgentDeps[AndroidDevice]]) -> io.BytesIO:
         logger.info(f'获取当前屏幕截图')
         image_buffer = io.BytesIO()
         screenshot = ctx.deps.device.adb_device.screenshot()
@@ -195,60 +217,60 @@ class AndroidAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> str:
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> dict:
         """
         获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]）
         """
-        data = self._parse_element(self.screenshot(ctx))
+        data = self._parse_element(await self.screenshot(ctx))
         self._page_record(data, ctx)
         logger.info(f'当前屏幕元素信息：{data.get("labeled_image_url")}')
         return data
 
     @tool
-    def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> dict:
+    async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> ToolResult:
         """
         任务完成后的清理步骤，返回步骤信息
         """
         logger.info(f'执行任务完成后的清理工作')
-        image_buffer = self.screenshot(ctx)
+        image_buffer = await self.screenshot(ctx)
         url = self._upload_cos(image_buffer)
         logger.info(f'当前屏幕截图：{url}')
         image_buffer.seek(0)
         self._page_record(self._parse_element(image_buffer), ctx)
-        return {
-            'status': Result.success,
-            'step_info': {
-                'message': '任务完成',
-                'description': '任务完成',
-                'action': 'tear_down',
-                'element_id': -1,
-                'element_bbox': [0.0, 0.0, 0.0, 0.0],
-                'labeled_image_url': url,
-                'error': ''
-            }
-        }
+        return ToolResult.success(StepInfo(description='任务完成', action='tear_down', labeled_image_url=url))
 
     @tool
-    def tap(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo):
+    async def open_url(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
+        """
+        使用设备打开URL {action.url}
+        """
+        params = {'p': json.dumps({'url': action.url})}
+        url_schema = f'qqmusic://qq.com/ui/openUrl?{urlencode(params, quote_via=quote)}'
+        ctx.deps.device.adb_device.shell(f'am start -a android.intent.action.VIEW -d "{url_schema}"')
+        await asyncio.sleep(2)
+        screenshot = await self.screenshot(ctx)
+        url = self._upload_cos(screenshot)
+        return ToolResult.success(StepInfo(description='打开URL', action='open_url', labeled_image_url=url))
+
+    @tool
+    async def tap(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo):
         """
         点击设备屏幕指定的元素
         """
-        logger.info(action)
         x, y = action.coordinate
         logger.info(f'Tap coordinate ({x}, {y})')
         ctx.deps.device.adb_device.click(x, y)
 
-        return Result.success
+        return ToolResult.success()
 
     @tool
-    def input(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo, text: str):
+    async def input(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo):
         """
         在设备指定的元素中输入文本
         """
-        logger.info(action)
         x, y = action.coordinate
-        logger.info(f'Input text: ({x}, {y}) -> {text}')
+        logger.info(f'Input text: ({x}, {y}) -> {action.text}')
         ctx.deps.device.adb_device.click(x, y)
-        AdbDeviceProxy(ctx.deps.device.adb_device).input_text(text)
+        AdbDeviceProxy(ctx.deps.device.adb_device).input_text(action.text)
         ctx.deps.device.adb_device.keyevent('KEYCODE_ENTER')
-        return Result.success
+        return ToolResult.success()
