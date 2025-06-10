@@ -177,7 +177,7 @@ def drawer_box(func):
                     box.style.zIndex = "1000";
                     box.style.border = "2px solid rgba(255,0,0)";
                     box.style.pointerEvents = "none"
-                    box.style.animation = 'fadeBorder 4s forwards';
+                    //box.style.animation = 'fadeBorder 4s forwards';
                     document.body.appendChild(box);
                 }
                 box.style.top = y1 * 100 + "%"
@@ -304,7 +304,7 @@ class AndroidAgentTool(AgentTool):
         return data
 
     @tool
-    async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> ToolResult:
+    async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
         """
         任务完成后的清理步骤，返回步骤信息
         """
