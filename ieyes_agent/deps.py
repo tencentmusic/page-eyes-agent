@@ -6,6 +6,7 @@
 from dataclasses import dataclass, field
 from typing import Generic, TypeVar
 from typing import TypedDict
+from playwright.async_api import JSHandle
 
 
 class DeviceInfo(TypedDict):
@@ -16,6 +17,7 @@ class DeviceInfo(TypedDict):
 @dataclass
 class Context:
     page: dict = field(default_factory=dict)
+    box_handle: JSHandle = None
 
 
 T = TypeVar('T')

@@ -11,13 +11,7 @@ from adbutils import AdbClient, AdbDevice
 from playwright.async_api import async_playwright, Playwright, Page, Browser, BrowserContext
 from pydantic import BaseModel
 
-
-class Platform(StrEnum):
-    WEB = "WEB"
-    QY = "QY"
-    KG = "KG"
-    KW = "KW"
-    APPLET = "APPLET"
+from ieyes_agent.util.platform import Platform
 
 
 class DeviceSize(BaseModel):
@@ -42,11 +36,12 @@ class WebDevice:
             headless=headless,
             args=['--start-maximized']
         )
+        # context = await browser.new_context(**playwright.devices['iPhone 15 Pro Max'])
         context = await browser.new_context(no_viewport=True)
         page = await context.new_page()
 
         # 更可靠的视口尺寸获取方式
-        viewport_size = page.viewport_size
+        viewport_size = None
         if viewport_size is None:
             viewport_size = await page.evaluate("""() => ({
                 width: document.documentElement.clientWidth,
@@ -66,11 +61,12 @@ class AndroidDevice:
     client: AdbClient
     adb_device: AdbDevice
     device_size: DeviceSize
+    platform: Platform
 
     @classmethod
-    async def create(cls, serial: Optional[str] = None):
+    async def create(cls, serial: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
         client = AdbClient()
         adb_device: AdbDevice = client.device(serial=serial) if serial else client.device_list()[0]
         window_size = adb_device.window_size()
         device_size = DeviceSize(width=window_size.width, height=window_size.height)
-        return cls(client, adb_device, device_size)
+        return cls(client, adb_device, device_size, platform)

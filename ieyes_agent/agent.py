@@ -38,7 +38,7 @@ class OutputType(BaseModel):
 class UiAgent:
     model: str
     deps: AgentDeps
-    agent: Agent
+    agent: Agent[AgentDeps, OutputType]
 
     @classmethod
     async def create(cls, *args, **kwargs):
@@ -46,13 +46,13 @@ class UiAgent:
 
     async def create_report(self, report_data: str, report_dir: Union[Path, str]):
         logger.info('创建报告...')
+        print(report_data)
         report_dir = Path(report_dir)
         report_dir.mkdir(parents=True, exist_ok=True)
 
         template = Path(__file__).parent / "report_template.html"
         content = template.read_text().replace('{reportData}', report_data)
 
-        content = content.replace('{pageData}', json.dumps(self.deps.context.page, ensure_ascii=False))
         output_path = report_dir / f'report_{datetime.now(): %Y%m%d%H%M%S}.html'
         output_path.write_text(content)
         logger.info(f"报告：{output_path.resolve().as_uri()}")
@@ -61,7 +61,11 @@ class UiAgent:
         # TODO: 给用户添加自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
         result = await self.agent.run(user_prompt=prompt, deps=self.deps)
         logger.info(result.output)
-        await self.create_report(result.output.model_dump_json(), report_dir)
+        report_data = result.output.dict()
+        if self.deps.context.page:
+            for item in report_data['results']:
+                item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []
+        await self.create_report(json.dumps(report_data, ensure_ascii=False), report_dir)
 
 
 class WebAgent(UiAgent):

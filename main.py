@@ -19,7 +19,7 @@ async def main():
 
     await ui_agent.run(
         ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
-         '2.点击搜索icon\n'
+         '2.点击"查找icon"\n'
          '3.在搜索输入框中输入"小美满"\n'
          '4.点击"小美满> "\n'
          '5.点击"日榜"'

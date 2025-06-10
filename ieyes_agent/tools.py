@@ -6,11 +6,12 @@
 import asyncio
 import io
 import json
-from abc import ABC
+from abc import ABC, abstractmethod
 from functools import wraps
 from traceback import print_exc
 from typing import IO, Optional, TypeVar
 from urllib.parse import urlencode, quote
+from contextlib import asynccontextmanager
 
 import requests
 from loguru import logger
@@ -20,6 +21,7 @@ from pydantic_ai import ModelRetry, RunContext
 from .deps import AgentDeps
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
+from .util.platform import Platform, get_client_url_schema
 
 
 class ElementInfo(BaseModel):
@@ -60,6 +62,7 @@ class ToolResult(BaseModel):
     @classmethod
     def success(cls, step_info: StepInfo = None):
         return cls(is_success=True, step_info=step_info)
+        # return 'success'
 
     @classmethod
     def failed(cls, step_info: StepInfo = None):
@@ -123,32 +126,104 @@ class AgentTool(ABC):
             ctx.deps.context.page.update({data.get("labeled_image_url", ''): data.get('parsed_content_list', [])})
         return ctx.deps.context.page
 
-    # @abstractmethod
-    # def screenshot(self, ctx: RunContext[AgentDeps]) -> io.BytesIO:
-    #     raise NotImplementedError
-    #
-    # @abstractmethod
-    # def get_device_screen_elements(self, ctx: RunContext[AgentDeps]) -> io.BytesIO:
-    #     raise NotImplementedError
-    #
-    # @abstractmethod
-    # def tear_down(self, ctx: RunContext[AgentDeps]) -> dict:
-    #     raise NotImplementedError
+    @staticmethod
+    @abstractmethod
+    async def screenshot(ctx: RunContext[AgentDeps]) -> io.BytesIO:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps]) -> dict:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def tear_down(self, ctx: RunContext[AgentDeps]) -> ToolResult:
+        raise NotImplementedError
+
+
+def drawer_box(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        ctx: Optional[RunContext[AgentDeps[WebDevice]]] = None
+        bbox: Optional[list[float]] = None
+        for arg in [*args, *kwargs.values()]:
+            if isinstance(arg, RunContext):
+                ctx = arg
+                continue
+            if isinstance(arg, ActionInfo):
+                bbox = arg.element_bbox
+                continue
+        if ctx and bbox:
+            style = """
+            @keyframes fadeBorder {
+                      from { border-color: rgba(255,0,0); }
+                      to { border-color: transparent; }
+                    }
+            """
+            await ctx.deps.device.page.evaluate("""
+            ([bbox, style]) => {
+                const [x1, y1, x2, y2] = bbox
+                let box = document.querySelector("#option-box")
+                let boxStyle = document.querySelector("#box-style")
+                if (!boxStyle) {
+                    boxStyle = document.createElement("style")
+                    boxStyle.id = "box-style"
+                    boxStyle.innerHTML = style
+                    document.head.appendChild(boxStyle)
+                }
+                if (!box) {
+                    box = document.createElement("div");
+                    box.id = "option-box";
+                    box.style.position = "absolute";
+                    box.style.zIndex = "1000";
+                    box.style.border = "2px solid rgba(255,0,0)";
+                    box.style.pointerEvents = "none"
+                    box.style.animation = 'fadeBorder 4s forwards';
+                    document.body.appendChild(box);
+                }
+                box.style.top = y1 * 100 + "%"
+                box.style.left = x1 * 100 + "%"
+                box.style.width = (x2 - x1) * 100 + "%"
+                box.style.height = (y2 - y1) * 100 + "%"
+                return box
+            }
+            """, [bbox, style])
+        return await func(*args, **kwargs)
+
+    return wrapper
+
+
+@asynccontextmanager
+async def clear_box(ctx: RunContext[AgentDeps[WebDevice]]):
+    await ctx.deps.device.page.evaluate("""() => {
+        const box = document.querySelector("#option-box")
+        if (box) {
+            box.style.display = "none"
+        }
+    }""")
+    yield
+    await ctx.deps.device.page.evaluate("""() => {
+        const box = document.querySelector("#option-box")
+        if (box) {
+            box.style.display = "unset"
+        }
+    }""")
 
 
 class WebAgentTool(AgentTool):
+
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDeps[WebDevice]]) -> io.BytesIO:
-        logger.info(f'获取当前屏幕截图')
-        screenshot = await ctx.deps.device.page.screenshot(type='jpeg', quality=80, full_page=False)
-        image_buffer = io.BytesIO(screenshot)
-        image_buffer.name = 'screen.jpeg'
-        return image_buffer
+        async with clear_box(ctx):
+            logger.info(f'获取当前屏幕截图')
+            screenshot = await ctx.deps.device.page.screenshot(type='jpeg', quality=80, full_page=False)
+            image_buffer = io.BytesIO(screenshot)
+            image_buffer.name = 'screen.jpeg'
+            return image_buffer
 
     @tool
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]]) -> dict:
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> dict:
         """
-        获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]）
+        获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]），一般作为步骤的前置动作
         """
         data = self._parse_element(await self.screenshot(ctx))
         self._page_record(data, ctx)
@@ -156,7 +231,7 @@ class WebAgentTool(AgentTool):
         return data
 
     @tool
-    async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]]) -> ToolResult:
+    async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
         任务完成后的清理步骤，返回步骤信息
         """
@@ -182,6 +257,7 @@ class WebAgentTool(AgentTool):
         return ToolResult.success(StepInfo(description='打开URL', action='open_url', labeled_image_url=url))
 
     @tool
+    @drawer_box
     async def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
         点击设备屏幕指定的元素
@@ -192,6 +268,7 @@ class WebAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool
+    @drawer_box
     async def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
         在设备指定的元素中输入文本 {action.text}
@@ -244,8 +321,10 @@ class AndroidAgentTool(AgentTool):
         """
         使用设备打开URL {action.url}
         """
-        params = {'p': json.dumps({'url': action.url})}
-        url_schema = f'qqmusic://qq.com/ui/openUrl?{urlencode(params, quote_via=quote)}'
+        platform = ctx.deps.device.platform
+        url_schema = get_client_url_schema(action.url, platform)
+        logger.info(f'open schema: {url_schema}')
+
         ctx.deps.device.adb_device.shell(f'am start -a android.intent.action.VIEW -d "{url_schema}"')
         await asyncio.sleep(2)
         screenshot = await self.screenshot(ctx)
