@@ -9,10 +9,10 @@ load_dotenv()
 
 async def main():
     # Web 端
-    ui_agent = await WebAgent.create('openai:deepseek/deepseek-chat', headless=False)
+    # ui_agent = await WebAgent.create('openai:deepseek/deepseek-chat', headless=False)
 
     # 移动端
-    # ui_agent = await MobileAgent.create('openai:deepseek/deepseek-chat')
+    ui_agent = await MobileAgent.create('openai:deepseek/deepseek-chat')
 
     # await ui_agent.run('1.点击 Find icon\n2.在搜索输入框中输入"小美满"\n3.点击"小美满> "\n4.点击"查看更多成绩"')
     # await ui_agent.run('1.点击第一个推荐按钮\n2.点击单曲购买\n3.点击"超会连续包月"\n4.点击"立即购买"')

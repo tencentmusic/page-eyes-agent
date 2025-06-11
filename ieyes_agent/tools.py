@@ -7,6 +7,7 @@ import asyncio
 import io
 import json
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from functools import wraps
 from traceback import print_exc
 from typing import IO, Optional, TypeVar
@@ -46,6 +47,15 @@ class ActionInfo(BaseModel):
         x1, y1, x2, y2 = self.element_bbox
         width, height = self.device_size
         return int((x1 + x2) / 2 * width), int((y1 + y2) / 2 * height)
+
+
+@dataclass
+class StepRecord:
+    description: str = ''
+    action: str = ''
+    element_bbox: list[float] = field(default_factory=list)
+    device_size: str = ''
+    labeled_image_url: str = ''
 
 
 class StepInfo(BaseModel):
@@ -294,13 +304,13 @@ class AndroidAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> dict:
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> dict:
         """
         获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]）
         """
         data = self._parse_element(await self.screenshot(ctx))
         self._page_record(data, ctx)
-        logger.info(f'当前屏幕元素信息：{data.get("labeled_image_url")}')
+        logger.info(f'step={action.step} 当前屏幕元素信息：{data.get("labeled_image_url")}')
         return data
 
     @tool
