@@ -109,7 +109,7 @@ def record_step(*args, **kwargs):
                                     ) or record.labeled_image_url
         record.page = (tool_result.output and tool_result.output.parsed_content_list
                        ) or record.page
-        logger.info(f'Record step {record.info()}')
+        logger.debug(record.info())
 
 
 def tool(func):
@@ -123,7 +123,7 @@ def tool(func):
             await asyncio.sleep(1)  # 避免页面渲染慢，不稳定
             result = await func(*args, **kwargs)
             record_step(result, *args, **kwargs)  # 记录步骤信息
-            logger.info(result)
+            logger.debug(result)
             return result
         except Exception as e:
             print_exc()
@@ -257,7 +257,6 @@ class WebAgentTool(AgentTool):
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDeps[WebDevice]]) -> io.BytesIO:
         async with clear_box(ctx):
-            logger.info(f'获取当前屏幕截图')
             screenshot = await ctx.deps.device.page.screenshot(type='jpeg', quality=80, full_page=False)
             image_buffer = io.BytesIO(screenshot)
             image_buffer.name = 'screen.jpeg'
@@ -266,13 +265,13 @@ class WebAgentTool(AgentTool):
     @tool
     async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
-        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]），一般作为步骤的前置动作
+        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]）
+        该工具禁止作为一个单独步骤，step 序号应与下一步的操作保持一致
         """
         data = self._parse_element(await self.screenshot(ctx))
         labeled_image_url = data.get('labeled_image_url') or ''
         parsed_content_list = data.get('parsed_content_list') or []
         self._page_record(data, ctx)
-        logger.info(f'step={action.step} 当前屏幕元素信息：{labeled_image_url}')
         return ToolResult.success(ToolOutput(
             labeled_image_url=labeled_image_url,
             parsed_content_list=parsed_content_list
@@ -283,10 +282,8 @@ class WebAgentTool(AgentTool):
         """
         任务完成后的清理步骤，返回步骤信息
         """
-        logger.info(f'执行任务完成后的清理工作')
         image_buffer = await self.screenshot(ctx)
         url = self._upload_cos(image_buffer)
-        logger.info(f'当前屏幕截图：{url}')
         image_buffer.seek(0)
         self._page_record(self._parse_element(image_buffer), ctx)
         await ctx.deps.device.context.close()
@@ -345,7 +342,8 @@ class AndroidAgentTool(AgentTool):
     async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]],
                                          action: ActionInfo) -> ToolResult:
         """
-        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]），一般作为步骤的前置动作
+        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]）
+        该工具禁止作为一个单独步骤，step 序号应与下一步的操作保持一致
         """
         data = self._parse_element(await self.screenshot(ctx))
         labeled_image_url = data.get('labeled_image_url') or ''
