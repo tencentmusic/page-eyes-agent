@@ -1,4 +1,7 @@
 import asyncio
+import sys
+
+from loguru import logger
 
 from dotenv import load_dotenv
 
@@ -6,6 +9,7 @@ from ieyes_agent.agent import WebAgent, MobileAgent
 from ieyes_agent.util.platform import Platform
 
 load_dotenv()
+logger.configure(handlers=[{"sink": sys.stdout, "level": "INFO"}])
 
 
 async def main():
