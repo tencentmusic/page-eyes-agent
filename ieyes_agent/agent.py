@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union
+from .util.platform import Platform
 
 from loguru import logger
 from pydantic import BaseModel
@@ -93,8 +94,8 @@ class WebAgent(UiAgent):
 class MobileAgent(UiAgent):
 
     @classmethod
-    async def create(cls, model: str, serial: Optional[str] = None):
-        device = await AndroidDevice.create(serial=serial)
+    async def create(cls, model: str, serial: Optional[str] = None, platform: Optional[str | Platform] = None):
+        device = await AndroidDevice.create(serial=serial, platform=platform)
         deps = AgentDeps(device)
         tool = AndroidAgentTool()
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
