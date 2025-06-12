@@ -49,37 +49,67 @@ class ActionInfo(BaseModel):
         return int((x1 + x2) / 2 * width), int((y1 + y2) / 2 * height)
 
 
-@dataclass
-class StepRecord:
+class StepRecord(BaseModel):
+    step: int
     description: str = ''
     action: str = ''
-    element_bbox: list[float] = field(default_factory=list)
-    device_size: str = ''
+    element_bbox: list[float] = []
+    device_size: list[int, int] = [0, 0]
     labeled_image_url: str = ''
+    error: str = ''
+    page: list = []
+
+    def info(self):
+        return type(self)(**self.dict(exclude={'page'}))
 
 
-class StepInfo(BaseModel):
-    description: Optional[str] = ''
-    action: Optional[str] = ''
-    labeled_image_url: str = ''
+class ToolOutput(BaseModel):
+    labeled_image_url: Optional[str] = ''
+    parsed_content_list: Optional[list] = []
     error: Optional[str] = ''
 
 
 class ToolResult(BaseModel):
     is_success: bool
-    step_info: Optional[StepInfo]
+    output: Optional[ToolOutput]
 
     @classmethod
-    def success(cls, step_info: StepInfo = None):
-        return cls(is_success=True, step_info=step_info)
-        # return 'success'
+    def success(cls, output: ToolOutput = None):
+        return cls(is_success=True, output=output)
 
     @classmethod
-    def failed(cls, step_info: StepInfo = None):
-        return cls(is_success=False, step_info=step_info)
+    def failed(cls, output: ToolOutput = None):
+        return cls(is_success=False, output=output)
 
 
 T = TypeVar('T')
+
+
+def record_step(*args, **kwargs):
+    ctx: Optional[RunContext[AgentDeps]] = None
+    action_info: Optional[ActionInfo] = None
+    tool_result: Optional[ToolResult] = None
+    for arg in [*args, *kwargs.values()]:
+        if isinstance(arg, RunContext):
+            ctx = arg
+            continue
+        if isinstance(arg, ActionInfo):
+            action_info = arg
+            continue
+        if isinstance(arg, ToolResult):
+            tool_result = arg
+            continue
+    if ctx and action_info and tool_result:
+        record = ctx.deps.context.steps.setdefault(action_info.step, StepRecord(step=action_info.step))
+        record.description = action_info.description or record.description
+        record.action = action_info.action or record.action
+        record.element_bbox = action_info.element_bbox or record.element_bbox
+        record.device_size = action_info.device_size or record.device_size
+        record.labeled_image_url = (tool_result.output and tool_result.output.labeled_image_url
+                                    ) or record.labeled_image_url
+        record.page = (tool_result.output and tool_result.output.parsed_content_list
+                       ) or record.page
+        logger.info(f'Record step {record.info()}')
 
 
 def tool(func):
@@ -91,7 +121,10 @@ def tool(func):
                 break
         try:
             await asyncio.sleep(1)  # 避免页面渲染慢，不稳定
-            return await func(*args, **kwargs)
+            result = await func(*args, **kwargs)
+            record_step(result, *args, **kwargs)  # 记录步骤信息
+            logger.info(result)
+            return result
         except Exception as e:
             print_exc()
             logger.error(f"Error occurred in tool '{func.__name__}': {str(e)}")
@@ -142,7 +175,7 @@ class AgentTool(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps]) -> dict:
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps]) -> ToolResult:
         raise NotImplementedError
 
     @abstractmethod
@@ -231,14 +264,19 @@ class WebAgentTool(AgentTool):
             return image_buffer
 
     @tool
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> dict:
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
-        获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]），一般作为步骤的前置动作
+        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]），一般作为步骤的前置动作
         """
         data = self._parse_element(await self.screenshot(ctx))
+        labeled_image_url = data.get('labeled_image_url') or ''
+        parsed_content_list = data.get('parsed_content_list') or []
         self._page_record(data, ctx)
-        logger.info(f'当前屏幕元素信息：{data.get("labeled_image_url")}')
-        return data
+        logger.info(f'step={action.step} 当前屏幕元素信息：{labeled_image_url}')
+        return ToolResult.success(ToolOutput(
+            labeled_image_url=labeled_image_url,
+            parsed_content_list=parsed_content_list
+        ))
 
     @tool
     async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
@@ -254,7 +292,7 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.context.close()
         await ctx.deps.device.browser.close()
         await ctx.deps.device.playwright.stop()
-        return ToolResult.success(StepInfo(description='任务完成', action='tear_down', labeled_image_url=url))
+        return ToolResult.success(ToolOutput(labeled_image_url=url))
 
     @tool
     async def open_url(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
@@ -264,7 +302,7 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.goto(action.url)
         screenshot = await self.screenshot(ctx)
         url = self._upload_cos(screenshot)
-        return ToolResult.success(StepInfo(description='打开URL', action='open_url', labeled_image_url=url))
+        return ToolResult.success(ToolOutput(labeled_image_url=url))
 
     @tool
     @drawer_box
@@ -304,14 +342,20 @@ class AndroidAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> dict:
+    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]],
+                                         action: ActionInfo) -> ToolResult:
         """
-        获取当前屏幕的元素信息，返回的数据格式为json（bbox 是相对值，格式为 [x1, y1, x2, y2]）
+        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]），一般作为步骤的前置动作
         """
         data = self._parse_element(await self.screenshot(ctx))
+        labeled_image_url = data.get('labeled_image_url') or ''
+        parsed_content_list = data.get('parsed_content_list') or []
         self._page_record(data, ctx)
-        logger.info(f'step={action.step} 当前屏幕元素信息：{data.get("labeled_image_url")}')
-        return data
+        logger.info(f'step={action.step} 当前屏幕元素信息：{labeled_image_url}')
+        return ToolResult.success(ToolOutput(
+            labeled_image_url=labeled_image_url,
+            parsed_content_list=parsed_content_list
+        ))
 
     @tool
     async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
@@ -324,7 +368,7 @@ class AndroidAgentTool(AgentTool):
         logger.info(f'当前屏幕截图：{url}')
         image_buffer.seek(0)
         self._page_record(self._parse_element(image_buffer), ctx)
-        return ToolResult.success(StepInfo(description='任务完成', action='tear_down', labeled_image_url=url))
+        return ToolResult.success(ToolOutput(labeled_image_url=url))
 
     @tool
     async def open_url(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
@@ -339,10 +383,10 @@ class AndroidAgentTool(AgentTool):
         await asyncio.sleep(2)
         screenshot = await self.screenshot(ctx)
         url = self._upload_cos(screenshot)
-        return ToolResult.success(StepInfo(description='打开URL', action='open_url', labeled_image_url=url))
+        return ToolResult.success(ToolOutput(labeled_image_url=url))
 
     @tool
-    async def tap(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo):
+    async def tap(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
         """
         点击设备屏幕指定的元素
         """

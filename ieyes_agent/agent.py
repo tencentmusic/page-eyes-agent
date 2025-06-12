@@ -62,6 +62,9 @@ class UiAgent:
         result = await self.agent.run(user_prompt=prompt, deps=self.deps)
         logger.info(result.output)
         report_data = result.output.dict()
+        logger.info(f"steps: {self.deps.context.steps}")
+        report_data_v2 = [step.dict() for step in self.deps.context.steps.values()]
+        logger.info(f'report_data_v2: {report_data_v2}')
         if self.deps.context.page:
             for item in report_data['results']:
                 item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []

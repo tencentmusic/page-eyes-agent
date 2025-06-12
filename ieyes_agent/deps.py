@@ -3,9 +3,11 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 18:30
+from collections import OrderedDict
 from dataclasses import dataclass, field
 from typing import Generic, TypeVar
 from typing import TypedDict
+
 from playwright.async_api import JSHandle
 
 
@@ -17,6 +19,7 @@ class DeviceInfo(TypedDict):
 @dataclass
 class Context:
     page: dict = field(default_factory=dict)
+    steps: dict = field(default_factory=OrderedDict)
     box_handle: JSHandle = None
 
 
