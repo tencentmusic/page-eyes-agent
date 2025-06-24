@@ -1,8 +1,11 @@
 [project]
 name = "ieyes-agent"
-version = "0.1.0"
+version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
+authors = [
+    { name = "aidenmo", email = "aidenmo@tencent.com" }
+]
 requires-python = ">=3.12"
 dependencies = [
     "adbutils>=2.8.10",
@@ -11,6 +14,33 @@ dependencies = [
     "playwright>=1.52.0",
     "pydantic-ai>=0.2.6",
 ]
+
+classifiers = [
+   # 这个项目的成熟度如何？常见的值有：
+   #   3 - Alpha
+   #   4 - Beta
+   #   5 - 生产/稳定版
+   "Development Status :: 4 - Beta",
+
+   # 指明你的项目面向的对象
+   "Intended Audience :: Developers",
+   "Topic :: Software Development :: Build Tools",
+
+   # 根据需要选择你的许可证（也见上面的 "license" 字段）
+   "License :: OSI Approved :: MIT License",
+
+   # 在这里指定你支持的 Python 版本。
+   "Programming Language :: Python :: 3",
+   "Programming Language :: Python :: 3.8",
+   "Programming Language :: Python :: 3.9",
+   "Programming Language :: Python :: 3.10",
+   "Programming Language :: Python :: 3.11",
+   "Programming Language :: Python :: 3.12",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [[tool.uv.index]]
 # 腾讯镜像源，同步自pypi
@@ -22,5 +52,6 @@ default = true
 # 腾讯镜像源，同步自pypi
 url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
 name = "tencent_pypi"
+publish-url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
 
 

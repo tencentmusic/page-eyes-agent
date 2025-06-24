@@ -4,14 +4,14 @@
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/9 15:47
 import json
-from enum import StrEnum
+from enum import Enum
 from urllib.parse import urlparse, urlencode, quote
 
 import requests
 from loguru import logger
 
 
-class Platform(StrEnum):
+class Platform(str, Enum):
     WEB = "WEB"
     WEB_H5 = "WEB_H5"
     QY = "QY"

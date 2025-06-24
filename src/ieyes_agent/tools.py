@@ -5,37 +5,30 @@
 # @Time : 2025/5/23 17:47
 import asyncio
 import io
-import json
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from contextlib import asynccontextmanager
 from functools import wraps
 from traceback import print_exc
-from typing import IO, Optional, TypeVar
-from urllib.parse import urlencode, quote
-from contextlib import asynccontextmanager
+from typing import IO, Optional, TypeVar, cast
 
 import requests
 from loguru import logger
 from pydantic import BaseModel, computed_field
 from pydantic_ai import ModelRetry, RunContext
 
+from .config import settings
 from .deps import AgentDeps
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
-from .util.platform import Platform, get_client_url_schema
-
-
-class ElementInfo(BaseModel):
-    element_bbox: list[float, float, float, float]
-    device_size: list[int, int]
+from .util.platform import get_client_url_schema
 
 
 class ActionInfo(BaseModel):
     step: int
     description: str
     action: str
-    element_bbox: Optional[list[float, float, float, float]] = []
-    device_size: list[int, int]
+    element_bbox: Optional[list[float]] = []
+    device_size: list[int]
     url: Optional[str] = None
     text: Optional[str] = None
 
@@ -53,8 +46,7 @@ class StepRecord(BaseModel):
     step: int
     description: str = ''
     action: str = ''
-    element_bbox: list[float] = []
-    device_size: list[int, int] = [0, 0]
+    element_bbox: Optional[list[float]] = []
     labeled_image_url: str = ''
     error: str = ''
     page: list = []
@@ -91,7 +83,7 @@ def record_step(*args, **kwargs):
     tool_result: Optional[ToolResult] = None
     for arg in [*args, *kwargs.values()]:
         if isinstance(arg, RunContext):
-            ctx = arg
+            ctx = cast(RunContext[AgentDeps], arg)
             continue
         if isinstance(arg, ActionInfo):
             action_info = arg
@@ -104,7 +96,6 @@ def record_step(*args, **kwargs):
         record.description = action_info.description or record.description
         record.action = action_info.action or record.action
         record.element_bbox = action_info.element_bbox or record.element_bbox
-        record.device_size = action_info.device_size or record.device_size
         record.labeled_image_url = (tool_result.output and tool_result.output.labeled_image_url
                                     ) or record.labeled_image_url
         record.page = (tool_result.output and tool_result.output.parsed_content_list
@@ -135,8 +126,8 @@ def tool(func):
 
 
 class AgentTool(ABC):
-    OMNI_BASE_URL = 'http://21.6.91.201:8000'
-    COS_BASE_URL = 'http://uniqc.woa.com/api/tools/file-upload/'
+    OMNI_BASE_URL = settings.omni_base_url
+    COS_BASE_URL = settings.cos_base_url
 
     @property
     def tools(self) -> list:
@@ -186,86 +177,57 @@ class AgentTool(ABC):
 def drawer_box(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
+        if not settings.debug:
+            return await func(*args, **kwargs)
+
         ctx: Optional[RunContext[AgentDeps[WebDevice]]] = None
         bbox: Optional[list[float]] = None
         for arg in [*args, *kwargs.values()]:
             if isinstance(arg, RunContext):
-                ctx = arg
+                ctx = cast(RunContext[AgentDeps[WebDevice]], arg)
                 continue
             if isinstance(arg, ActionInfo):
                 bbox = arg.element_bbox
                 continue
         if ctx and bbox:
-            style = """
-            @keyframes fadeBorder {
-                      from { border-color: rgba(255,0,0); }
-                      to { border-color: transparent; }
-                    }
-            """
             await ctx.deps.device.page.evaluate("""
-            ([bbox, style]) => {
-                const [x1, y1, x2, y2] = bbox
-                let box = document.querySelector("#option-box")
-                let boxStyle = document.querySelector("#box-style")
-                if (!boxStyle) {
-                    boxStyle = document.createElement("style")
-                    boxStyle.id = "box-style"
-                    boxStyle.innerHTML = style
-                    document.head.appendChild(boxStyle)
-                }
+            ([bbox]) => {
+                let box = document.querySelector("#option-el-box")
                 if (!box) {
                     box = document.createElement("div");
-                    box.id = "option-box";
+                    box.id = "option-el-box";
                     box.style.position = "absolute";
                     box.style.zIndex = "1000";
                     box.style.border = "2px solid rgba(255,0,0)";
                     box.style.pointerEvents = "none"
-                    //box.style.animation = 'fadeBorder 4s forwards';
                     document.body.appendChild(box);
                 }
+                const [x1, y1, x2, y2] = bbox
                 box.style.top = y1 * 100 + "%"
                 box.style.left = x1 * 100 + "%"
                 box.style.width = (x2 - x1) * 100 + "%"
                 box.style.height = (y2 - y1) * 100 + "%"
                 return box
             }
-            """, [bbox, style])
+            """, [bbox])
         return await func(*args, **kwargs)
 
     return wrapper
-
-
-@asynccontextmanager
-async def clear_box(ctx: RunContext[AgentDeps[WebDevice]]):
-    await ctx.deps.device.page.evaluate("""() => {
-        const box = document.querySelector("#option-box")
-        if (box) {
-            box.style.display = "none"
-        }
-    }""")
-    yield
-    await ctx.deps.device.page.evaluate("""() => {
-        const box = document.querySelector("#option-box")
-        if (box) {
-            box.style.display = "unset"
-        }
-    }""")
 
 
 class WebAgentTool(AgentTool):
 
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDeps[WebDevice]]) -> io.BytesIO:
-        async with clear_box(ctx):
-            screenshot = await ctx.deps.device.page.screenshot(type='jpeg', quality=80, full_page=False)
-            image_buffer = io.BytesIO(screenshot)
-            image_buffer.name = 'screen.jpeg'
-            return image_buffer
+        screenshot = await ctx.deps.device.page.screenshot(full_page=False, style='#option-el-box {display: none;}')
+        image_buffer = io.BytesIO(screenshot)
+        image_buffer.name = 'screen.png'
+        return image_buffer
 
     @tool
     async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
-        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]）
+        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素，bbox 是相对值，格式为 (x1, y1, x2, y2)
         该工具禁止作为一个单独步骤，step 序号应与下一步的操作保持一致
         """
         data = self._parse_element(await self.screenshot(ctx))
@@ -286,9 +248,11 @@ class WebAgentTool(AgentTool):
         url = self._upload_cos(image_buffer)
         image_buffer.seek(0)
         self._page_record(self._parse_element(image_buffer), ctx)
-        await ctx.deps.device.context.close()
-        await ctx.deps.device.browser.close()
-        await ctx.deps.device.playwright.stop()
+
+        if ctx.deps.device.playwright is not None:
+            await ctx.deps.device.context.close()
+            await ctx.deps.device.browser.close()
+            await ctx.deps.device.playwright.stop()
         return ToolResult.success(ToolOutput(labeled_image_url=url))
 
     @tool
@@ -305,11 +269,12 @@ class WebAgentTool(AgentTool):
     @drawer_box
     async def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
         """
-        点击设备屏幕指定的元素
+        点击设备屏幕指定的元素, action.element_bbox 不能为空
         """
         x, y = action.coordinate
         logger.info(f'click coordinate ({x}, {y})')
         await ctx.deps.device.page.mouse.click(x, y)
+        await ctx.deps.device.page.touchscreen.tap(x, y)
         return ToolResult.success()
 
     @tool

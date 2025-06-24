@@ -18,21 +18,21 @@ from .deps import AgentDeps
 from .device import AndroidDevice, WebDevice
 from .prompt import SYSTEM_PROMPT
 from .tools import AndroidAgentTool, WebAgentTool
+from .config import settings
 
 
 class ResultsType(BaseModel):
     step: int
     description: str
     action: str
-    element_bbox: list[float, float, float, float]
-    device_size: str
+    element_bbox: list[float]
     labeled_image_url: str
     error: str
 
 
 class OutputType(BaseModel):
     is_success: bool
-    results: list[ResultsType]
+    # results: list[ResultsType]
 
 
 @dataclass
@@ -45,9 +45,11 @@ class UiAgent:
     async def create(cls, *args, **kwargs):
         raise NotImplementedError
 
-    async def create_report(self, report_data: str, report_dir: Union[Path, str]):
-        logger.info('创建报告...')
-        print(report_data)
+    @staticmethod
+    async def create_report(report_data: str, report_dir: Union[Path, str]) -> Path:
+        logger.info('创建步骤报告...')
+        logger.debug(f'report_data: {report_data}')
+
         report_dir = Path(report_dir)
         report_dir.mkdir(parents=True, exist_ok=True)
 
@@ -57,30 +59,39 @@ class UiAgent:
         output_path = report_dir / f'report_{datetime.now(): %Y%m%d%H%M%S}.html'
         output_path.write_text(content)
         logger.info(f"报告：{output_path.resolve().as_uri()}")
+        return output_path
 
     async def run(self, prompt: str, system_prompt: Optional[str] = None, report_dir: str = "./report"):
-        # TODO: 给用户添加自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
-        result = await self.agent.run(user_prompt=prompt, deps=self.deps)
+        # TODO: 给用户添加额外的自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
+        result = await self.agent.run(user_prompt=prompt, deps=self.deps, output_type=OutputType)
         logger.info(result.output)
-        report_data = result.output.dict()
+        # report_data = result.output.dict()
         logger.info(f"steps: {self.deps.context.steps}")
-        report_data_v2 = [step.dict() for step in self.deps.context.steps.values()]
-        logger.info(f'report_data_v2: {report_data_v2}')
-        if self.deps.context.page:
-            for item in report_data['results']:
-                item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []
+        report_data = {'is_success': result.output.is_success, 'results': [step.dict() for step in self.deps.context.steps.values()]}
+        # if self.deps.context.page:
+        #     for item in report_data['results']:
+        #         item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []
         await self.create_report(json.dumps(report_data, ensure_ascii=False), report_dir)
 
 
 class WebAgent(UiAgent):
     @classmethod
-    async def create(cls, model: str, headless: bool = False):
-        device = await WebDevice.create(headless=headless)
+    async def create(
+            cls,
+            model: Optional[str] = None,
+            *,
+            device: Optional[WebDevice] = None,
+            headless: Optional[bool] = None
+    ):
+        model = settings.model if model is None else model
+        headless = settings.headless if headless is None else headless
+
+        device = device or await WebDevice.create(headless=headless)
         deps = AgentDeps(device)
         tool = WebAgentTool()
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
-        agent = Agent(
+        agent = Agent[AgentDeps, OutputType](
             model=model,
             system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
             deps_type=AgentDeps,
@@ -94,13 +105,20 @@ class WebAgent(UiAgent):
 class MobileAgent(UiAgent):
 
     @classmethod
-    async def create(cls, model: str, serial: Optional[str] = None, platform: Optional[str | Platform] = None):
+    async def create(
+            cls, model: Optional[str] = None,
+            *,
+            serial: Optional[str] = None,
+            platform: Optional[str | Platform] = None
+    ):
+        model = settings.model if model is None else model
+
         device = await AndroidDevice.create(serial=serial, platform=platform)
         deps = AgentDeps(device)
         tool = AndroidAgentTool()
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
-        agent = Agent(
+        agent = Agent[AgentDeps, OutputType](
             model=model,
             system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
             deps_type=AgentDeps,
