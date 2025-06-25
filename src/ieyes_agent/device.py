@@ -10,7 +10,7 @@ from adbutils import AdbClient, AdbDevice
 from playwright.async_api import async_playwright, Playwright, Page, Browser, BrowserContext, ViewportSize
 from pydantic import BaseModel
 
-from ieyes_agent.util.platform import Platform
+from .util.platform import Platform
 
 
 class DeviceSize(BaseModel):
@@ -25,47 +25,36 @@ class WebDevice:
     context: BrowserContext
     page: Page
     device_size: DeviceSize
+    simulate_device: Optional[str] = None
 
     @classmethod
-    async def _get_device_size(cls, page: Page) -> DeviceSize:
-        """获取设备尺寸, 更可靠的视口尺寸获取方式"""
-        viewport_size = await page.evaluate("""() => ({
-                        width: document.documentElement.clientWidth,
-                        height: document.documentElement.clientHeight
-                    })""")
-
-        return DeviceSize(
-            width=viewport_size["width"],
-            height=viewport_size["height"]
-        )
-
-    @classmethod
-    async def create(cls, headless: bool = False) -> "WebDevice":
+    async def create(cls, headless: bool = False, simulate_device: Optional[str] = None) -> "WebDevice":
         """异步工厂方法用于创建实例"""
         playwright = await async_playwright().start()
         browser = await playwright.chromium.launch(
             channel='chrome',
             headless=headless,
         )
-        context = await browser.new_context(**playwright.devices['iPhone 6'])
-        # context = await browser.new_context(viewport=ViewportSize(width=1920, height=1080))
-        page = await context.new_page()
+        context_params = {'viewport': ViewportSize(width=1920, height=1080)}
+        if simulate_device and simulate_device in playwright.devices:
+            context_params.update(playwright.devices[simulate_device])
 
-        # device_size = await cls._get_device_size(page)
+        context = await browser.new_context(**context_params)
+        page = await context.new_page()
         device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, browser, context, page, device_size)
+        return cls(playwright, browser, context, page, device_size, simulate_device)
 
     @classmethod
-    async def from_page(cls, page: Page) -> "WebDevice":
+    async def from_page(cls, page: Page, simulate_device: Optional[str] = None) -> "WebDevice":
         """通过page对象创建实例"""
         playwright = None
         context = page.context
         browser = context.browser
 
-        device_size = await cls._get_device_size(page)
+        device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, browser, context, page, device_size)
+        return cls(playwright, browser, context, page, device_size, simulate_device)
 
 
 @dataclass

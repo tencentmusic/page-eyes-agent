@@ -7,18 +7,18 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
-from .util.platform import Platform
+from typing import Optional, Union, Literal, TypeAlias
 
 from loguru import logger
 from pydantic import BaseModel
 from pydantic_ai import Agent
 
+from .config import global_settings
 from .deps import AgentDeps
 from .device import AndroidDevice, WebDevice
 from .prompt import SYSTEM_PROMPT
 from .tools import AndroidAgentTool, WebAgentTool
-from .config import settings
+from .util.platform import Platform
 
 
 class ResultsType(BaseModel):
@@ -67,11 +67,15 @@ class UiAgent:
         logger.info(result.output)
         # report_data = result.output.dict()
         logger.info(f"steps: {self.deps.context.steps}")
-        report_data = {'is_success': result.output.is_success, 'results': [step.dict() for step in self.deps.context.steps.values()]}
+        report_data = {'is_success': result.output.is_success,
+                       'results': [step.dict() for step in self.deps.context.steps.values()]}
         # if self.deps.context.page:
         #     for item in report_data['results']:
         #         item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []
         await self.create_report(json.dumps(report_data, ensure_ascii=False), report_dir)
+
+
+SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str
 
 
 class WebAgent(UiAgent):
@@ -81,18 +85,26 @@ class WebAgent(UiAgent):
             model: Optional[str] = None,
             *,
             device: Optional[WebDevice] = None,
-            headless: Optional[bool] = None
+            simulate_device: Optional[SimulateDeviceType] = None,
+            headless: Optional[bool] = None,
+            debug: Optional[bool] = None,
     ):
-        model = settings.model if model is None else model
-        headless = settings.headless if headless is None else headless
 
-        device = device or await WebDevice.create(headless=headless)
-        deps = AgentDeps(device)
+        settings = global_settings.copy_and_update(
+            model=model,
+            simulate_device=simulate_device,
+            headless=headless,
+            debug=debug)
+
+        logger.info(f'settings: {settings}')
+
+        device = device or await WebDevice.create(settings.headless, settings.simulate_device)
+        deps = AgentDeps(device, settings)
         tool = WebAgentTool()
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
         agent = Agent[AgentDeps, OutputType](
-            model=model,
+            model=global_settings.model,
             system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
             deps_type=AgentDeps,
             tools=tool.tools,
@@ -109,12 +121,15 @@ class MobileAgent(UiAgent):
             cls, model: Optional[str] = None,
             *,
             serial: Optional[str] = None,
-            platform: Optional[str | Platform] = None
+            platform: Optional[str | Platform] = None,
+            debug: Optional[bool] = None,
     ):
-        model = settings.model if model is None else model
+        settings = global_settings.copy_and_update(model=model, debug=debug)
+
+        logger.info(f'settings: {settings}')
 
         device = await AndroidDevice.create(serial=serial, platform=platform)
-        deps = AgentDeps(device)
+        deps = AgentDeps(device, settings)
         tool = AndroidAgentTool()
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 

@@ -3,7 +3,8 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/24 12:18
-import logging
+from typing import Literal, Optional
+
 from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -32,11 +33,16 @@ class CosConfig(BaseSettings):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='agent_', extra='ignore')
 
-    headless: bool = True
-    model: str = 'openai:deepseek-v3'
-    omni_base_url: str = 'http://21.6.91.201:8000'
-    cos_base_url: str = 'http://uniqc.woa.com/api/tools/file-upload/'
-    debug: bool = False
+    headless: Optional[bool] = True
+    model: Optional[str] = 'openai:deepseek-v3'
+    omni_base_url: Optional[str] = 'http://21.6.91.201:8000'
+    cos_base_url: Optional[str] = 'http://uniqc.woa.com/api/tools/file-upload/'
+    simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
+    debug: Optional[bool] = False
+
+    def copy_and_update(self, **kwargs):
+        validated_settings = self.model_validate(kwargs)
+        return self.model_copy(update=validated_settings.model_dump(exclude_none=True), deep=True)
 
 
-settings = Settings()
+global_settings = Settings()

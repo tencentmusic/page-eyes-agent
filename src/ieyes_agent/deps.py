@@ -10,6 +10,8 @@ from typing import TypedDict
 
 from playwright.async_api import JSHandle
 
+from .config import Settings
+
 
 class DeviceInfo(TypedDict):
     device_name: str
@@ -29,4 +31,5 @@ T = TypeVar('T')
 @dataclass
 class AgentDeps(Generic[T]):
     device: T
+    settings: Settings
     context: Context = field(default_factory=Context)

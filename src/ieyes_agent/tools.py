@@ -6,7 +6,6 @@
 import asyncio
 import io
 from abc import ABC, abstractmethod
-from contextlib import asynccontextmanager
 from functools import wraps
 from traceback import print_exc
 from typing import IO, Optional, TypeVar, cast
@@ -16,7 +15,7 @@ from loguru import logger
 from pydantic import BaseModel, computed_field
 from pydantic_ai import ModelRetry, RunContext
 
-from .config import settings
+from .config import global_settings
 from .deps import AgentDeps
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
@@ -126,8 +125,8 @@ def tool(func):
 
 
 class AgentTool(ABC):
-    OMNI_BASE_URL = settings.omni_base_url
-    COS_BASE_URL = settings.cos_base_url
+    OMNI_BASE_URL = global_settings.omni_base_url
+    COS_BASE_URL = global_settings.cos_base_url
 
     @property
     def tools(self) -> list:
@@ -177,9 +176,6 @@ class AgentTool(ABC):
 def drawer_box(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-        if not settings.debug:
-            return await func(*args, **kwargs)
-
         ctx: Optional[RunContext[AgentDeps[WebDevice]]] = None
         bbox: Optional[list[float]] = None
         for arg in [*args, *kwargs.values()]:
@@ -189,7 +185,7 @@ def drawer_box(func):
             if isinstance(arg, ActionInfo):
                 bbox = arg.element_bbox
                 continue
-        if ctx and bbox:
+        if ctx and ctx.deps.settings.debug and bbox:
             await ctx.deps.device.page.evaluate("""
             ([bbox]) => {
                 let box = document.querySelector("#option-el-box")
@@ -274,7 +270,6 @@ class WebAgentTool(AgentTool):
         x, y = action.coordinate
         logger.info(f'click coordinate ({x}, {y})')
         await ctx.deps.device.page.mouse.click(x, y)
-        await ctx.deps.device.page.touchscreen.tap(x, y)
         return ToolResult.success()
 
     @tool

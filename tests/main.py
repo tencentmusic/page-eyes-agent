@@ -6,7 +6,6 @@ from loguru import logger
 from ieyes_agent.agent import WebAgent, MobileAgent
 from ieyes_agent.util.platform import Platform
 from typing import cast
-from ieyes_agent.config import settings
 try:
     from loguru import BasicHandlerConfig
 except ImportError:
@@ -17,9 +16,9 @@ logger.configure(handlers=cast(list['BasicHandlerConfig'], [{"sink": sys.stdout,
 
 
 async def main():
-    logger.info(f'settings: {settings}')
     # Web 端
-    ui_agent = await WebAgent.create('openai:deepseek-v3')
+    ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro Max', debug=True)
+    # ui_agent = await WebAgent.create('openai:deepseek-v3', headless=False, debug=True)
 
     # 移动端
     # ui_agent = await MobileAgent.create('openai:deepseek-v3', platform=Platform.KG)
