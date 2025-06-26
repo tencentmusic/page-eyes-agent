@@ -18,15 +18,11 @@ logger.configure(handlers=cast(list['BasicHandlerConfig'], [{"sink": sys.stdout,
 async def main():
     # Web 端
     ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro Max', debug=True)
-    # ui_agent = await WebAgent.create('openai:deepseek-v3', headless=False, debug=True)
 
     # 移动端
-    # ui_agent = await MobileAgent.create('openai:deepseek-v3', platform=Platform.KG)
+    # ui_agent = await MobileAgent.create(platform=Platform.QY)
 
-    # await ui_agent.run('1.点击 Find icon\n2.在搜索输入框中输入"小美满"\n3.点击"小美满> "\n4.点击"查看更多成绩"')
-    # await ui_agent.run('1.点击第一个推荐按钮\n2.点击单曲购买\n3.点击"超会连续包月"\n4.点击"立即购买"')
-
-    await ui_agent.run(
+    report = await ui_agent.run(
         ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
          '2.点击"查找icon"\n'
          '3.在搜索输入框中输入"小美满"\n'

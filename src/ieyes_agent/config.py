@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     cos_base_url: Optional[str] = 'http://uniqc.woa.com/api/tools/file-upload/'
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
     debug: Optional[bool] = False
+    log_graph_node: Optional[bool] = False
 
     def copy_and_update(self, **kwargs):
         validated_settings = self.model_validate(kwargs)

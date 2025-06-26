@@ -63,7 +63,13 @@ class UiAgent:
 
     async def run(self, prompt: str, system_prompt: Optional[str] = None, report_dir: str = "./report"):
         # TODO: 给用户添加额外的自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
-        result = await self.agent.run(user_prompt=prompt, deps=self.deps, output_type=OutputType)
+        async with self.agent.iter(user_prompt=prompt, deps=self.deps, output_type=OutputType) as agent_run:
+            async for node in agent_run:
+                if self.deps.settings.log_graph_node:
+                    logger.info(f"Agent Node: {node}")
+            assert agent_run.result is not None, 'The graph run did not finish properly'
+            result = agent_run.result
+
         logger.info(result.output)
         # report_data = result.output.dict()
         logger.info(f"steps: {self.deps.context.steps}")
@@ -72,7 +78,7 @@ class UiAgent:
         # if self.deps.context.page:
         #     for item in report_data['results']:
         #         item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []
-        await self.create_report(json.dumps(report_data, ensure_ascii=False), report_dir)
+        return await self.create_report(json.dumps(report_data, ensure_ascii=False), report_dir)
 
 
 SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str
