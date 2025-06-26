@@ -7,11 +7,14 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union, Literal, TypeAlias
+from typing import Optional, Union, Literal, TypeAlias, cast
 
 from loguru import logger
 from pydantic import BaseModel
-from pydantic_ai import Agent
+from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode
+from pydantic_ai.messages import ToolReturnPart, ToolCallPart
+from pydantic_ai.result import FinalResult
+from pydantic_graph.nodes import End
 
 from .config import global_settings
 from .deps import AgentDeps
@@ -61,12 +64,31 @@ class UiAgent:
         logger.info(f"报告：{output_path.resolve().as_uri()}")
         return output_path
 
+    @staticmethod
+    def format_logger_node(node):
+        if isinstance(node, UserPromptNode):
+            logger.info(f"🤖Agent start user task: {repr(node.user_prompt)}")
+
+        elif isinstance(node, ModelRequestNode):
+            for part in node.request.parts:
+                if isinstance(part, ToolReturnPart):
+                    logger.info(f"🤖Agent tool feedback: {part.tool_name} -> {part.content}")
+
+        elif isinstance(node, CallToolsNode):
+            for part in node.model_response.parts:
+                if isinstance(part, ToolCallPart):
+                    logger.info(f"🤖Agent tool call: {part.tool_name}({part.args})")
+
+        elif isinstance(node, End):
+            node = cast(End[FinalResult[OutputType]], node)
+            logger.info(f"🤖Agent finished with output: {node.data.output.model_dump()}")
+
     async def run(self, prompt: str, system_prompt: Optional[str] = None, report_dir: str = "./report"):
         # TODO: 给用户添加额外的自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
         async with self.agent.iter(user_prompt=prompt, deps=self.deps, output_type=OutputType) as agent_run:
             async for node in agent_run:
                 if self.deps.settings.log_graph_node:
-                    logger.info(f"Agent Node: {node}")
+                    self.format_logger_node(node)
             assert agent_run.result is not None, 'The graph run did not finish properly'
             result = agent_run.result
 
