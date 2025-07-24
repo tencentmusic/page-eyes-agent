@@ -20,14 +20,15 @@ async def main():
     ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro Max', debug=True)
 
     # 移动端
-    # ui_agent = await MobileAgent.create(platform=Platform.QY)
+    # ui_agent = await MobileAgent.create(serial='10.91.145.46:49295',platform=Platform.QY)
 
     report = await ui_agent.run(
         ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
+         # '2.点击"播放按钮"\n'
          '2.点击"查找icon"\n'
          '3.在搜索输入框中输入"小美满"\n'
-         # '4.点击"小美满> "\n'
-         # '5.点击"日榜"'
+         '4.点击"小美满> "\n'
+         '5.点击"日榜"'
          ))
 
     # await ui_agent.run(

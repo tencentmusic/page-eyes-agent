@@ -132,7 +132,7 @@ class WebAgent(UiAgent):
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
         agent = Agent[AgentDeps, OutputType](
-            model=global_settings.model,
+            model=settings.model,
             system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
             deps_type=AgentDeps,
             tools=tool.tools,
@@ -162,7 +162,7 @@ class MobileAgent(UiAgent):
         screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
         agent = Agent[AgentDeps, OutputType](
-            model=model,
+            model=settings.model,
             system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
             deps_type=AgentDeps,
             tools=tool.tools,

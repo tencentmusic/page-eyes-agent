@@ -67,7 +67,18 @@ class AndroidDevice:
     @classmethod
     async def create(cls, serial: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
         client = AdbClient()
-        adb_device: AdbDevice = client.device(serial=serial) if serial else client.device_list()[0]
+        current_devices = client.device_list()
+        if serial:
+            if serial not in current_devices:
+                output = client.connect(serial, timeout=10)
+                if 'connected' not in output:
+                    raise Exception(f"adb connect failed: {output}")
+            adb_device: AdbDevice = client.device(serial=serial)
+        elif current_devices:
+            adb_device: AdbDevice = client.device_list()[0]
+        else:
+            raise Exception("No adb device found")
+
         window_size = adb_device.window_size()
         device_size = DeviceSize(width=window_size.width, height=window_size.height)
         return cls(client, adb_device, device_size, platform)
