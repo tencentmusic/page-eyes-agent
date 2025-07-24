@@ -1,5 +1,5 @@
 
-# 基于AI的UI自动化提效(二)：PageEyes Agent应用探索
+# 基于AI的UI自动化提效：PageEyes Agent应用探索
 
 ### 一、背景
 
