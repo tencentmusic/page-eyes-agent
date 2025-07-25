@@ -47,14 +47,15 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 
 ##### 2.1 PageEyes Agent 架构
 **整体框架**
-![](整体框架.png)
+<img src="整体框架.png" style="width: 600px; display: block; margin: 0 auto;" />
 
 **Agent 执行流程**
-![](Agent执行流程.png)
+<img src="Agent执行流程.png" style="width: 800px; display: block; margin: 0 auto;" />
+
 
 #### 2.2 信息感知方案的选择
 信息感知方案选择上我们分别对比了用得比较多的几种：
-![](信息感知方案对比.png)
+<img src="信息感知方案对比.png" style="width: 800px; display: block; margin: 0 auto;" />
 
 **结论**
 
@@ -63,7 +64,8 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 ✅ OmniParser 需额外部署模型，但对机器配置要求不高，元素解析稳定，适用全平台  
 
 #### 2.2 PageEyes Agent 提示词工程示例
-![](提示词工程.png)
+<img src="提示词工程.png" style="width: 800px; display: block; margin: 0 auto;" />
+
 
 #### 2.3 PageEyes Agent 稳定性优化的一些策略
 - 设计上我们只依赖模型的规划能力和元素解析能力，所以小模型也能胜任
