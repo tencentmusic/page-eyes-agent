@@ -8,7 +8,7 @@ import io
 from abc import ABC, abstractmethod
 from functools import wraps
 from traceback import print_exc
-from typing import IO, Optional, TypeVar, cast, Literal
+from typing import IO, Optional, TypeVar, cast, Literal, Tuple
 
 import requests
 from loguru import logger
@@ -427,3 +427,23 @@ class AndroidAgentTool(AgentTool):
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
         return ToolResult.success()
+
+    @tool
+    async def swipe_from_coordinate(
+            self,
+            ctx: RunContext[AgentDeps[AndroidDevice]],
+            action: ActionInfo,
+            start_coordinate: Tuple[int, int],
+            end_coordinate: Tuple[int, int]
+    ):
+        """
+        在设备屏幕中根据指定的起始坐标和结束坐标滑动
+        start_coordinate 为起始坐标，格式为 (x1, y1)
+        end_coordinate 为结束坐标，格式为 (x2, y2)
+        """
+        x1, y1 = start_coordinate
+        x2, y2 = end_coordinate
+        logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
+        ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+        return ToolResult.success()
+
