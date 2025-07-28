@@ -8,7 +8,7 @@ import io
 from abc import ABC, abstractmethod
 from functools import wraps
 from traceback import print_exc
-from typing import IO, Optional, TypeVar, cast
+from typing import IO, Optional, TypeVar, cast, Literal
 
 import requests
 from loguru import logger
@@ -285,6 +285,37 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.keyboard.press('Enter')
         return ToolResult.success()
 
+    @tool
+    async def scroll(
+            self,
+            ctx: RunContext[AgentDeps[WebDevice]],
+            action: ActionInfo,
+            to: Literal['left', 'right', 'top', 'bottom']
+    ):
+        """
+        在设备屏幕中滚动滚动条，参数 to 表示滚动方向
+        to='left' 向左滚动
+        to='right' 向右滚动
+        to='top' 向上滚动
+        to='bottom' 向下滚动
+        """
+        logger.info(f'swipe to {to}')
+        width, height = action.device_size
+        if to == 'bottom':
+            delta_x, delta_y = 0, 0.5 * height
+        elif to == 'right':
+            delta_x, delta_y = 0.5 * width, 0
+        elif to == 'top':
+            delta_x, delta_y = 0, -0.5 * height
+        elif to == 'left':
+            delta_x, delta_y = -0.5 * width, 0
+        else:
+            raise ValueError(f'Invalid Parameter: to={to}')
+
+        logger.info(f'Scroll delta_x={delta_x}, delta_y={delta_y}')
+        await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
+        return ToolResult.success()
+
 
 class AndroidAgentTool(AgentTool):
 
@@ -364,4 +395,35 @@ class AndroidAgentTool(AgentTool):
         ctx.deps.device.adb_device.click(x, y)
         AdbDeviceProxy(ctx.deps.device.adb_device).input_text(action.text)
         ctx.deps.device.adb_device.keyevent('KEYCODE_ENTER')
+        return ToolResult.success()
+
+    @tool
+    async def swipe(
+            self,
+            ctx: RunContext[AgentDeps[AndroidDevice]],
+            action: ActionInfo,
+            to: Literal['left', 'right', 'top', 'bottom']
+    ):
+        """
+        在设备屏幕中滑动，参数 to 表示滑动方向
+        to='left' 向左滑动
+        to='right' 向右滑动
+        to='top' 向上滑动
+        to='bottom' 向下滑动
+        """
+        logger.info(f'swipe to {to}')
+        width, height = action.device_size
+        if to == 'top':
+            x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.2 * height
+        elif to == 'left':
+            x1, y1, x2, y2 = 0.8 * width, 0.5 * height, 0.2 * width, 0.5 * height
+        elif to == 'bottom':
+            x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.8 * height
+        elif to == 'right':
+            x1, y1, x2, y2 = 0.2 * width, 0.5 * height, 0.8 * width, 0.5 * height
+        else:
+            raise ValueError(f'Invalid Parameter: to={to}')
+
+        logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
+        ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
         return ToolResult.success()
