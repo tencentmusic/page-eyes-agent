@@ -30,6 +30,7 @@ class ActionInfo(BaseModel):
     device_size: list[int]
     url: Optional[str] = None
     text: Optional[str] = None
+    to: Optional[Literal['left', 'right', 'top', 'bottom']] = None
 
     @computed_field()
     @property
@@ -46,6 +47,7 @@ class StepRecord(BaseModel):
     description: str = ''
     action: str = ''
     element_bbox: Optional[list[float]] = []
+    coordinate: Optional[list[float]] = []
     labeled_image_url: str = ''
     error: str = ''
     page: list = []
@@ -156,7 +158,15 @@ class AgentTool(ABC):
     def _page_record(data: dict, ctx: RunContext[AgentDeps]):
         """通过上下文记录页面截图和元素解析信息"""
         if data:
-            ctx.deps.context.page.update({data.get("labeled_image_url", ''): data.get('parsed_content_list', [])})
+            parsed_content_list: list[dict] = data.get('parsed_content_list', [])
+            if parsed_content_list and isinstance(ctx.deps.device, (AndroidDevice, WebDevice)):
+                width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
+                for item in parsed_content_list:
+                    x1, y1, x2, y2 = item['bbox']
+                    item['bbox_coordinate'] = [int(width * x1), int(height * y1), int(width * x2), int(height * y2)]
+
+            ctx.deps.context.page.update({data.get("labeled_image_url", ''): parsed_content_list})
+
         return ctx.deps.context.page
 
     @staticmethod
@@ -285,36 +295,65 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.keyboard.press('Enter')
         return ToolResult.success()
 
+    @staticmethod
+    async def _scroll(
+            ctx: RunContext[AgentDeps[WebDevice]],
+            action: ActionInfo,
+    ):
+        logger.info(f'scroll {action.to}')
+        width, height = action.device_size
+        if action.to == 'bottom':
+            delta_x, delta_y = 0, 0.5 * height
+        elif action.to == 'right':
+            delta_x, delta_y = 0.5 * width, 0
+        elif action.to == 'top':
+            delta_x, delta_y = 0, -0.5 * height
+        elif action.to == 'left':
+            delta_x, delta_y = -0.5 * width, 0
+        else:
+            raise ValueError(f'Invalid Parameter: to={action.to}')
+
+        logger.info(f'Scroll delta_x={delta_x}, delta_y={delta_y}')
+        await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
+
     @tool
     async def scroll(
             self,
             ctx: RunContext[AgentDeps[WebDevice]],
             action: ActionInfo,
-            to: Literal['left', 'right', 'top', 'bottom']
     ):
         """
-        在设备屏幕中滚动滚动条，参数 to 表示滚动方向
+        在设备屏幕中滚动滚动条，仅滚动操作可使用，参数 to 表示滚动方向
         to='left' 向左滚动
         to='right' 向右滚动
         to='top' 向上滚动
         to='bottom' 向下滚动
         """
-        logger.info(f'swipe to {to}')
-        width, height = action.device_size
-        if to == 'bottom':
-            delta_x, delta_y = 0, 0.5 * height
-        elif to == 'right':
-            delta_x, delta_y = 0.5 * width, 0
-        elif to == 'top':
-            delta_x, delta_y = 0, -0.5 * height
-        elif to == 'left':
-            delta_x, delta_y = -0.5 * width, 0
-        else:
-            raise ValueError(f'Invalid Parameter: to={to}')
-
-        logger.info(f'Scroll delta_x={delta_x}, delta_y={delta_y}')
-        await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
+        await self._scroll(ctx, action)
         return ToolResult.success()
+
+    @tool
+    async def swipe(
+            self,
+            ctx: RunContext[AgentDeps[WebDevice]],
+            action: ActionInfo,
+    ):
+        """
+        在设备屏幕中滑动，仅滑动操作可使用，参数 to 表示滑动方向
+        action.to='left' 向左滑动
+        action.to='right' 向右滑动
+        action.to='top' 向上滑动
+        action.to='bottom' 向下滑动
+        """
+        swipe_to_scroll_mapping = {
+            'left': 'right',
+            'right': 'left',
+            'top': 'bottom',
+            'bottom': 'top',
+        }
+        # noinspection PyTypeChecker
+        action.to = swipe_to_scroll_mapping.get(action.to)
+        return await self._scroll(ctx, action)
 
 
 class AndroidAgentTool(AgentTool):
@@ -402,27 +441,26 @@ class AndroidAgentTool(AgentTool):
             self,
             ctx: RunContext[AgentDeps[AndroidDevice]],
             action: ActionInfo,
-            to: Literal['left', 'right', 'top', 'bottom']
     ):
         """
         在设备屏幕中滑动，参数 to 表示滑动方向
-        to='left' 向左滑动
-        to='right' 向右滑动
-        to='top' 向上滑动
-        to='bottom' 向下滑动
+        action.to='left' 向左滑动
+        action.to='right' 向右滑动
+        action.to='top' 向上滑动
+        action.to='bottom' 向下滑动
         """
-        logger.info(f'swipe to {to}')
+        logger.info(f'swipe to {action.to}')
         width, height = action.device_size
-        if to == 'top':
+        if action.to == 'top':
             x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.2 * height
-        elif to == 'left':
+        elif action.to == 'left':
             x1, y1, x2, y2 = 0.8 * width, 0.5 * height, 0.2 * width, 0.5 * height
-        elif to == 'bottom':
+        elif action.to == 'bottom':
             x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.8 * height
-        elif to == 'right':
+        elif action.to == 'right':
             x1, y1, x2, y2 = 0.2 * width, 0.5 * height, 0.8 * width, 0.5 * height
         else:
-            raise ValueError(f'Invalid Parameter: to={to}')
+            raise ValueError(f'Invalid Parameter: to={action.to}')
 
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
