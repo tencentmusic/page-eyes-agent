@@ -16,7 +16,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 3. .env 文件
 4. 类属性默认值
 """
-load_dotenv()
+load_dotenv(override=True)
 
 
 class CosConfig(BaseSettings):

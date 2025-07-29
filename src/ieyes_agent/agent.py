@@ -59,7 +59,7 @@ class UiAgent:
         template = Path(__file__).parent / "report_template.html"
         content = template.read_text().replace('{reportData}', report_data)
 
-        output_path = report_dir / f'report_{datetime.now(): %Y%m%d%H%M%S}.html'
+        output_path = report_dir / f'report_{datetime.now():%Y%m%d%H%M%S}.html'
         output_path.write_text(content)
         logger.info(f"报告：{output_path.resolve().as_uri()}")
         return output_path
@@ -137,7 +137,7 @@ class WebAgent(UiAgent):
             deps_type=AgentDeps,
             tools=tool.tools,
             output_type=OutputType,
-            retries=2
+            retries=3
         )
         return cls(model, deps, agent)
 

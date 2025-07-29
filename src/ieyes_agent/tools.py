@@ -12,7 +12,7 @@ from typing import IO, Optional, TypeVar, cast, Literal, Tuple
 
 import requests
 from loguru import logger
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, computed_field, Field, confloat, conlist
 from pydantic_ai import ModelRetry, RunContext
 
 from .config import global_settings
@@ -23,11 +23,11 @@ from .util.platform import get_client_url_schema
 
 
 class ActionInfo(BaseModel):
-    step: int
+    step: int = Field(ge=1)
     description: str
     action: str
-    element_bbox: Optional[list[float]] = []
-    device_size: list[int]
+    element_bbox: Optional[conlist(confloat(ge=0.0, le=1.0), min_length=4, max_length=4)] = []
+    device_size: list[int] = Field(min_length=2, max_length=2)
     url: Optional[str] = None
     text: Optional[str] = None
     to: Optional[Literal['left', 'right', 'top', 'bottom']] = None
