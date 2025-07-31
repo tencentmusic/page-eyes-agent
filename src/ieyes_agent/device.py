@@ -38,6 +38,7 @@ class WebDevice:
         context_params = {'viewport': ViewportSize(width=1920, height=1080)}
         if simulate_device and simulate_device in playwright.devices:
             context_params.update(playwright.devices[simulate_device])
+            del context_params['has_touch']  # 解决模拟设备的触摸滑动问题
 
         context = await browser.new_context(**context_params)
         page = await context.new_page()
