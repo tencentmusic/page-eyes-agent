@@ -329,7 +329,7 @@ class WebAgentTool(AgentTool):
             """)
         await ctx.deps.device.page.mouse.move(x1, y1)
         await ctx.deps.device.page.mouse.down()
-        await ctx.deps.device.page.mouse.move(x2, y2, steps=20)
+        await ctx.deps.device.page.mouse.move(x2, y2, steps=50)
         await ctx.deps.device.page.mouse.up()
 
     async def _scroll(
