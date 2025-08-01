@@ -346,8 +346,12 @@ class WebAgentTool(AgentTool):
         has_horizontal = await ctx.deps.device.page.evaluate('''() => {
                     return document.body.scrollWidth > window.innerWidth;
                 }''')
-        scrollable = action.to in ['left', 'right'] and has_horizontal or action.to in ['top', 'bottom'] and has_vertical
-        if ctx.deps.device.simulate_device and ctx.deps.device.simulate_device in ctx.deps.device.playwright.devices and not scrollable:
+        scrollable = (action.to in ['left', 'right']
+                      and has_horizontal
+                      or action.to in ['top', 'bottom'] and has_vertical)
+        if (ctx.deps.device.simulate_device
+                and ctx.deps.device.simulate_device in ctx.deps.device.playwright.devices
+                and not scrollable):
             await self._swipe(ctx, action)
             return None
 
@@ -412,7 +416,7 @@ class AndroidAgentTool(AgentTool):
 
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDeps[AndroidDevice]]) -> io.BytesIO:
-        logger.info(f'获取当前屏幕截图')
+        logger.info('获取当前屏幕截图')
         image_buffer = io.BytesIO()
         screenshot = ctx.deps.device.adb_device.screenshot()
         screenshot.save(image_buffer, format='webp')
