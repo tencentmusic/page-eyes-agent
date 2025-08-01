@@ -14,6 +14,7 @@ from .util.platform import Platform
 
 
 class DeviceSize(BaseModel):
+    """设备尺寸"""
     width: int
     height: int
 
@@ -67,6 +68,7 @@ class AndroidDevice:
 
     @classmethod
     async def create(cls, serial: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
+        """异步工厂方法用于创建实例"""
         client = AdbClient()
         current_devices = client.device_list()
         if serial:

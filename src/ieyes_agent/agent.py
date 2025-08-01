@@ -24,16 +24,8 @@ from .tools import AndroidAgentTool, WebAgentTool
 from .util.platform import Platform
 
 
-class ResultsType(BaseModel):
-    step: int
-    description: str
-    action: str
-    element_bbox: list[float]
-    labeled_image_url: str
-    error: str
-
-
 class OutputType(BaseModel):
+    """Agent 执行结果类型"""
     is_success: bool
     # results: list[ResultsType]
 
@@ -46,10 +38,12 @@ class UiAgent:
 
     @classmethod
     async def create(cls, *args, **kwargs):
+        """Async factory method to create an instance of this class."""
         raise NotImplementedError
 
     @staticmethod
     async def create_report(report_data: str, report_dir: Union[Path, str]) -> Path:
+        """Create a report file based on the given data and directory."""
         logger.info('创建步骤报告...')
         logger.debug(f'report_data: {report_data}')
 
@@ -66,6 +60,7 @@ class UiAgent:
 
     @staticmethod
     def format_logger_node(node):
+        """Format the logger node based on the given node type."""
         if isinstance(node, UserPromptNode):
             logger.info(f"🤖Agent start user task: {repr(node.user_prompt)}")
 
@@ -107,6 +102,7 @@ SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15
 
 
 class WebAgent(UiAgent):
+    """WebAgent class for web automation."""
     @classmethod
     async def create(
             cls,
@@ -117,7 +113,6 @@ class WebAgent(UiAgent):
             headless: Optional[bool] = None,
             debug: Optional[bool] = None,
     ):
-
         settings = global_settings.copy_and_update(
             model=model,
             simulate_device=simulate_device,
@@ -143,6 +138,7 @@ class WebAgent(UiAgent):
 
 
 class MobileAgent(UiAgent):
+    """MobileAgent class for mobile device automation."""
 
     @classmethod
     async def create(

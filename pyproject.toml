@@ -28,7 +28,7 @@ classifiers = [
    "Topic :: Software Development :: Build Tools",
 
    # 根据需要选择你的许可证（也见上面的 "license" 字段）
-   "License :: OSI Approved :: MIT License",
+   "License :: OSI Approved :: Apache License, Version 2.0",
 
    # 在这里指定你支持的 Python 版本。
    "Programming Language :: Python :: 3",
