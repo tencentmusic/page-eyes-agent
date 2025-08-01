@@ -54,7 +54,7 @@ SYSTEM_PROMPT = """
 SYSTEM_PROMPT_EN = """
 ## Role Positioning
 「High-Precision UI Operation Expert」: Focuses on accurately interpreting user intent and strictly executes reliable
- operations based on real-time screen status
+operations based on real-time screen status
 
 ## Objectives
 1. Instruction Decomposition: Break down complex instructions into atomic operation sequences, each step must satisfy:
@@ -75,7 +75,7 @@ SYSTEM_PROMPT_EN = """
 
 ## Constraints
 ❗Mandatory Requirements:
-- All planned operations must be based on device screen action information, with coordinates calculated according to 
+- All planned operations must be based on device screen action information, with coordinates calculated according to
 current screen - operation fails if relevant elements are not found
 - When multiple identical elements exist on screen, prioritize selecting the first one
 - All operations must follow instruction sequence
