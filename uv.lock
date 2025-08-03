@@ -251,6 +251,15 @@ wheels = [
 ]
 
 [[package]]
+name = "esprima2"
+version = "5.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/76/ff/93db74202800e8553d93f255489fe96e5c56d19c5c236f56dee018e60c6b/esprima2-5.0.0.tar.gz", hash = "sha256:d2c2213adda66ed5ac2b6998f3c7cb4957d7a120453888c06c9b088c29ff8eaf", size = 5726495 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/8e/e9933d74b86e38dc9dcce11830be78e3eeaec8d9e757e26f127e9e1571a4/esprima2-5.0.0-py3-none-any.whl", hash = "sha256:084b6fc2b472adb570e15698a8fa670e099393cb3ca8230684deb68009f194d1", size = 67350 },
+]
+
+[[package]]
 name = "eval-type-backport"
 version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -507,6 +516,7 @@ source = { editable = "." }
 dependencies = [
     { name = "adbutils" },
     { name = "cos-python-sdk-v5" },
+    { name = "esprima2" },
     { name = "loguru" },
     { name = "nest-asyncio" },
     { name = "openai" },
@@ -518,6 +528,7 @@ dependencies = [
 requires-dist = [
     { name = "adbutils", specifier = ">=2.8.10" },
     { name = "cos-python-sdk-v5", specifier = ">=1.9.38" },
+    { name = "esprima2", specifier = ">=5.0.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "nest-asyncio", specifier = ">=1.6.0" },
     { name = "openai", specifier = ">=1.92.2" },

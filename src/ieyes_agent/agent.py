@@ -23,15 +23,6 @@ from .tools import AndroidAgentTool, WebAgentTool
 from .util.platform import Platform
 
 
-class ResultsType(BaseModel):
-    step: int
-    description: str
-    action: str
-    element_bbox: list[float]
-    labeled_image_url: str
-    error: str
-
-
 class OutputType(BaseModel):
     """
     执行指令完成后的需判断整个任务是否成功，并总结各个步骤执行结果，结果格式如下：

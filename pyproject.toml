@@ -10,6 +10,7 @@ requires-python = ">=3.12"
 dependencies = [
     "adbutils>=2.8.10",
     "cos-python-sdk-v5>=1.9.38",
+    "esprima2>=5.0.0",
     "loguru>=0.7.3",
     "nest-asyncio>=1.6.0",
     "openai>=1.92.2",
@@ -27,7 +28,6 @@ classifiers = [
    # 指明你的项目面向的对象
    "Intended Audience :: Developers",
    "Topic :: Software Development :: Build Tools",
-
 
    # 在这里指定你支持的 Python 版本。
    "Programming Language :: Python :: 3",

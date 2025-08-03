@@ -20,6 +20,7 @@ from .deps import AgentDeps, StepActionInfo, ToolResult, StepInfo, LocationActio
     InputActionInfo, SwipeActionInfo, SwipeFromCoordinateActionInfo, OpenUrlActionInfo, ScreenInfo, ToolContext
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
+from .util.js_tool import JSTool
 from .util.platform import get_client_url_schema
 
 cos_client = global_settings.cos_client
@@ -45,16 +46,19 @@ class ToolHandler:
     def context(self) -> ToolContext:
         return self.ctx and self.ctx.deps.context
 
-    def pre_handle(self):
+    async def pre_handle(self):
         """工具的前置处理"""
         if not all([self.ctx, self.step_action]):
             return
+        if self.ctx.deps.settings.debug and isinstance(self.step_action, LocationActionInfo):
+            await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_action.element_bbox)
+
         self.step_info = self.ctx.deps.context.steps.setdefault(
             self.step_action.step,
             StepInfo.model_validate(self.step_action)
         )
 
-    def post_handle(self, tool_result: ToolResult):
+    async def post_handle(self, tool_result: ToolResult):
         """工具的后置处理"""
         if not all([self.ctx, self.step_action]):
             return
@@ -78,12 +82,12 @@ def tool(f=None, *, delay=1):
 
             try:
                 tool_handler = ToolHandler(*args, **kwargs)
-                tool_handler.pre_handle()
+                await tool_handler.pre_handle()
                 # 工具执行
                 result = await func(*args, **kwargs)
                 await asyncio.sleep(delay)  # 避免页面渲染慢，不稳定
 
-                tool_handler.post_handle(result)
+                await tool_handler.post_handle(result)
                 return result
             except Exception as e:
                 print_exc()
@@ -96,45 +100,6 @@ def tool(f=None, *, delay=1):
     if f is not None:
         return decorator(f)
     return decorator
-
-
-def drawer_box(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        ctx: Optional[RunContext[AgentDeps[WebDevice]]] = None
-        bbox: Optional[list[float]] = None
-        for arg in [*args, *kwargs.values()]:
-            if isinstance(arg, RunContext):
-                ctx = cast(RunContext[AgentDeps[WebDevice]], arg)
-                continue
-            if isinstance(arg, LocationActionInfo):
-                bbox = arg.element_bbox
-                continue
-        if ctx and ctx.deps.settings.debug and bbox:
-            await ctx.deps.device.page.evaluate("""
-            ([bbox]) => {
-                let box = document.querySelector("#option-el-box")
-                if (!box) {
-                    box = document.createElement("div");
-                    box.id = "option-el-box";
-                    box.style.position = "absolute";
-                    box.style.zIndex = "1000";
-                    box.style.border = "2px solid rgba(255,0,0)";
-                    box.style.borderRadius = "5px";
-                    box.style.pointerEvents = "none"
-                    document.body.appendChild(box);
-                }
-                const [x1, y1, x2, y2] = bbox
-                box.style.top = y1 * 100 + "%"
-                box.style.left = x1 * 100 + "%"
-                box.style.width = (x2 - x1) * 100 + "%"
-                box.style.height = (y2 - y1) * 100 + "%"
-                return box
-            }
-            """, [bbox])
-        return await func(*args, **kwargs)
-
-    return wrapper
 
 
 class AgentTool(ABC):
@@ -212,12 +177,11 @@ class WebAgentTool(AgentTool):
     @tool(delay=0)
     async def get_screen_info(self, ctx: RunContext[AgentDeps[WebDevice]]) -> ToolResult[dict]:
         """
-        获取当前屏幕信息，parsed_content_list 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
+        获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
         该工具禁止作为一个单独步骤
         """
         screen_info = await self._get_screen_info(ctx)
-        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}),
-                                  'screen_elements 为当前屏幕元素信息')
+        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}))
 
     @tool(delay=0)
     async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]], action: StepActionInfo) -> ToolResult:
@@ -236,12 +200,11 @@ class WebAgentTool(AgentTool):
         """
         使用设备打开URL {action.url}
         """
-        await ctx.deps.device.page.goto(action.url, wait_until='networkidle')
+        await ctx.deps.device.page.goto(action.url, wait_until='load')
         await self._get_screen_info(ctx, parse_element=False)
         return ToolResult.success()
 
     @tool
-    @drawer_box
     async def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ClickActionInfo) -> ToolResult:
         """
         点击设备屏幕指定的元素, action.element_bbox 不能为空
@@ -252,7 +215,6 @@ class WebAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool
-    @drawer_box
     async def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: InputActionInfo) -> ToolResult:
         """
         在设备指定的元素中输入文本 {action.text}
@@ -265,20 +227,13 @@ class WebAgentTool(AgentTool):
         return ToolResult.success()
 
     @staticmethod
-    async def _swipe(
+    async def _swipe_by_mouse(
             ctx: RunContext[AgentDeps[WebDevice]],
-            action: ActionInfo,
+            action: SwipeActionInfo,
+            width: int,
+            height: int,
+            steps: int = 1000
     ):
-        scroll_to_swipe_mapping = {
-            'right': 'left',
-            'left': 'right',
-            'bottom': 'top',
-            'top': 'bottom',
-        }
-        # noinspection PyTypeChecker
-        action.to = scroll_to_swipe_mapping.get(action.to)
-        logger.info(f'swipe to {action.to}')
-        width, height = action.device_size
         if action.to == 'top':
             x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.2 * height
         elif action.to == 'left':
@@ -289,50 +244,31 @@ class WebAgentTool(AgentTool):
             x1, y1, x2, y2 = 0.2 * width, 0.5 * height, 0.8 * width, 0.5 * height
         else:
             raise ValueError(f'Invalid Parameter: to={action.to}')
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         # TODO: 禁止滑动的时候选中文字，目前先简单实现，后面寻找更优方案
-        await ctx.deps.device.page.add_style_tag(content="""
-                * {
-                    user-select: none !important;
-                }
-            """)
+        el_handle = await ctx.deps.device.page.add_style_tag(content="* {user-select: none !important;}")
+
         await ctx.deps.device.page.mouse.move(x1, y1)
         await ctx.deps.device.page.mouse.down()
-        await ctx.deps.device.page.mouse.move(x2, y2, steps=50)
+        await ctx.deps.device.page.mouse.move(x2, y2, steps=steps)
         await ctx.deps.device.page.mouse.up()
+        await JSTool.remove_element(el_handle)
 
-    async def _scroll(
-            self,
+    @staticmethod
+    async def _swipe_by_scroll(
             ctx: RunContext[AgentDeps[WebDevice]],
-            action: StepActionInfo,
+            action: SwipeActionInfo,
+            width: int,
+            height: int,
     ):
-        # 判断垂直滚动条是否存在
-        has_vertical = await ctx.deps.device.page.evaluate('''() => {
-                    return document.body.scrollHeight > window.innerHeight;
-                }''')
-
-        # 判断水平滚动条是否存在
-        has_horizontal = await ctx.deps.device.page.evaluate('''() => {
-                    return document.body.scrollWidth > window.innerWidth;
-                }''')
-        scrollable = (action.to in ['left', 'right']
-                      and has_horizontal
-                      or action.to in ['top', 'bottom'] and has_vertical)
-        if (ctx.deps.device.simulate_device
-                and ctx.deps.device.simulate_device in ctx.deps.device.playwright.devices
-                and not scrollable):
-            await self._swipe(ctx, action)
-            return None
-
-        logger.info(f'scroll {action.to}')
-        width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
-        if action.to == 'bottom':
+        if action.to == 'top':
             delta_x, delta_y = 0, 0.9 * height
-        elif action.to == 'right':
-            delta_x, delta_y = 0.9 * width, 0
-        elif action.to == 'top':
-            delta_x, delta_y = 0, -0.9 * height
         elif action.to == 'left':
+            delta_x, delta_y = 0.9 * width, 0
+        elif action.to == 'bottom':
+            delta_x, delta_y = 0, -0.9 * height
+        elif action.to == 'right':
             delta_x, delta_y = -0.9 * width, 0
         else:
             raise ValueError(f'Invalid Parameter: to={action.to}')
@@ -341,35 +277,18 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
 
     @tool
-    async def scroll(self, ctx: RunContext[AgentDeps[WebDevice]], action: SwipeActionInfo) -> ToolResult:
-        """
-        在设备屏幕中滚动滚动条，仅滚动操作可使用，参数 to 表示滚动方向
-        to='left' 向左滚动
-        to='right' 向右滚动
-        to='top' 向上滚动
-        to='bottom' 向下滚动
-        """
-        await self._scroll(ctx, action)
-        return ToolResult.success()
-
-    @tool
     async def swipe(self, ctx: RunContext[AgentDeps[WebDevice]], action: SwipeActionInfo) -> ToolResult:
         """
-        在设备屏幕中滑动，仅滑动操作可使用，参数 to 表示滑动方向
-        action.to='left' 向左滑动
-        action.to='right' 向右滑动
-        action.to='top' 向上滑动
-        action.to='bottom' 向下滑动
+        在设备屏幕中滑动或滚动，参数 action.to 表示目标方向
         """
-        swipe_to_scroll_mapping = {
-            'left': 'right',
-            'right': 'left',
-            'top': 'bottom',
-            'bottom': 'top',
-        }
-        # noinspection PyTypeChecker
-        action.to = swipe_to_scroll_mapping.get(action.to)
-        await self._scroll(ctx, action)
+        logger.info(f'swipe to {action.to}')
+        width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
+        has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.page, action.to)
+        if ctx.deps.device.is_mobile and not has_scroll_bar:
+            await self._swipe_by_mouse(ctx, action, width, height)
+        else:
+            await self._swipe_by_scroll(ctx, action, width, height)
+
         return ToolResult.success()
 
 
@@ -387,12 +306,11 @@ class AndroidAgentTool(AgentTool):
     @tool
     async def get_screen_info(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> ToolResult:
         """
-        获取当前屏幕信息，parsed_content_list 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
+        获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
         该工具禁止作为一个单独步骤
         """
         screen_info = await self._get_screen_info(ctx)
-        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}),
-                                  'screen_elements 为当前屏幕元素信息')
+        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}))
 
     @tool
     async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: StepActionInfo) -> ToolResult:
@@ -446,11 +364,7 @@ class AndroidAgentTool(AgentTool):
             action: SwipeActionInfo,
     ):
         """
-        在设备屏幕中滑动，参数 to 表示滑动方向
-        action.to='left' 向左滑动
-        action.to='right' 向右滑动
-        action.to='top' 向上滑动
-        action.to='bottom' 向下滑动
+        在设备屏幕中滑动或滚动，参数 action.to 表示目标方向
         """
         logger.info(f'swipe to {action.to}')
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
@@ -464,7 +378,7 @@ class AndroidAgentTool(AgentTool):
             x1, y1, x2, y2 = 0.1 * width, 0.5 * height, 0.9 * width, 0.5 * height
         else:
             raise ValueError(f'Invalid Parameter: to={action.to}')
-
+        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
         return ToolResult.success()
@@ -476,7 +390,7 @@ class AndroidAgentTool(AgentTool):
             action: SwipeFromCoordinateActionInfo,
     ):
         """
-        在设备屏幕中根据给定的坐标进行滑动操作，支持使用多个坐标进行连续滑动
+        在设备屏幕中根据给定的坐标进行滑动操作，支持传递多个坐标进行连续滑动
         action.coordinates 是滑动坐标值的集合，如[(x1, y1), (x2, y2), ...]
         工具依次从坐标集中取出2组值作为开始坐标(x1, y1)和结束坐标(x2, y2)，直到完成所有坐标的滑动操作
         """

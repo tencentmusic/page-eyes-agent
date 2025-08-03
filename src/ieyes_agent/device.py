@@ -22,13 +22,16 @@ class WebDevice:
     page: Page
     device_size: DeviceSize
     simulate_device: Optional[str] = None
+    is_mobile: Optional[bool] = None
 
     @classmethod
     async def create(cls, headless: bool = False, simulate_device: Optional[str] = None) -> "WebDevice":
         """异步工厂方法用于创建实例"""
         playwright = await async_playwright().start()
         context_params = {'viewport': ViewportSize(width=1600, height=900)}
+        is_mobile = False
         if simulate_device and simulate_device in playwright.devices:
+            is_mobile = True
             context_params.update(playwright.devices[simulate_device])
             del context_params['has_touch']  # fix swipe scene
             del context_params['default_browser_type']  # launch_persistent_context not support default_browser_type
@@ -41,10 +44,10 @@ class WebDevice:
             **context_params
         )
 
-        page = await context.new_page()
+        page = context.pages[0]
         device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, context, page, device_size, simulate_device)
+        return cls(playwright, context, page, device_size, simulate_device, is_mobile)
 
     @classmethod
     async def from_page(cls, page: Page, simulate_device: Optional[str] = None) -> "WebDevice":
