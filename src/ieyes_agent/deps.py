@@ -3,8 +3,9 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 18:30
+from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Optional, TypeVar, Literal, Generic, OrderedDict
+from typing import Optional, TypeVar, Literal, Generic
 
 from pydantic import BaseModel, Field, confloat, conlist, ConfigDict
 
@@ -66,8 +67,9 @@ class ActionInfo(BaseModel):
 
 class StepActionInfo(ActionInfo):
     step: int = Field(ge=1)
-    action: str
-    description: str
+
+    def __repr_args__(self):
+        return sorted(super().__repr_args__(), key=lambda item: {'step': 0}.get(item[0], 1))
 
 
 class OpenUrlActionInfo(StepActionInfo):

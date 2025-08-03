@@ -50,6 +50,7 @@ class ToolHandler:
         """工具的前置处理"""
         if not all([self.ctx, self.step_action]):
             return
+        logger.info(f'🕹 {self.step_action}')
         if self.ctx.deps.settings.debug and isinstance(self.step_action, LocationActionInfo):
             await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_action.element_bbox)
 
@@ -142,7 +143,7 @@ class AgentTool(ABC):
             parsed_data = await self._parse_element(image_buffer)
             image_url = parsed_data.get('labeled_image_url') or ''
             parsed_content_list = parsed_data.get('parsed_content_list') or []
-            logger.info(f'获取当前屏幕元素信息：{image_url}')
+            logger.info(f'🕹 👁‍🗨Get screen info：{image_url}')
         else:
             image_url = await self._upload_cos(image_buffer, suffix=Path(image_buffer.name).suffix)
             parsed_content_list = []
@@ -214,7 +215,7 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.mouse.click(x, y)
         return ToolResult.success()
 
-    @tool
+    @tool(delay=0)
     async def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: InputActionInfo) -> ToolResult:
         """
         在设备指定的元素中输入文本 {action.text}
@@ -345,7 +346,7 @@ class AndroidAgentTool(AgentTool):
 
         return ToolResult.success()
 
-    @tool
+    @tool(delay=0)
     async def input(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: InputActionInfo):
         """
         在设备指定的元素中输入文本

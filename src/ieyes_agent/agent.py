@@ -75,7 +75,7 @@ class UiAgent:
         elif isinstance(node, CallToolsNode):
             for part in node.model_response.parts:
                 if isinstance(part, ToolCallPart):
-                    logger.info(f"🤖Agent tool call: {part.tool_name}({part.args})")
+                    logger.info(f"🤖Agent tool call: {part.tool_name}({part.args.replace('{}', '')})")
 
         elif isinstance(node, End):
             node = cast(End[FinalResult[OutputType]], node)
