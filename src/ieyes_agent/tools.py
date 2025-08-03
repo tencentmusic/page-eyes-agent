@@ -265,10 +265,65 @@ class WebAgentTool(AgentTool):
         return ToolResult.success()
 
     @staticmethod
+    async def _swipe(
+            ctx: RunContext[AgentDeps[WebDevice]],
+            action: ActionInfo,
+    ):
+        scroll_to_swipe_mapping = {
+            'right': 'left',
+            'left': 'right',
+            'bottom': 'top',
+            'top': 'bottom',
+        }
+        # noinspection PyTypeChecker
+        action.to = scroll_to_swipe_mapping.get(action.to)
+        logger.info(f'swipe to {action.to}')
+        width, height = action.device_size
+        if action.to == 'top':
+            x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.2 * height
+        elif action.to == 'left':
+            x1, y1, x2, y2 = 0.8 * width, 0.5 * height, 0.2 * width, 0.5 * height
+        elif action.to == 'bottom':
+            x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.8 * height
+        elif action.to == 'right':
+            x1, y1, x2, y2 = 0.2 * width, 0.5 * height, 0.8 * width, 0.5 * height
+        else:
+            raise ValueError(f'Invalid Parameter: to={action.to}')
+        logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
+        # TODO: 禁止滑动的时候选中文字，目前先简单实现，后面寻找更优方案
+        await ctx.deps.device.page.add_style_tag(content="""
+                * {
+                    user-select: none !important;
+                }
+            """)
+        await ctx.deps.device.page.mouse.move(x1, y1)
+        await ctx.deps.device.page.mouse.down()
+        await ctx.deps.device.page.mouse.move(x2, y2, steps=50)
+        await ctx.deps.device.page.mouse.up()
+
     async def _scroll(
+            self,
             ctx: RunContext[AgentDeps[WebDevice]],
             action: StepActionInfo,
     ):
+        # 判断垂直滚动条是否存在
+        has_vertical = await ctx.deps.device.page.evaluate('''() => {
+                    return document.body.scrollHeight > window.innerHeight;
+                }''')
+
+        # 判断水平滚动条是否存在
+        has_horizontal = await ctx.deps.device.page.evaluate('''() => {
+                    return document.body.scrollWidth > window.innerWidth;
+                }''')
+        scrollable = (action.to in ['left', 'right']
+                      and has_horizontal
+                      or action.to in ['top', 'bottom'] and has_vertical)
+        if (ctx.deps.device.simulate_device
+                and ctx.deps.device.simulate_device in ctx.deps.device.playwright.devices
+                and not scrollable):
+            await self._swipe(ctx, action)
+            return None
+
         logger.info(f'scroll {action.to}')
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         if action.to == 'bottom':

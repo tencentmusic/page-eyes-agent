@@ -34,4 +34,3 @@ class AdbDeviceProxy:
 
     def input_text(self, text: str):
         self.execute_command('-keyboard', text)
-

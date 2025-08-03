@@ -26,7 +26,6 @@ class WebDevice:
     @classmethod
     async def create(cls, headless: bool = False, simulate_device: Optional[str] = None) -> "WebDevice":
         """异步工厂方法用于创建实例"""
-        # TODO: 启动带缓存的浏览器
         playwright = await async_playwright().start()
         context_params = {'viewport': ViewportSize(width=1600, height=900)}
         if simulate_device and simulate_device in playwright.devices:
@@ -67,6 +66,7 @@ class AndroidDevice:
 
     @classmethod
     async def create(cls, serial: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
+        """异步工厂方法用于创建实例"""
         client = AdbClient()
         current_devices = client.device_list()
         if serial:
