@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from .util.cos import CosClient
+
 """
 优先级规则（从高到低）：
 1. 代码中传入的参数（如 Settings(headless=False)）
@@ -37,6 +39,7 @@ class Settings(BaseSettings):
     model: Optional[str] = 'openai:deepseek-v3'
     omni_base_url: Optional[str] = 'http://21.6.91.201:8000'
     cos_base_url: Optional[str] = 'http://uniqc.woa.com/api/tools/file-upload/'
+    cos_client: CosClient = CosClient(**CosConfig().model_dump())
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
     debug: Optional[bool] = False
     log_graph_node: Optional[bool] = False

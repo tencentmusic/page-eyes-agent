@@ -3,25 +3,21 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/6 14:58
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from adbutils import AdbClient, AdbDevice
-from playwright.async_api import async_playwright, Playwright, Page, Browser, BrowserContext, ViewportSize
-from pydantic import BaseModel
+from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
 
+from .deps import DeviceSize
 from .util.platform import Platform
-
-
-class DeviceSize(BaseModel):
-    width: int
-    height: int
 
 
 @dataclass
 class WebDevice:
     playwright: Optional[Playwright]
-    browser: Browser
     context: BrowserContext
     page: Page
     device_size: DeviceSize
@@ -30,31 +26,36 @@ class WebDevice:
     @classmethod
     async def create(cls, headless: bool = False, simulate_device: Optional[str] = None) -> "WebDevice":
         """异步工厂方法用于创建实例"""
+        # TODO: 启动带缓存的浏览器
         playwright = await async_playwright().start()
-        browser = await playwright.chromium.launch(
-            channel='chrome',
-            headless=headless,
-        )
-        context_params = {'viewport': ViewportSize(width=1920, height=1080)}
+        context_params = {'viewport': ViewportSize(width=1600, height=900)}
         if simulate_device and simulate_device in playwright.devices:
             context_params.update(playwright.devices[simulate_device])
+            del context_params['has_touch']  # fix swipe scene
+            del context_params['default_browser_type']  # launch_persistent_context not support default_browser_type
 
-        context = await browser.new_context(**context_params)
+        context = await playwright.chromium.launch_persistent_context(
+            user_data_dir=Path(tempfile.gettempdir()) / 'playwright',
+            channel='chrome',
+            headless=headless,
+            devtools=True,
+            **context_params
+        )
+
         page = await context.new_page()
         device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, browser, context, page, device_size, simulate_device)
+        return cls(playwright, context, page, device_size, simulate_device)
 
     @classmethod
     async def from_page(cls, page: Page, simulate_device: Optional[str] = None) -> "WebDevice":
         """通过page对象创建实例"""
         playwright = None
         context = page.context
-        browser = context.browser
 
         device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, browser, context, page, device_size, simulate_device)
+        return cls(playwright, context, page, device_size, simulate_device)
 
 
 @dataclass

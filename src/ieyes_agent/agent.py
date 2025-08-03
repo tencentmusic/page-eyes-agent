@@ -3,14 +3,13 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 15:31
-import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union, Literal, TypeAlias, cast
 
 from loguru import logger
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.result import FinalResult
@@ -34,14 +33,19 @@ class ResultsType(BaseModel):
 
 
 class OutputType(BaseModel):
+    """
+    执行指令完成后的需判断整个任务是否成功，并总结各个步骤执行结果，结果格式如下：
+    - is_success: 任务否成功
+    - summary: 总结各个步骤执行结果
+    """
     is_success: bool
-    # results: list[ResultsType]
+    # summary: str  # 加上步骤总结会增加结果输出耗时 3~5s
 
 
 @dataclass
 class UiAgent:
     model: str
-    deps: AgentDeps
+    deps: AgentDeps[WebDevice | AndroidDevice]
     agent: Agent[AgentDeps, OutputType]
 
     @classmethod
@@ -85,7 +89,7 @@ class UiAgent:
 
     async def run(self, prompt: str, system_prompt: Optional[str] = None, report_dir: str = "./report"):
         # TODO: 给用户添加额外的自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
-        async with self.agent.iter(user_prompt=prompt, deps=self.deps, output_type=OutputType) as agent_run:
+        async with self.agent.iter(user_prompt=prompt.strip(), deps=self.deps, output_type=OutputType) as agent_run:
             async for node in agent_run:
                 if self.deps.settings.log_graph_node:
                     self.format_logger_node(node)
@@ -93,14 +97,12 @@ class UiAgent:
             result = agent_run.result
 
         logger.info(result.output)
-        # report_data = result.output.dict()
         logger.info(f"steps: {self.deps.context.steps}")
         report_data = {'is_success': result.output.is_success,
-                       'results': [step.dict() for step in self.deps.context.steps.values()]}
-        # if self.deps.context.page:
-        #     for item in report_data['results']:
-        #         item['page'] = self.deps.context.page.get(item.get('labeled_image_url')) or []
-        return await self.create_report(json.dumps(report_data, ensure_ascii=False), report_dir)
+                       'device_size': self.deps.device.device_size,
+                       'steps': self.deps.context.steps}
+        report_json = TypeAdapter(dict).dump_json(report_data).decode()
+        return await self.create_report(report_json, report_dir)
 
 
 SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str
@@ -129,11 +131,10 @@ class WebAgent(UiAgent):
         device = device or await WebDevice.create(settings.headless, settings.simulate_device)
         deps = AgentDeps(device, settings)
         tool = WebAgentTool()
-        screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
         agent = Agent[AgentDeps, OutputType](
             model=settings.model,
-            system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
+            system_prompt=SYSTEM_PROMPT,
             deps_type=AgentDeps,
             tools=tool.tools,
             output_type=OutputType,
@@ -159,11 +160,10 @@ class MobileAgent(UiAgent):
         device = await AndroidDevice.create(serial=serial, platform=platform)
         deps = AgentDeps(device, settings)
         tool = AndroidAgentTool()
-        screen_resolution = f'{device.device_size.width}x{device.device_size.height}'
 
         agent = Agent[AgentDeps, OutputType](
             model=settings.model,
-            system_prompt=SYSTEM_PROMPT.format(screen_resolution=screen_resolution),
+            system_prompt=SYSTEM_PROMPT,
             deps_type=AgentDeps,
             tools=tool.tools,
             output_type=OutputType,

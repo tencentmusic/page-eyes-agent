@@ -7,122 +7,133 @@ import asyncio
 import io
 from abc import ABC, abstractmethod
 from functools import wraps
+from pathlib import Path
 from traceback import print_exc
-from typing import IO, Optional, TypeVar, cast, Literal, Tuple
+from typing import IO, Optional, cast
 
-import requests
+from httpx import AsyncClient
 from loguru import logger
-from pydantic import BaseModel, computed_field, Field, confloat, conlist
 from pydantic_ai import ModelRetry, RunContext
 
 from .config import global_settings
-from .deps import AgentDeps
+from .deps import AgentDeps, StepActionInfo, ToolResult, StepInfo, LocationActionInfo, ClickActionInfo, \
+    InputActionInfo, SwipeActionInfo, SwipeFromCoordinateActionInfo, OpenUrlActionInfo, ScreenInfo, ToolContext
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
 from .util.platform import get_client_url_schema
 
+cos_client = global_settings.cos_client
 
-class ActionInfo(BaseModel):
-    step: int = Field(ge=1)
-    description: str
-    action: str
-    element_bbox: Optional[conlist(confloat(ge=0.0, le=1.0), min_length=4, max_length=4)] = []
-    device_size: list[int] = Field(min_length=2, max_length=2)
-    url: Optional[str] = None
-    text: Optional[str] = None
-    to: Optional[Literal['left', 'right', 'top', 'bottom']] = None
 
-    @computed_field()
+class ToolHandler:
+    """工具调用处理类，用于处理工具函数的前置和后置操作"""
+
+    def __init__(self, *args, **kwargs):
+        self.ctx: Optional[RunContext[AgentDeps]] = None
+        self.step_action: Optional[StepActionInfo] = None
+        self.step_info: Optional[StepInfo] = None
+
+        for arg in [*args, *kwargs.values()]:
+            if isinstance(arg, RunContext):
+                self.ctx = cast(RunContext[AgentDeps], arg)
+                continue
+            if isinstance(arg, StepActionInfo):
+                self.step_action = arg
+                continue
+
     @property
-    def coordinate(self) -> Optional[tuple[int, int]]:
-        if not self.element_bbox:
-            return None
-        x1, y1, x2, y2 = self.element_bbox
-        width, height = self.device_size
-        return int((x1 + x2) / 2 * width), int((y1 + y2) / 2 * height)
+    def context(self) -> ToolContext:
+        return self.ctx and self.ctx.deps.context
+
+    def pre_handle(self):
+        """工具的前置处理"""
+        if not all([self.ctx, self.step_action]):
+            return
+        self.step_info = self.ctx.deps.context.steps.setdefault(
+            self.step_action.step,
+            StepInfo.model_validate(self.step_action)
+        )
+
+    def post_handle(self, tool_result: ToolResult):
+        """工具的后置处理"""
+        if not all([self.ctx, self.step_action]):
+            return
+        self.step_info.image_url = self.context.screen_info.image_url
+        self.step_info.screen_elements = self.context.screen_info.screen_elements
+        self.step_info.is_success = tool_result.is_success
+        self.context.screen_info.reset()  # 步骤结束后，重置当前屏幕信息
 
 
-class StepRecord(BaseModel):
-    step: int
-    description: str = ''
-    action: str = ''
-    element_bbox: Optional[list[float]] = []
-    coordinate: Optional[list[float]] = []
-    labeled_image_url: str = ''
-    error: str = ''
-    page: list = []
+def tool(f=None, *, delay=1):
+    """
+    工具函数装饰器，用于标记函数为工具函数，并自动记录步骤信息
+    :param f: 被装饰的函数
+    :param delay: 操作后的等待时间，单位为秒，默认为1秒
+    :return: 装饰后的函数
+    """
 
-    def info(self):
-        return type(self)(**self.dict(exclude={'page'}))
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
 
+            try:
+                tool_handler = ToolHandler(*args, **kwargs)
+                tool_handler.pre_handle()
+                # 工具执行
+                result = await func(*args, **kwargs)
+                await asyncio.sleep(delay)  # 避免页面渲染慢，不稳定
 
-class ToolOutput(BaseModel):
-    labeled_image_url: Optional[str] = ''
-    parsed_content_list: Optional[list] = []
-    error: Optional[str] = ''
+                tool_handler.post_handle(result)
+                return result
+            except Exception as e:
+                print_exc()
+                logger.error(f"Error occurred in tool '{func.__name__}': {str(e)}")
+                raise ModelRetry(f"Error occurred in tool '{func.__name__}': {str(e)}")
 
+        wrapper.is_tool = True
+        return wrapper
 
-class ToolResult(BaseModel):
-    is_success: bool
-    output: Optional[ToolOutput]
-
-    @classmethod
-    def success(cls, output: ToolOutput = None):
-        return cls(is_success=True, output=output)
-
-    @classmethod
-    def failed(cls, output: ToolOutput = None):
-        return cls(is_success=False, output=output)
-
-
-T = TypeVar('T')
+    if f is not None:
+        return decorator(f)
+    return decorator
 
 
-def record_step(*args, **kwargs):
-    ctx: Optional[RunContext[AgentDeps]] = None
-    action_info: Optional[ActionInfo] = None
-    tool_result: Optional[ToolResult] = None
-    for arg in [*args, *kwargs.values()]:
-        if isinstance(arg, RunContext):
-            ctx = cast(RunContext[AgentDeps], arg)
-            continue
-        if isinstance(arg, ActionInfo):
-            action_info = arg
-            continue
-        if isinstance(arg, ToolResult):
-            tool_result = arg
-            continue
-    if ctx and action_info and tool_result:
-        record = ctx.deps.context.steps.setdefault(action_info.step, StepRecord(step=action_info.step))
-        record.description = action_info.description or record.description
-        record.action = action_info.action or record.action
-        record.element_bbox = action_info.element_bbox or record.element_bbox
-        record.labeled_image_url = (tool_result.output and tool_result.output.labeled_image_url
-                                    ) or record.labeled_image_url
-        record.page = (tool_result.output and tool_result.output.parsed_content_list
-                       ) or record.page
-        logger.debug(record.info())
-
-
-def tool(func):
+def drawer_box(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
+        ctx: Optional[RunContext[AgentDeps[WebDevice]]] = None
+        bbox: Optional[list[float]] = None
         for arg in [*args, *kwargs.values()]:
-            if isinstance(arg, ActionInfo):
-                logger.info(arg)
-                break
-        try:
-            await asyncio.sleep(1)  # 避免页面渲染慢，不稳定
-            result = await func(*args, **kwargs)
-            record_step(result, *args, **kwargs)  # 记录步骤信息
-            logger.debug(result)
-            return result
-        except Exception as e:
-            print_exc()
-            logger.error(f"Error occurred in tool '{func.__name__}': {str(e)}")
-            raise ModelRetry(f"Error occurred in tool '{func.__name__}': {str(e)}")
+            if isinstance(arg, RunContext):
+                ctx = cast(RunContext[AgentDeps[WebDevice]], arg)
+                continue
+            if isinstance(arg, LocationActionInfo):
+                bbox = arg.element_bbox
+                continue
+        if ctx and ctx.deps.settings.debug and bbox:
+            await ctx.deps.device.page.evaluate("""
+            ([bbox]) => {
+                let box = document.querySelector("#option-el-box")
+                if (!box) {
+                    box = document.createElement("div");
+                    box.id = "option-el-box";
+                    box.style.position = "absolute";
+                    box.style.zIndex = "1000";
+                    box.style.border = "2px solid rgba(255,0,0)";
+                    box.style.borderRadius = "5px";
+                    box.style.pointerEvents = "none"
+                    document.body.appendChild(box);
+                }
+                const [x1, y1, x2, y2] = bbox
+                box.style.top = y1 * 100 + "%"
+                box.style.left = x1 * 100 + "%"
+                box.style.width = (x2 - x1) * 100 + "%"
+                box.style.height = (y2 - y1) * 100 + "%"
+                return box
+            }
+            """, [bbox])
+        return await func(*args, **kwargs)
 
-    wrapper.is_tool = True
     return wrapper
 
 
@@ -142,83 +153,51 @@ class AgentTool(ABC):
 
         return result
 
-    def _upload_cos(self, file: IO[bytes]) -> str:
-        response = requests.post(self.COS_BASE_URL, files={'file': file})
-        return response.json().get('url')
+    @staticmethod
+    async def _upload_cos(file: IO[bytes], prefix='page-eyes-agent/', suffix='.png') -> str:
+        return await cos_client.async_upload_file(file, prefix=prefix, suffix=suffix)
 
-    def _parse_element(self, file: Optional[IO[bytes]] = None, image_url: Optional[str] = None):
+    async def _parse_element(self, file: Optional[IO[bytes]] = None, image_url: Optional[str] = None):
         url = f'{self.OMNI_BASE_URL}/omni/parse/'
         if not file and not image_url:
             raise ValueError('请提供file或image_url')
-        response = requests.post(url, files={'file': file}, data={'image_url': image_url})
-        response.raise_for_status()
-        return response.json()
-
-    @staticmethod
-    def _page_record(data: dict, ctx: RunContext[AgentDeps]):
-        """通过上下文记录页面截图和元素解析信息"""
-        if data:
-            parsed_content_list: list[dict] = data.get('parsed_content_list', [])
-            if parsed_content_list and isinstance(ctx.deps.device, (AndroidDevice, WebDevice)):
-                width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
-                for item in parsed_content_list:
-                    x1, y1, x2, y2 = item['bbox']
-                    item['bbox_coordinate'] = [int(width * x1), int(height * y1), int(width * x2), int(height * y2)]
-
-            ctx.deps.context.page.update({data.get("labeled_image_url", ''): parsed_content_list})
-
-        return ctx.deps.context.page
+        async with AsyncClient() as client:
+            response = await client.post(url, files={'file': file})
+            response.raise_for_status()
+            return response.json()
 
     @staticmethod
     @abstractmethod
     async def screenshot(ctx: RunContext[AgentDeps]) -> io.BytesIO:
         raise NotImplementedError
 
+    async def _get_screen_info(self, ctx: RunContext[AgentDeps], parse_element: bool = True) -> ScreenInfo:
+        image_buffer = await self.screenshot(ctx)
+        if parse_element:
+            parsed_data = await self._parse_element(image_buffer)
+            image_url = parsed_data.get('labeled_image_url') or ''
+            parsed_content_list = parsed_data.get('parsed_content_list') or []
+            logger.info(f'获取当前屏幕元素信息：{image_url}')
+        else:
+            image_url = await self._upload_cos(image_buffer, suffix=Path(image_buffer.name).suffix)
+            parsed_content_list = []
+
+        screen_info = ScreenInfo(image_url=image_url, screen_elements=parsed_content_list)
+        # 将当前屏幕信息记录到上下文
+        ctx.deps.context.screen_info = screen_info.model_copy(deep=True)
+        return screen_info
+
     @abstractmethod
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps]) -> ToolResult:
+    async def open_url(self, ctx: RunContext[AgentDeps], action: OpenUrlActionInfo) -> ToolResult:
         raise NotImplementedError
 
     @abstractmethod
-    async def tear_down(self, ctx: RunContext[AgentDeps]) -> ToolResult:
+    async def get_screen_info(self, ctx: RunContext[AgentDeps]) -> ToolResult[ScreenInfo]:
         raise NotImplementedError
 
-
-def drawer_box(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-        ctx: Optional[RunContext[AgentDeps[WebDevice]]] = None
-        bbox: Optional[list[float]] = None
-        for arg in [*args, *kwargs.values()]:
-            if isinstance(arg, RunContext):
-                ctx = cast(RunContext[AgentDeps[WebDevice]], arg)
-                continue
-            if isinstance(arg, ActionInfo):
-                bbox = arg.element_bbox
-                continue
-        if ctx and ctx.deps.settings.debug and bbox:
-            await ctx.deps.device.page.evaluate("""
-            ([bbox]) => {
-                let box = document.querySelector("#option-el-box")
-                if (!box) {
-                    box = document.createElement("div");
-                    box.id = "option-el-box";
-                    box.style.position = "absolute";
-                    box.style.zIndex = "1000";
-                    box.style.border = "2px solid rgba(255,0,0)";
-                    box.style.pointerEvents = "none"
-                    document.body.appendChild(box);
-                }
-                const [x1, y1, x2, y2] = bbox
-                box.style.top = y1 * 100 + "%"
-                box.style.left = x1 * 100 + "%"
-                box.style.width = (x2 - x1) * 100 + "%"
-                box.style.height = (y2 - y1) * 100 + "%"
-                return box
-            }
-            """, [bbox])
-        return await func(*args, **kwargs)
-
-    return wrapper
+    @abstractmethod
+    async def tear_down(self, ctx: RunContext[AgentDeps], action: StepActionInfo) -> ToolResult:
+        raise NotImplementedError
 
 
 class WebAgentTool(AgentTool):
@@ -230,65 +209,55 @@ class WebAgentTool(AgentTool):
         image_buffer.name = 'screen.png'
         return image_buffer
 
-    @tool
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+    @tool(delay=0)
+    async def get_screen_info(self, ctx: RunContext[AgentDeps[WebDevice]]) -> ToolResult[dict]:
         """
-        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素，bbox 是相对值，格式为 (x1, y1, x2, y2)
-        该工具禁止作为一个单独步骤，step 序号应与下一步的操作保持一致
+        获取当前屏幕信息，parsed_content_list 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
+        该工具禁止作为一个单独步骤
         """
-        data = self._parse_element(await self.screenshot(ctx))
-        labeled_image_url = data.get('labeled_image_url') or ''
-        parsed_content_list = data.get('parsed_content_list') or []
-        self._page_record(data, ctx)
-        return ToolResult.success(ToolOutput(
-            labeled_image_url=labeled_image_url,
-            parsed_content_list=parsed_content_list
-        ))
+        screen_info = await self._get_screen_info(ctx)
+        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}),
+                                  'screen_elements 为当前屏幕元素信息')
 
-    @tool
-    async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+    @tool(delay=0)
+    async def tear_down(self, ctx: RunContext[AgentDeps[WebDevice]], action: StepActionInfo) -> ToolResult:
         """
-        任务完成后的清理步骤，返回步骤信息
+        任务完成后的清理步骤
         """
-        image_buffer = await self.screenshot(ctx)
-        url = self._upload_cos(image_buffer)
-        image_buffer.seek(0)
-        self._page_record(self._parse_element(image_buffer), ctx)
+        await self._get_screen_info(ctx, parse_element=False)
 
         if ctx.deps.device.playwright is not None:
             await ctx.deps.device.context.close()
-            await ctx.deps.device.browser.close()
             await ctx.deps.device.playwright.stop()
-        return ToolResult.success(ToolOutput(labeled_image_url=url))
+        return ToolResult.success()
 
-    @tool
-    async def open_url(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+    @tool(delay=0)
+    async def open_url(self, ctx: RunContext[AgentDeps[WebDevice]], action: OpenUrlActionInfo) -> ToolResult:
         """
         使用设备打开URL {action.url}
         """
-        await ctx.deps.device.page.goto(action.url)
-        screenshot = await self.screenshot(ctx)
-        url = self._upload_cos(screenshot)
-        return ToolResult.success(ToolOutput(labeled_image_url=url))
+        await ctx.deps.device.page.goto(action.url, wait_until='networkidle')
+        await self._get_screen_info(ctx, parse_element=False)
+        return ToolResult.success()
 
     @tool
     @drawer_box
-    async def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+    async def click(self, ctx: RunContext[AgentDeps[WebDevice]], action: ClickActionInfo) -> ToolResult:
         """
         点击设备屏幕指定的元素, action.element_bbox 不能为空
         """
-        x, y = action.coordinate
+        x, y = action.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'click coordinate ({x}, {y})')
         await ctx.deps.device.page.mouse.click(x, y)
         return ToolResult.success()
 
     @tool
     @drawer_box
-    async def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: ActionInfo) -> ToolResult:
+    async def input(self, ctx: RunContext[AgentDeps[WebDevice]], action: InputActionInfo) -> ToolResult:
         """
         在设备指定的元素中输入文本 {action.text}
         """
-        x, y = action.coordinate
+        x, y = action.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'Input text: ({x}, {y}) -> {action.text}')
         await ctx.deps.device.page.mouse.click(x, y)
         await ctx.deps.device.page.keyboard.type(action.text)
@@ -298,18 +267,18 @@ class WebAgentTool(AgentTool):
     @staticmethod
     async def _scroll(
             ctx: RunContext[AgentDeps[WebDevice]],
-            action: ActionInfo,
+            action: StepActionInfo,
     ):
         logger.info(f'scroll {action.to}')
-        width, height = action.device_size
+        width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         if action.to == 'bottom':
-            delta_x, delta_y = 0, 0.5 * height
+            delta_x, delta_y = 0, 0.9 * height
         elif action.to == 'right':
-            delta_x, delta_y = 0.5 * width, 0
+            delta_x, delta_y = 0.9 * width, 0
         elif action.to == 'top':
-            delta_x, delta_y = 0, -0.5 * height
+            delta_x, delta_y = 0, -0.9 * height
         elif action.to == 'left':
-            delta_x, delta_y = -0.5 * width, 0
+            delta_x, delta_y = -0.9 * width, 0
         else:
             raise ValueError(f'Invalid Parameter: to={action.to}')
 
@@ -317,11 +286,7 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
 
     @tool
-    async def scroll(
-            self,
-            ctx: RunContext[AgentDeps[WebDevice]],
-            action: ActionInfo,
-    ):
+    async def scroll(self, ctx: RunContext[AgentDeps[WebDevice]], action: SwipeActionInfo) -> ToolResult:
         """
         在设备屏幕中滚动滚动条，仅滚动操作可使用，参数 to 表示滚动方向
         to='left' 向左滚动
@@ -333,11 +298,7 @@ class WebAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool
-    async def swipe(
-            self,
-            ctx: RunContext[AgentDeps[WebDevice]],
-            action: ActionInfo,
-    ):
+    async def swipe(self, ctx: RunContext[AgentDeps[WebDevice]], action: SwipeActionInfo) -> ToolResult:
         """
         在设备屏幕中滑动，仅滑动操作可使用，参数 to 表示滑动方向
         action.to='left' 向左滑动
@@ -353,14 +314,14 @@ class WebAgentTool(AgentTool):
         }
         # noinspection PyTypeChecker
         action.to = swipe_to_scroll_mapping.get(action.to)
-        return await self._scroll(ctx, action)
+        await self._scroll(ctx, action)
+        return ToolResult.success()
 
 
 class AndroidAgentTool(AgentTool):
 
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDeps[AndroidDevice]]) -> io.BytesIO:
-        logger.info(f'获取当前屏幕截图')
         image_buffer = io.BytesIO()
         screenshot = ctx.deps.device.adb_device.screenshot()
         screenshot.save(image_buffer, format='webp')
@@ -369,37 +330,25 @@ class AndroidAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    async def get_device_screen_elements(self, ctx: RunContext[AgentDeps[AndroidDevice]],
-                                         action: ActionInfo) -> ToolResult:
+    async def get_screen_info(self, ctx: RunContext[AgentDeps[AndroidDevice]]) -> ToolResult:
         """
-        获取当前屏幕的元素信息，parsed_content_list 包含所有解析到的元素（bbox 是相对值，格式为 [x1, y1, x2, y2]）
-        该工具禁止作为一个单独步骤，step 序号应与下一步的操作保持一致
+        获取当前屏幕信息，parsed_content_list 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
+        该工具禁止作为一个单独步骤
         """
-        data = self._parse_element(await self.screenshot(ctx))
-        labeled_image_url = data.get('labeled_image_url') or ''
-        parsed_content_list = data.get('parsed_content_list') or []
-        self._page_record(data, ctx)
-        logger.info(f'step={action.step} 当前屏幕元素信息：{labeled_image_url}')
-        return ToolResult.success(ToolOutput(
-            labeled_image_url=labeled_image_url,
-            parsed_content_list=parsed_content_list
-        ))
+        screen_info = await self._get_screen_info(ctx)
+        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}),
+                                  'screen_elements 为当前屏幕元素信息')
 
     @tool
-    async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
+    async def tear_down(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: StepActionInfo) -> ToolResult:
         """
         任务完成后的清理步骤，返回步骤信息
         """
-        logger.info(f'执行任务完成后的清理工作')
-        image_buffer = await self.screenshot(ctx)
-        url = self._upload_cos(image_buffer)
-        logger.info(f'当前屏幕截图：{url}')
-        image_buffer.seek(0)
-        self._page_record(self._parse_element(image_buffer), ctx)
-        return ToolResult.success(ToolOutput(labeled_image_url=url))
+        await self._get_screen_info(ctx, parse_element=False)
+        return ToolResult.success()
 
-    @tool
-    async def open_url(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
+    @tool(delay=0)
+    async def open_url(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: OpenUrlActionInfo) -> ToolResult:
         """
         使用设备打开URL {action.url}
         """
@@ -409,27 +358,26 @@ class AndroidAgentTool(AgentTool):
 
         ctx.deps.device.adb_device.shell(f'am start -a android.intent.action.VIEW -d "{url_schema}"')
         await asyncio.sleep(2)
-        screenshot = await self.screenshot(ctx)
-        url = self._upload_cos(screenshot)
-        return ToolResult.success(ToolOutput(labeled_image_url=url))
+        await self._get_screen_info(ctx, parse_element=False)
+        return ToolResult.success()
 
     @tool
-    async def tap(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo) -> ToolResult:
+    async def click(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ClickActionInfo) -> ToolResult:
         """
         点击设备屏幕指定的元素
         """
-        x, y = action.coordinate
-        logger.info(f'Tap coordinate ({x}, {y})')
+        x, y = action.get_coordinate(ctx.deps.device.device_size)
+        logger.info(f'Click coordinate ({x}, {y})')
         ctx.deps.device.adb_device.click(x, y)
 
         return ToolResult.success()
 
     @tool
-    async def input(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: ActionInfo):
+    async def input(self, ctx: RunContext[AgentDeps[AndroidDevice]], action: InputActionInfo):
         """
         在设备指定的元素中输入文本
         """
-        x, y = action.coordinate
+        x, y = action.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'Input text: ({x}, {y}) -> {action.text}')
         ctx.deps.device.adb_device.click(x, y)
         AdbDeviceProxy(ctx.deps.device.adb_device).input_text(action.text)
@@ -440,7 +388,7 @@ class AndroidAgentTool(AgentTool):
     async def swipe(
             self,
             ctx: RunContext[AgentDeps[AndroidDevice]],
-            action: ActionInfo,
+            action: SwipeActionInfo,
     ):
         """
         在设备屏幕中滑动，参数 to 表示滑动方向
@@ -450,15 +398,15 @@ class AndroidAgentTool(AgentTool):
         action.to='bottom' 向下滑动
         """
         logger.info(f'swipe to {action.to}')
-        width, height = action.device_size
+        width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         if action.to == 'top':
-            x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.2 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.9 * height, 0.5 * width, 0.1 * height
         elif action.to == 'left':
-            x1, y1, x2, y2 = 0.8 * width, 0.5 * height, 0.2 * width, 0.5 * height
+            x1, y1, x2, y2 = 0.9 * width, 0.5 * height, 0.1 * width, 0.5 * height
         elif action.to == 'bottom':
-            x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.8 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.1 * height, 0.5 * width, 0.9 * height
         elif action.to == 'right':
-            x1, y1, x2, y2 = 0.2 * width, 0.5 * height, 0.8 * width, 0.5 * height
+            x1, y1, x2, y2 = 0.1 * width, 0.5 * height, 0.9 * width, 0.5 * height
         else:
             raise ValueError(f'Invalid Parameter: to={action.to}')
 
@@ -470,18 +418,18 @@ class AndroidAgentTool(AgentTool):
     async def swipe_from_coordinate(
             self,
             ctx: RunContext[AgentDeps[AndroidDevice]],
-            action: ActionInfo,
-            start_coordinate: Tuple[int, int],
-            end_coordinate: Tuple[int, int]
+            action: SwipeFromCoordinateActionInfo,
     ):
         """
-        在设备屏幕中根据指定的起始坐标和结束坐标滑动
-        start_coordinate 为起始坐标，格式为 (x1, y1)
-        end_coordinate 为结束坐标，格式为 (x2, y2)
+        在设备屏幕中根据给定的坐标进行滑动操作，支持使用多个坐标进行连续滑动
+        action.coordinates 是滑动坐标值的集合，如[(x1, y1), (x2, y2), ...]
+        工具依次从坐标集中取出2组值作为开始坐标(x1, y1)和结束坐标(x2, y2)，直到完成所有坐标的滑动操作
         """
-        x1, y1 = start_coordinate
-        x2, y2 = end_coordinate
-        logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
-        ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+        # TODO: 先判断坐标是否在屏幕范围内
+        coordinate_iter = iter(action.coordinates)
+        for start_coordinate, end_coordinate in zip(coordinate_iter, coordinate_iter):
+            x1, y1 = start_coordinate
+            x2, y2 = end_coordinate
+            logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
+            ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
         return ToolResult.success()
-
