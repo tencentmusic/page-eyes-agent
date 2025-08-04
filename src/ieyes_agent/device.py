@@ -40,7 +40,7 @@ class WebDevice:
             user_data_dir=Path(tempfile.gettempdir()) / 'playwright',
             channel='chrome',
             headless=headless,
-            devtools=True,
+            # devtools=True,
             **context_params
         )
 
