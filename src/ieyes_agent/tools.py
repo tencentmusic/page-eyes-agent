@@ -30,7 +30,7 @@ class ToolHandler:
     """工具调用处理类，用于处理工具函数的前置和后置操作"""
 
     def __init__(self, *args, **kwargs):
-        self.ctx: Optional[RunContext[AgentDeps]] = None
+        self.ctx: Optional[RunContext[AgentDeps[WebDevice | AndroidDevice]]] = None
         self.step_action: Optional[StepActionInfo] = None
         self.step_info: Optional[StepInfo] = None
 
@@ -52,7 +52,8 @@ class ToolHandler:
             return
         logger.info(f'🕹 {self.step_action}')
         if self.ctx.deps.settings.debug and isinstance(self.step_action, LocationActionInfo):
-            await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_action.element_bbox)
+            if isinstance(self.ctx.deps.device, WebDevice):
+                await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_action.element_bbox)
 
         self.step_info = self.ctx.deps.context.steps.setdefault(
             self.step_action.step,
