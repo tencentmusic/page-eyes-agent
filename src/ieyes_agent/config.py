@@ -38,7 +38,6 @@ class Settings(BaseSettings):
     headless: Optional[bool] = True
     model: Optional[str] = 'openai:deepseek-v3'
     omni_base_url: Optional[str] = 'http://21.6.91.201:8000'
-    cos_base_url: Optional[str] = 'http://uniqc.woa.com/api/tools/file-upload/'
     cos_client: CosClient = CosClient(**CosConfig().model_dump())
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
     debug: Optional[bool] = False

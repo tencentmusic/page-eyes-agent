@@ -105,7 +105,6 @@ def tool(f=None, *, delay=1):
 
 class AgentTool(ABC):
     OMNI_BASE_URL = global_settings.omni_base_url
-    COS_BASE_URL = global_settings.cos_base_url
 
     @property
     def tools(self) -> list:
