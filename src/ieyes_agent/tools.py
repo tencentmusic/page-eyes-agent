@@ -143,7 +143,7 @@ class AgentTool(ABC):
             parsed_data = await self._parse_element(image_buffer)
             image_url = parsed_data.get('labeled_image_url') or ''
             parsed_content_list = parsed_data.get('parsed_content_list') or []
-            logger.info(f'🕹 👁‍🗨Get screen info：{image_url}')
+            logger.info(f'👁‍🗨 Get screen info：{image_url}')
         else:
             image_url = await self._upload_cos(image_buffer, suffix=Path(image_buffer.name).suffix)
             parsed_content_list = []

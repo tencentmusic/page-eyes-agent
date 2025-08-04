@@ -1,6 +1,6 @@
 [project]
 name = "ieyes-agent"
-version = "0.1.5"
+version = "0.1.6"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -41,6 +41,12 @@ classifiers = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build]
+exclude = [
+    "docs",
+    "tests"
+]
 
 [[tool.uv.index]]
 # 腾讯镜像源，同步自pypi

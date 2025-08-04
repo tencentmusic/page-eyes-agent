@@ -5,6 +5,7 @@
 ##### 1.1 业务质量保障之痛
 
 腾讯音乐榜是一个面向C端用户的榜单产品，内嵌在TME音乐app内的H5，如下所示。产品入口包含QQ音乐、酷狗音乐、酷我音乐等，产品形态为腾讯音乐各类榜单及商业化活动。
+
 <img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/f0bf1c880caad3cdc4a644fc1267deb7.webp" alt="" data-align="center" width="454">
 
 因此，对于这种多端多场景的业务测试复杂度，存在以下挑战：
@@ -101,7 +102,9 @@ step 3: 查看结果报告
 执行成功后查看结果报告，报告内还包含了执行过程录像。
 <img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/17d0c310f0686d15bf6c9cb83146be74.webp" alt="" data-align="center" width="571">
 
-<img title="" src="file:///Users/aidenmo/Library/Application%20Support/marktext/images/7d5767e1151d993a21529f8cded51dea93b2496e.png" alt="" width="566" data-align="center"><img title="" src="https://cdn-y.tencentmusic.com/c23e618af4428528c7f731bfbd42cbd3.gif" alt="" data-align="center" width="385">
+<img title="" src="file:///Users/aidenmo/Library/Application%20Support/marktext/images/7d5767e1151d993a21529f8cded51dea93b2496e.png" alt="" width="566" data-align="center">
+
+<img title="" src="https://cdn-y.tencentmusic.com/c23e618af4428528c7f731bfbd42cbd3.gif" alt="" data-align="center" width="385">
 
 通过回看执行过程，可以看到agent基本遵循了输入的交互指令：找到搜索icon并点击 -> 输入搜索词并回车 -> 选取搜索结果并点击
 <img title="腾讯音乐榜" src="file:///Users/aidenmo/Library/Application Support/marktext/images/5bf36992b46340d4636aeac5bb19480d084da12e.webp" alt="" data-align="center">
