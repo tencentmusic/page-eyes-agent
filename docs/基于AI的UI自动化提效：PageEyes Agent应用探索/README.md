@@ -109,22 +109,11 @@ step 3: 查看结果报告
 通过回看执行过程，可以看到agent基本遵循了输入的交互指令：找到搜索icon并点击 -> 输入搜索词并回车 -> 选取搜索结果并点击
 <img title="腾讯音乐榜" src="file:///Users/aidenmo/Library/Application Support/marktext/images/5bf36992b46340d4636aeac5bb19480d084da12e.webp" alt="" data-align="center">
 
-完整版页面截屏录像如下：
-![/Users/leenjiang/Desktop/PageEye/Markdown图片](体验适配.webm "腾讯音乐榜")
+完整版页面截屏录像见文章附件📎
+
 
 这样，一个搜索demo的任务配置完成，后续会每半小时巡检一次，不通过时将通过告警群推送消息。
 
-##### 3.2 腾讯音乐榜-歌曲播放
-
-步骤同3.1的case, 交互指令修改为：
-
-1. 点击关闭弹窗，没有弹窗则跳过步骤;
-2. 找到页面内的“歌曲播放icon"，如果找到多个只取前3个;
-3. 分别点击步骤2中找到的"歌曲播放icon"
-
-https://ieyes.woa.com/#/services/white-screen-detection/report?task_id=596&page=1&page_size=10
-
-待调试，这个demo没通
 
 ### 四、业内GUI-Agent工具试用
 
