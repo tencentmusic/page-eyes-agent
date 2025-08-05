@@ -370,11 +370,11 @@ class AndroidAgentTool(AgentTool):
         logger.info(f'swipe to {action.to}')
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         if action.to == 'top':
-            x1, y1, x2, y2 = 0.5 * width, 0.9 * height, 0.5 * width, 0.1 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.1 * height
         elif action.to == 'left':
             x1, y1, x2, y2 = 0.9 * width, 0.5 * height, 0.1 * width, 0.5 * height
         elif action.to == 'bottom':
-            x1, y1, x2, y2 = 0.5 * width, 0.1 * height, 0.5 * width, 0.9 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.9 * height
         elif action.to == 'right':
             x1, y1, x2, y2 = 0.1 * width, 0.5 * height, 0.9 * width, 0.5 * height
         else:
