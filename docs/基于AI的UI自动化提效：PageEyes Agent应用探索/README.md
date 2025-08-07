@@ -6,7 +6,7 @@
 
 腾讯音乐榜是一个面向C端用户的榜单产品，内嵌在TME音乐app内的H5，如下所示。产品入口包含QQ音乐、酷狗音乐、酷我音乐等，产品形态为腾讯音乐各类榜单及商业化活动。
 
-<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/f0bf1c880caad3cdc4a644fc1267deb7.webp" alt="" data-align="center" width="454">
+<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/f0bf1c880caad3cdc4a644fc1267deb7.webp" alt="" style="display: block; margin: 0 auto;" width="510">
 
 因此，对于这种多端多场景的业务测试复杂度，存在以下挑战：
 
@@ -51,15 +51,15 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 ##### 2.1 PageEyes Agent 架构
 
 **整体框架**
-<img title="" src="https://cdn-y.tencentmusic.com/251563cb2c122f012d772699c1bd93a2.png" alt="" style="width: 600px; display: block; margin: 0 auto;" data-align="center" width="425">
+<img title="" src="https://cdn-y.tencentmusic.com/251563cb2c122f012d772699c1bd93a2.png" alt="" style="display: block; margin: 0 auto;" width="425">
 
 **Agent 执行流程**
-<img title="" src="https://cdn-y.tencentmusic.com/1e1e171e6dd06b6808489acd381db735.png" alt="" style="width: 800px; display: block; margin: 0 auto;" data-align="center" width="520">
+<img title="" src="https://cdn-y.tencentmusic.com/1e1e171e6dd06b6808489acd381db735.png" alt="" style="display: block; margin: 0 auto;" width="679">
 
 #### 2.2 信息感知方案的选择
 
 信息感知方案选择上我们分别对比了用得比较多的几种：
-<img title="" src="https://cdn-y.tencentmusic.com/ac78855205d75f94dccc3c4083e50f9c.png" alt="" style="width: 800px; display: block; margin: 0 auto;" width="666" data-align="center">
+<img title="" src="https://cdn-y.tencentmusic.com/ac78855205d75f94dccc3c4083e50f9c.png" alt="" width="666" style="display: block; margin: 0 auto;">
 
 **结论**
 
@@ -69,7 +69,7 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 
 #### 2.2 PageEyes Agent 提示词工程示例
 
-<img title="" src="https://cdn-y.tencentmusic.com/b968ab8e68441dcf4307ad8804ed95bb.png" alt="" style="width: 800px; display: block; margin: 0 auto;" width="543" data-align="center">
+<img title="" src="https://cdn-y.tencentmusic.com/b968ab8e68441dcf4307ad8804ed95bb.png" alt="" width="699" style="display: block; margin: 0 auto;">
 
 #### 2.3 PageEyes Agent 稳定性优化的一些策略
 
@@ -93,27 +93,25 @@ step 1:录入任务和交互指令
 4. 点击第1首歌;
 
 完整配置如下图所示
-<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/02861ddef1bd1d3452699c1d6408fb95.webp" alt="" data-align="center" width="251">
+<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/02861ddef1bd1d3452699c1d6408fb95.webp" alt="" style="display: block; margin: 0 auto;" width="251">
 
 step 2: 执行单次任务查看效果
-<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/13ca4e1007c6d8fddedcb1d6376d3192.webp" alt="" data-align="center" width="654">
+<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/13ca4e1007c6d8fddedcb1d6376d3192.webp" alt="" style="display: block; margin: 0 auto;" width="654">
 
 step 3: 查看结果报告
 执行成功后查看结果报告，报告内还包含了执行过程录像。
-<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/17d0c310f0686d15bf6c9cb83146be74.webp" alt="" data-align="center" width="571">
+<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/17d0c310f0686d15bf6c9cb83146be74.webp" alt="" style="display: block; margin: 0 auto;" width="571">
 
-<img title="" src="file:///Users/aidenmo/Library/Application%20Support/marktext/images/7d5767e1151d993a21529f8cded51dea93b2496e.png" alt="" width="566" data-align="center">
+<img title="" src="https://cdn-y.tencentmusic.com/050132335ac96e8ce7dfe3dd4834a6e3.png" alt="" width="566" style="display: block; margin: 0 auto;">
 
-<img title="" src="https://cdn-y.tencentmusic.com/c23e618af4428528c7f731bfbd42cbd3.gif" alt="" data-align="center" width="385">
+<img title="" src="https://cdn-y.tencentmusic.com/c23e618af4428528c7f731bfbd42cbd3.gif" alt="" style="display: block; margin: 0 auto;" width="385">
 
 通过回看执行过程，可以看到agent基本遵循了输入的交互指令：找到搜索icon并点击 -> 输入搜索词并回车 -> 选取搜索结果并点击
-<img title="腾讯音乐榜" src="file:///Users/aidenmo/Library/Application Support/marktext/images/5bf36992b46340d4636aeac5bb19480d084da12e.webp" alt="" data-align="center">
+<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/939d2a2f924edd1e4519a24f3620ff4c.webp" alt="" style="display: block; margin: 0 auto;">
 
 完整版页面截屏录像见文章附件📎
 
-
 这样，一个搜索demo的任务配置完成，后续会每半小时巡检一次，不通过时将通过告警群推送消息。
-
 
 ### 四、业内GUI-Agent工具试用
 
@@ -141,7 +139,7 @@ UI-Tars desktop，使用Computer Operator模式
 
 体验缺点：移动端H5通过operator-adb控制支持选项不多，PC端日常办公提效无法使用
 
-<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/fa10e4ba3b02a3372c62daf5575753db.webp" alt="/Users/leenjiang/Desktop/PageEye/Markdown图片" width="625" data-align="center">
+<img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/fa10e4ba3b02a3372c62daf5575753db.webp" alt="" width="625" style="display: block; margin: 0 auto;">
 
 ### 五、总结
 
