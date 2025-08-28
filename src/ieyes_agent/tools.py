@@ -106,6 +106,7 @@ def tool(f=None, *, delay=1):
 
 class AgentTool(ABC):
     OMNI_BASE_URL = global_settings.omni_base_url
+    OMNI_KEY = global_settings.omni_key
 
     @property
     def tools(self) -> list:
@@ -128,7 +129,7 @@ class AgentTool(ABC):
         if not file and not image_url:
             raise ValueError('请提供file或image_url')
         async with AsyncClient() as client:
-            response = await client.post(url, files={'file': file})
+            response = await client.post(url, files={'file': file}, data={'key': self.OMNI_KEY})
             response.raise_for_status()
             return response.json()
 
@@ -189,6 +190,7 @@ class WebAgentTool(AgentTool):
         """
         任务完成后的清理步骤
         """
+        await JSTool.remove_highlight_element(ctx.deps.device.page)
         await self._get_screen_info(ctx, parse_element=False)
 
         if ctx.deps.device.playwright is not None:

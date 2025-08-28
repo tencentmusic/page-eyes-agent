@@ -27,6 +27,10 @@ class JSTool:
         return (await page.evaluate_handle(cls._script['add_highlight_element'], [element_bbox])).as_element()
 
     @classmethod
+    async def remove_highlight_element(cls, page: Page):
+        return await page.evaluate(cls._script['remove_highlight_element'])
+
+    @classmethod
     async def has_scrollbar(cls, page: Page, to: str) -> bool:
         if to in ['top', 'bottom']:
             return await page.evaluate(cls._script['has_vertical_scrollbar'])
