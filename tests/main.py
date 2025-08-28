@@ -3,8 +3,8 @@ import sys
 
 from loguru import logger
 
-from ieyes_agent.agent import WebAgent, MobileAgent
-from ieyes_agent.util.platform import Platform
+from src.ieyes_agent.agent import WebAgent, MobileAgent
+from src.ieyes_agent.util.platform import Platform
 from typing import cast
 try:
     from loguru import BasicHandlerConfig

@@ -109,7 +109,7 @@ step 3: 查看结果报告
 通过回看执行过程，可以看到agent基本遵循了输入的交互指令：找到搜索icon并点击 -> 输入搜索词并回车 -> 选取搜索结果并点击
 <img title="腾讯音乐榜" src="https://cdn-y.tencentmusic.com/939d2a2f924edd1e4519a24f3620ff4c.webp" alt="" style="display: block; margin: 0 auto;">
 
-完整版页面截屏录像见文章附件📎
+完整版页面截屏录像见:  [点击查看视频](https://cdn-y.tencentmusic.com/uni/commonPic/cos_db21ebf3718f3e7d94669df16cb3656067cf5e66.webm) 
 
 这样，一个搜索demo的任务配置完成，后续会每半小时巡检一次，不通过时将通过告警群推送消息。
 
