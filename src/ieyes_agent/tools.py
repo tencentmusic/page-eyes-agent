@@ -17,7 +17,8 @@ from pydantic_ai import ModelRetry, RunContext
 
 from .config import global_settings
 from .deps import AgentDeps, StepActionInfo, ToolResult, StepInfo, LocationActionInfo, ClickActionInfo, \
-    InputActionInfo, SwipeActionInfo, SwipeFromCoordinateActionInfo, OpenUrlActionInfo, ScreenInfo, ToolContext
+    InputActionInfo, SwipeActionInfo, SwipeFromCoordinateActionInfo, OpenUrlActionInfo, ScreenInfo, ToolContext, \
+    WaitActionInfo, AssertContainsActionInfo
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
 from .util.js_tool import JSTool
@@ -128,7 +129,7 @@ class AgentTool(ABC):
         url = f'{self.OMNI_BASE_URL}/omni/parse/'
         if not file and not image_url:
             raise ValueError('请提供file或image_url')
-        async with AsyncClient() as client:
+        async with AsyncClient(timeout=120) as client:
             response = await client.post(url, files={'file': file}, data={'key': self.OMNI_KEY})
             response.raise_for_status()
             return response.json()
@@ -165,6 +166,29 @@ class AgentTool(ABC):
     @abstractmethod
     async def tear_down(self, ctx: RunContext[AgentDeps], action: StepActionInfo) -> ToolResult:
         raise NotImplementedError
+
+    @tool(delay=0)
+    async def wait_for_timeout(self, ctx: RunContext[AgentDeps[WebDevice]], action: WaitActionInfo) -> ToolResult:
+        """
+        在任务中等待或停留指定的超时时间（action.timeout），单位：秒
+        """
+        logger.info(f'Wait for timeout {action.timeout}s')
+        await asyncio.sleep(action.timeout)
+        await self._get_screen_info(ctx, parse_element=False)
+        return ToolResult.success()
+
+    @tool(delay=0)
+    async def assert_screen_contains(self, ctx: RunContext[AgentDeps[WebDevice]],
+                                     action: AssertContainsActionInfo) -> ToolResult:
+        """
+        断言屏幕中是否出现、存在、包含指定关键字内容，如果是则 is_success=True, 否则 is_success=False
+        """
+        screen_info: ScreenInfo = await self._get_screen_info(ctx, parse_element=True)
+        if action.keyword in str(screen_info.screen_elements):
+            logger.info(f'Screen contains keyword "{action.keyword}"')
+            return ToolResult.success()
+        logger.warning(f'Screen not contains keyword "{action.keyword}"')
+        return ToolResult.failed()
 
 
 class WebAgentTool(AgentTool):

@@ -102,6 +102,14 @@ class SwipeFromCoordinateActionInfo(StepActionInfo):
     coordinates: conlist(item_type=tuple[int, int], min_length=2)
 
 
+class WaitActionInfo(StepActionInfo):
+    timeout: int
+
+
+class AssertContainsActionInfo(StepActionInfo):
+    keyword: str
+
+
 class ToolResult(BaseModel, Generic[T]):
     is_success: bool
     description: Optional[str] = None
