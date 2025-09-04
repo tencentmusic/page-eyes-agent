@@ -86,4 +86,4 @@ if __name__ == "__main__":
   
   1. 支持移动端 Agent 模式
   2. 增加`click` `input` `open_url` 工具
-  3. 支持接入 Omniparser 进行元素解析z
+  3. 支持接入 OmniParser 进行元素解析
