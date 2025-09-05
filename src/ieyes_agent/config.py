@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .util.cos import CosClient
+from .util.storage import StorageClient
 
 """
 优先级规则（从高到低）：
@@ -22,7 +22,6 @@ load_dotenv(override=True)
 
 
 class CosConfig(BaseSettings):
-    # todo: 暂时保留，后续看看是否需要
     model_config = SettingsConfigDict(env_file='.env', env_prefix='cos_', extra='ignore')
 
     region: str = Field(default='ap-guangzhou')
@@ -32,6 +31,23 @@ class CosConfig(BaseSettings):
     bucket: str = Field(default='tme-dev-test-cos-1257943044')
 
 
+class MinioConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_file='.env', env_prefix='minio_', extra='ignore')
+
+    access_key: str = Field(default='')
+    secret_key: str = Field(default='')
+    endpoint: str = Field(default='')
+    bucket: str = Field(default='')
+    region: str = Field(default='')
+    secure: bool = Field(default=False)
+
+def create_storage_client():
+    """创建存储客户端的工厂函数"""
+    cos_config = CosConfig()
+    minio_config = MinioConfig()
+    return StorageClient.create_from_config(cos_config, minio_config)
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='agent_', extra='ignore')
 
@@ -39,14 +55,18 @@ class Settings(BaseSettings):
     model: Optional[str] = 'openai:deepseek-v3'
     omni_base_url: Optional[str] = 'http://21.6.91.201:8000'
     omni_key: Optional[str] = ''
-    cos_client: CosClient = CosClient(**CosConfig().model_dump())
+    storage_client: StorageClient = Field(default_factory=create_storage_client)
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
     debug: Optional[bool] = False
     log_graph_node: Optional[bool] = False
 
     def copy_and_update(self, **kwargs):
         validated_settings = self.model_validate(kwargs)
-        return self.model_copy(update=validated_settings.model_dump(exclude_none=True), deep=True)
+        # 不对 storage_client 进行深拷贝，而是重用原来的实例
+        update_dict = validated_settings.model_dump(exclude_none=True)
+        if 'storage_client' not in update_dict:
+            update_dict['storage_client'] = self.storage_client
+        return self.model_copy(update=update_dict, deep=False)
 
 
 global_settings = Settings()

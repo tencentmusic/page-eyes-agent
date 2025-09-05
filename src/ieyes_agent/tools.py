@@ -24,7 +24,7 @@ from .util.adb_tool import AdbDeviceProxy
 from .util.js_tool import JSTool
 from .util.platform import get_client_url_schema
 
-cos_client = global_settings.cos_client
+storage_client = global_settings.storage_client
 
 
 class ToolHandler:
@@ -123,7 +123,7 @@ class AgentTool(ABC):
 
     @staticmethod
     async def _upload_cos(file: IO[bytes], prefix='page-eyes-agent/', suffix='.png') -> str:
-        return await cos_client.async_upload_file(file, prefix=prefix, suffix=suffix)
+        return await storage_client.async_upload_file(file, prefix=prefix, suffix=suffix)
 
     async def _parse_element(self, file: Optional[IO[bytes]] = None, image_url: Optional[str] = None):
         url = f'{self.OMNI_BASE_URL}/omni/parse/'
