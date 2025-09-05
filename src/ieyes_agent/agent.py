@@ -96,7 +96,15 @@ class UiAgent:
                        'device_size': self.deps.device.device_size,
                        'steps': self.deps.context.steps}
         report_json = TypeAdapter(dict).dump_json(report_data).decode()
-        return await self.create_report(report_json, report_dir)
+        report_path = await self.create_report(report_json, report_dir)
+
+        return {
+            'is_success': result.output.is_success,
+            'steps': [
+                step.model_dump(include={'step', 'description', 'action', 'is_success'})
+                for step in self.deps.context.steps.values()],
+            'report_path': report_path
+        }
 
 
 SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str
