@@ -106,6 +106,7 @@ class CosStrategy(StorageStrategy):
 class MinioStrategy(StorageStrategy):
     def __init__(self, access_key, secret_key, endpoint, bucket, region=None, secure=False):
         self._client = Minio(access_key=access_key, secret_key=secret_key, region=region, endpoint=endpoint, secure=secure)
+        self.endpoint = endpoint
         self.bucket = bucket
 
     def object_exists(self, key):
@@ -130,7 +131,7 @@ class MinioStrategy(StorageStrategy):
                 file_size = file.tell()
                 file.seek(0)
                 self._client.put_object(bucket_name=self.bucket, object_name=key, data=file, length=file_size)
-            return f"http://{self._client._base_url}/{self.bucket}/{key}"
+            return f"http://{self.endpoint}/{self.bucket}/{key}"
         except Exception as e:
             logger.error(f"上传文件失败: {e}")
             raise e
