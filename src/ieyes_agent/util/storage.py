@@ -108,6 +108,7 @@ class MinioStrategy(StorageStrategy):
         self._client = Minio(access_key=access_key, secret_key=secret_key, region=region, endpoint=endpoint, secure=secure)
         self.endpoint = endpoint
         self.bucket = bucket
+        self.protocol = 'https' if secure else 'http'
 
     def object_exists(self, key):
         try:
@@ -131,7 +132,8 @@ class MinioStrategy(StorageStrategy):
                 file_size = file.tell()
                 file.seek(0)
                 self._client.put_object(bucket_name=self.bucket, object_name=key, data=file, length=file_size)
-            return f"http://{self.endpoint}/{self.bucket}/{key}"
+
+            return f"{self.protocol}://{self.endpoint}/{self.bucket}/{key}"
         except Exception as e:
             logger.error(f"上传文件失败: {e}")
             raise e
