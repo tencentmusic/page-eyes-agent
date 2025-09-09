@@ -14,6 +14,7 @@ from typing import IO, Optional, cast
 from httpx import AsyncClient
 from loguru import logger
 from pydantic_ai import ModelRetry, RunContext
+from playwright.async_api import TimeoutError
 
 from .config import global_settings
 from .deps import AgentDeps, StepActionInfo, ToolResult, StepInfo, LocationActionInfo, ClickActionInfo, \
@@ -238,7 +239,14 @@ class WebAgentTool(AgentTool):
         """
         x, y = action.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'click coordinate ({x}, {y})')
-        await ctx.deps.device.page.mouse.click(x, y)
+        try:
+            async with ctx.deps.device.page.context.expect_page(timeout=1000) as new_page_info:
+                await ctx.deps.device.page.mouse.click(x, y)
+            old_page = ctx.deps.device.page
+            ctx.deps.device.page = await new_page_info.value
+            await old_page.close()
+        except TimeoutError:
+            pass
         return ToolResult.success()
 
     @tool(delay=0)

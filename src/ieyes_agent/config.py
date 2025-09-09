@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     log_graph_node: Optional[bool] = False
 
     def copy_and_update(self, **kwargs):
+        # TODO: 这里又会实例化一次 StorageClient，建议改成单例模式 @lancefayang
         validated_settings = self.model_validate(kwargs)
         # 不对 storage_client 进行深拷贝，而是重用原来的实例
         update_dict = validated_settings.model_dump(exclude_none=True)

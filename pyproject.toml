@@ -13,8 +13,6 @@ dependencies = [
     "esprima2>=5.0.0",
     "loguru>=0.7.3",
     "minio>=7.2.16",
-    "nest-asyncio>=1.6.0",
-    "openai>=1.92.2",
     "playwright>=1.52.0",
     "pydantic-ai>=0.2.6",
 ]
