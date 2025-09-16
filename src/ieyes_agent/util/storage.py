@@ -70,10 +70,9 @@ class StorageStrategy(ABC):
 
     @staticmethod
     def get_file_md5(file):
-        location = file.tell()
+        file.seek(0)
         m = hashlib.md5()
         m.update(file.read())
-        file.seek(location)
         return m.hexdigest()
 
 
