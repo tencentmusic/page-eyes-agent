@@ -1,5 +1,5 @@
 [project]
-name = "ieyes-agent"
+name = "page-eyes"
 version = "0.2.0"
 description = "Add your description here"
 readme = "README.md"
@@ -28,10 +28,10 @@ classifiers = [
    "Intended Audience :: Developers",
    "Topic :: Software Development :: Build Tools",
 
+   # 指明你的项目遵循的开源许可证
+   "License :: OSI Approved :: MIT License",
+
    # 在这里指定你支持的 Python 版本。
-   "Programming Language :: Python :: 3",
-   "Programming Language :: Python :: 3.8",
-   "Programming Language :: Python :: 3.9",
    "Programming Language :: Python :: 3.10",
    "Programming Language :: Python :: 3.11",
    "Programming Language :: Python :: 3.12",
