@@ -1,0 +1,53 @@
+site_name: page-eyes-agent
+site_description: gui-agent项目
+site_url: https://xxxx.com
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.instant
+    - content.code.copy
+    - content.tabs.link
+    - search.highlight
+    - search.share
+
+nav:
+  - 主页: index.md
+  - 快速开始:
+      - 介绍: getting-started/index.md
+      - 安装: getting-started/installation.md
+      - 第一个Demo: getting-started/demo.md
+  - 指南:
+      - 核心概念: guides/core-concepts.md
+      - 使用场景: guides/use-cases.md
+      - 最佳实践: guides/best-practices.md
+  - API参考:
+      - 概览: api/index.md
+      - 模块A: api/module-a.md
+      - 模块B: api/module-b.md
+      - 高级接口: api/advanced.md
+  - 教程:
+      - 快速上手: tutorials/quickstart.md
+      - 实战案例: tutorials/examples.md
+      - 视频教程: tutorials/videos.md
+  - 关联项目:
+      - 相关工具: related/tools.md
+      - 集成方案: related/integrations.md
+  - 常见问题:
+      - FAQ: faq/index.md
+      - 故障排查: faq/troubleshooting.md
+  - 贡献指南:
+      - 如何贡献: contributing/index.md
+      - 代码规范: contributing/code-style.md
+      - 开发环境: contributing/dev-env.md
+  - 版本信息:
+      - 更新日志: changelog.md
+      - 安全策略: security.md
+      - 路线图: roadmap.md
+  - 关于:
+      - 团队: about/team.md
+      - 许可证: about/license.md
+      - 致谢: about/acknowledgements.md
