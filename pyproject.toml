@@ -44,7 +44,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 exclude = [
     "docs",
-    "tests"
+    "tests",
+    ".code.yml"
 ]
 
 [[tool.uv.index]]

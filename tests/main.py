@@ -3,8 +3,8 @@ import sys
 
 from loguru import logger
 
-from src.ieyes_agent.agent import WebAgent, MobileAgent
-from src.ieyes_agent.util.platform import Platform
+from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.util.platform import Platform
 from typing import cast
 try:
     from loguru import BasicHandlerConfig
@@ -30,6 +30,13 @@ async def main():
     #      '4.点击"年轮> "\n'
     #      '5.点击"日榜"'
     #      ))
+    # report = await ui_agent.run(
+    #     ('1.打开 url "https://chart.tencentmusic.com/wave-chart"\n'
+    #      # '2.点击"首页"\n'
+    #      '2.点击"浪潮评委会"\n'
+    #      # '3.点击"查找icon"\n'
+    #      # '4.检查屏幕中是否出现"年轮"\n'
+    #      ))
 
     # report = await ui_agent.run("""
     # 打开 url https://yobang.tencentmusic.com/chart-h5/annual-report-2025-mid/ending?slideId=main
@@ -39,10 +46,10 @@ async def main():
     # 4. 点击"周杰伦" 最多3次 , 直到页面中出现 "2025年上半年成绩单" 元素
     # """)
 
-    report = await ui_agent.run(
-        ('1.打开 url "https://yobang.tencentmusic.com/chart-h5/annual-report-2025-mid/tmeChart?slideId=main"\n'
-         '2.不断向上滑动，直到屏幕出现"歌手你好"的元素\n'
-         ))
+    # report = await ui_agent.run(
+    #     ('1.打开 url "https://yobang.tencentmusic.com/chart-h5/annual-report-2025-mid/tmeChart?slideId=main"\n'
+    #      '2.不断向上滑动，直到屏幕出现"歌手你好"的元素\n'
+    #      ))
 
     # report = await ui_agent.run(
     #     (

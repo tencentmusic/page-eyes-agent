@@ -13,7 +13,7 @@ source:
   auto_generate_source:
     # 填写相对路径的正则表达式(相对于代码库根目录)，要求匹配到文件层级，例如：["auto_generate/.*"]
     filepath_regex:
-      - src/ieyes_agent/report_template\.html
+      - src/page_eyes/report_template\.html
 
   # 提供产品代码库中直接以源码形式存在的第三方代码文件路径。
   # 此处配置的路径，在后续统计代码环节会被排除，若不需要排除，该项配置标识可为空。

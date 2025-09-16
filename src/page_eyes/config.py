@@ -41,6 +41,7 @@ class MinioConfig(BaseSettings):
     region: str = Field(default='')
     secure: bool = Field(default=False)
 
+
 def create_storage_client():
     """创建存储客户端的工厂函数"""
     cos_config = CosConfig()
