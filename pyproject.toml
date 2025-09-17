@@ -1,11 +1,20 @@
 [project]
 name = "page-eyes"
-version = "0.2.0"
-description = "Add your description here"
+version = "0.2.4"
+description = "PageEyes Agent 是一个轻量级 UI Agent，通过自然语言指令驱动，无需编写脚本既可实现Web、Android平台的UI自动化任务。"
 readme = "README.md"
 authors = [
     { name = "aidenmo", email = "aidenmo@tencent.com" }
 ]
+maintainers = [
+    { name = "bepoxu", email = "bepoxu@tencent.com" },
+    { name = "leenjiang", email = "leenjiang@tencent.com" },
+    { name = "xinlanshi", email = "xinlanshi@tencent.com" },
+    { name = "yicanguo", email = "yicanguo@tencent.com" },
+    { name = "lancefayang", email = "lancefayang@tencent.com" },
+    { name = "aidenmo", email = "aidenmo@tencent.com" }
+]
+
 requires-python = ">=3.12"
 dependencies = [
     "adbutils>=2.8.10",
@@ -14,28 +23,31 @@ dependencies = [
     "loguru>=0.7.3",
     "minio>=7.2.16",
     "playwright>=1.52.0",
-    "pydantic-ai>=0.2.6",
+    "pydantic-ai==0.3.4",
 ]
 
 classifiers = [
-   # 这个项目的成熟度如何？常见的值有：
-   #   3 - Alpha
-   #   4 - Beta
-   #   5 - 生产/稳定版
-   "Development Status :: 4 - Beta",
-
-   # 指明你的项目面向的对象
-   "Intended Audience :: Developers",
-   "Topic :: Software Development :: Build Tools",
-
-   # 指明你的项目遵循的开源许可证
-   "License :: OSI Approved :: MIT License",
-
-   # 在这里指定你支持的 Python 版本。
-   "Programming Language :: Python :: 3.10",
-   "Programming Language :: Python :: 3.11",
-   "Programming Language :: Python :: 3.12",
+    # 这个项目的成熟度如何？常见的值有：
+    #   3 - Alpha
+    #   4 - Beta
+    #   5 - 生产/稳定版
+    "Development Status :: 4 - Beta",
+    # 指明你的项目面向的对象
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    # 指明你的项目遵循的开源许可证
+    "License :: OSI Approved :: MIT License",
+    # 在这里指定你支持的 Python 版本。
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
+
+[project.urls]
+Homepage = "https://github.com/tencentmusic/page-eyes-agent"
+Documentation = "https://github.com/tencentmusic/page-eyes-agent"
+Repository = "https://github.com/tencentmusic/page-eyes-agent"
+Changelog = "https://github.com/tencentmusic/page-eyes-agent/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
