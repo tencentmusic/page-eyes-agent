@@ -14,6 +14,22 @@ theme:
     - search.highlight
     - search.share
 
+  palette:
+    - scheme: slate
+      primary: black
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    # 日间模式
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+
 markdown_extensions:
   - admonition
   - attr_list

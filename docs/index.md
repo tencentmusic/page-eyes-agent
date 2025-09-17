@@ -1,17 +1,31 @@
 ---
-title: Page Eyes Agent
+title: PageEyes Agent
 hide:
   - navigation
 ---
 
 <div align="center" markdown>
 
-# **Page Eyes Agent**
+# **PageEyes Agent**
 
 ### 轻量级 UI 自动化 Agent  
-基于自然语言指令驱动的跨平台 UI 自动化解决方案
+*基于自然语言指令驱动的跨平台 UI 自动化解决方案*
+
+[![PyPI version](https://img.shields.io/pypi/v/page-eyes)](https://pypi.org/project/page-eyes/) 
+[![License](https://img.shields.io/github/license/tme_dev_center_autotest/page-eyes-agent-docs)](#)
+[![CI](https://img.shields.io/github/actions/workflow/status/tme_dev_center_autotest/page-eyes-agent-docs/ci.yml)](#)
+
 
 </div>
+---
+## 简介
+
+PageEyes Agent 是一个 **Python UI 自动化 Agent 框架**，帮助你用自然语言快速、稳定地完成跨平台 UI 自动化测试、巡检和业务验证。
+
+PageEyes Agent 以 *自然语言指令* 颠覆传统 UI 自动化：无需编写脚本，也能实现复杂的跨平台测试与巡检。基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydanticai) 框架开发，
+其中元素信息感知能力依靠 [OmniParserV2](https://huggingface.co/microsoft/OmniParser-v2.0) 模型，不依赖视觉语言大模型，
+即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android）
+
 ---
 
 ## 功能特性
@@ -30,31 +44,47 @@ hide:
   支持 DeepSeek、OpenAI、千问等多种大模型接入，默认使用 DeepSeek V3 模型。  
   { .card .shadow .purple }
 
-- :material-file-document:{ .lg .icon-color } **[详细报告](guides/best-practices.md)**  
+- :material-file-document:{ .lg .icon-color } **[详细报告](guides/core-concepts.md)**  
   可通过自然语言进行断言，并生成详细的执行日志和报告。  
   { .card .shadow .blue }
 
 </div>
+
 ---
 
-## 为什么使用Page Eyes Agent
+## 为什么选择 PageEyes Agent？
 
-<div class="full-width-table" markdown>
+借助 Page Eyes Agent，你可以用自然语言快速构建、执行和维护跨平台 UI 自动化测试。  
+与传统 UI 自动化方案相比，它具备以下优势：
 
-| 特性 |       Page Eyes Agent       | 传统 UI 自动化 |
-|:------------------:|:---------------------------:|:----------------------------------:|
-| 编写效率 | **高** <br> 使用自然语言指令，无需编程技能  | **低** <br> 需要编写和维护大量代码 |
-| 维护成本 | **低** <br> UI变动时只需调整自然语言指令  | **高** <br> UI变动需要重写定位器和测试逻辑 |
-| 学习曲线 | **平缓** <br> 无需编程知识，使用自然语言即可 | **陡峭** <br> 需要掌握自动化框架和编程语言 |
-| 跨平台能力 |   **强** <br> 同一套指令可跨平台使用    | **弱** <br> 不同平台需要不同实现方式 |
-| 故障恢复 |  **智能** <br> 自动尝试替代路径和恢复策略  | **脆弱** <br> 严格按脚本执行，容易因小变化而失败 |
+<div class="grid cards" markdown>
 
+- :material-speedometer:{ .lg } **更高的开发效率**  
+  使用自然语言指令即可完成测试用例，无需编写和维护脚本  
+  { .card .shadow }
+
+- :material-autorenew:{ .lg } **更低的维护成本**  
+  UI 变动时仅需调整指令，减少定位器和测试逻辑的重复修改  
+  { .card .shadow }
+
+- :material-school:{ .lg } **平缓的学习曲线**  
+  无需自动化框架或编程知识，业务人员也可直接使用  
+  { .card .shadow }
+
+- :material-devices:{ .lg } **强大的跨平台能力**  
+  同一套指令适用于 Web、Android，未来支持 iOS  
+  { .card .shadow }
+
+- :material-shield-check:{ .lg } **智能的故障恢复**  
+  自动尝试替代路径和恢复策略，避免小变动导致脚本失败  
+  { .card .shadow }
 
 </div>
+
+
 ---
 
 ## 应用场景
-
 <div class="grid cards" markdown>
 
 - :material-rocket-launch:{ .lg .icon-color } **UI 自动化测试**  
