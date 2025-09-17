@@ -92,17 +92,25 @@ class UiAgent:
 
         logger.info(result.output)
         logger.info(f"steps: {self.deps.context.steps}")
-        report_data = {'is_success': result.output.is_success,
+
+        is_success_output = all([step.is_success for step in self.deps.context.steps.values()])
+        if is_success_output != result.output.is_success:
+            logger.warning(f'model return {result.output.is_success}, but real is {is_success_output}')
+
+        report_data = {'is_success': is_success_output,
                        'device_size': self.deps.device.device_size,
                        'steps': self.deps.context.steps}
         report_json = TypeAdapter(dict).dump_json(report_data).decode()
         report_path = await self.create_report(report_json, report_dir)
 
-        return {
-            'is_success': result.output.is_success,
-            'steps': [
+        steps_output = [
                 step.model_dump(include={'step', 'description', 'action', 'is_success'})
-                for step in self.deps.context.steps.values()],
+                for step in self.deps.context.steps.values()
+        ]
+
+        return {
+            'is_success': is_success_output,
+            'steps': steps_output,
             'report_path': report_path
         }
 

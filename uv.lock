@@ -891,7 +891,7 @@ wheels = [
 
 [[package]]
 name = "page-eyes"
-version = "0.2.3"
+version = "0.2.5"
 source = { editable = "." }
 dependencies = [
     { name = "adbutils" },
@@ -911,7 +911,7 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "minio", specifier = ">=7.2.16" },
     { name = "playwright", specifier = ">=1.52.0" },
-    { name = "pydantic-ai", specifier = ">=0.2.6" },
+    { name = "pydantic-ai", specifier = "==0.3.4" },
 ]
 
 [[package]]
