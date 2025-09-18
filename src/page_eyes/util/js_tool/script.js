@@ -18,7 +18,13 @@ const script = {
         box.style.height = (y2 - y1) * 100 + "%"
         return box
     },
-    remove_highlight_element: () => document.querySelector("#option-el-box")?.remove(),
+    // remove_highlight_element: () => document.querySelector("#option-el-box")?.remove(),
+    remove_highlight_element: () => {
+        const box = document.querySelector("#option-el-box");
+        if (box) {
+            box.remove();
+        }
+    },
     has_vertical_scrollbar: () => document.body.scrollHeight > window.innerHeight,
     has_horizontal_scrollbar: () => document.body.scrollWidth > window.innerWidth,
 

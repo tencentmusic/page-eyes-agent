@@ -36,7 +36,7 @@
 
 ```bash
 # --- Agent 行为配置 ---
-# (可选) 指定使用的模型, 格式为 '提供商:模型名'。例如: openai:gpt-4o
+# (可选) 指定使用的模型, 格式为 '提供商:模型名'。例如: openai:gpt-4o, 不指定时默认使用deepseek-v3
 AGENT_MODEL=openai:your-model-name
 # (调试) 是否开启调试模式，会打印更详细的日志
 AGENT_DEBUG=True
@@ -45,24 +45,16 @@ AGENT_HEADLESS=False
 # (调试) 是否在日志中打印 Agent 的决策图节点
 AGENT_LOG_GRAPH_NODE=True
 
-# (必填) 你部署的OmniParser服务统计使用来源key
-AGENT_OMNI_KEY="your_omni_key_here"
-
 # --- 必填: 服务依赖配置 ---
 # 你的 OmniParser 服务 API Key
 AGENT_OMNI_KEY="your_omni_parser_api_key_here"
 
+
 # 你的大模型服务基础 URL (例如 LiteLLM 代理地址或云服务商提供的地址)
 OPENAI_BASE_URL="https://your.llm.provider.com/v1/"
-
 # 你的大模型服务 API Key
 OPENAI_API_KEY="your_llm_api_key_here"
 
-
-# --- 可选: 报告存储配置 (腾讯云 COS) ---
-# 如果不需要将报告上传到对象存储，可以忽略以下配置
-COS_SECRET_ID="your_cos_secret_id"
-COS_SECRET_KEY="your_cos_secret_key"
 
 # --- 可选: 报告存储配置 (minIO) ---
 # 如果不需要将报告上传到对象存储，可以忽略以下配置

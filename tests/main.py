@@ -3,8 +3,8 @@ import sys
 
 from loguru import logger
 
-from page_eyes.agent import WebAgent, MobileAgent
-from page_eyes.util.platform import Platform
+from src.page_eyes.agent import WebAgent, MobileAgent
+from src.page_eyes.util.platform import Platform
 from typing import cast
 try:
     from loguru import BasicHandlerConfig
@@ -17,19 +17,29 @@ logger.configure(handlers=cast(list['BasicHandlerConfig'], [{"sink": sys.stdout,
 
 async def main():
     # Web 端
-    ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro Max', debug=True)
+    # ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro Max', debug=True)
+
+    # ui_agent = await WebAgent.create(simulate_device='Intel MacBook Pro 13-inch', debug=True)
 
     # 移动端
-    # ui_agent = await MobileAgent.create(serial='10.91.145.46:56000',platform=Platform.QY)
+    ui_agent = await MobileAgent.create(serial=None,platform=Platform.QY)
+
+    report = await ui_agent.run(
+        ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
+         '2.点击关闭弹窗，没有弹窗则跳过步骤\n'
+         '3.点击"查找"icon\n'
+         '4.搜索输入框内输入"林俊杰"\n'
+         '5.点击第一首歌曲的"推荐"按钮\n'
+         '6.弹窗内点击"推荐"按钮\n'
+         ))
 
     # report = await ui_agent.run(
-    #     ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
-    #      # '2.点击"播放按钮"\n'
-    #      '2.点击"查找icon"\n'
-    #      '3.在搜索输入框中输入"年轮"\n'
-    #      '4.点击"年轮> "\n'
-    #      '5.点击"日榜"'
+    #     ('1.打开 url "https://wma.wavecommittee.com/"\n'
+    #      '2.点击"浪潮评委会成员"tab\n'
+    #      '3.上滑页面，直到出现"查看浪潮评委会"\n'
+    #      '4.点击"查看浪潮评委会"按钮\n'
     #      ))
+
     # report = await ui_agent.run(
     #     ('1.打开 url "https://chart.tencentmusic.com/wave-chart"\n'
     #      # '2.点击"首页"\n'
