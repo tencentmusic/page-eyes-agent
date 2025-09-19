@@ -64,23 +64,26 @@ AGENT_OMNI_KEY=test-UfcWMpXW
 
 #### 方法 2：使用 Docker 部署
 
+1. 拉取镜像并部署服务 
 ```bash
 docker pull xxxxx/omniparser:v2.0
 docker run -d -p 8000:8000 xxxxx/omniparser:v2.0
 ```
+2. 设置环境变量 `AGENT_OMNI_BASE_URL` 为服务地址
+3. 设置环境变量 `AGENT_OMNI_KEY` 为服务的 API 密钥
+
 
 #### 方法 3：从 Hugging Face 部署
 
 1. 访问 [OmniParser V2 模型页面](https://huggingface.co/microsoft/OmniParser-v2.0)
 2. 按照说明下载模型并部署服务
 3. 确保服务在 `http://localhost:8000` 或其他可访问的地址上运行
-4. 设置环境变量 `OMNI_BASE_URL` 为服务地址
-5. 设置环境变量 `OMNI_KEY` 为服务的 API 密钥
+4. 设置环境变量 `AGENT_OMNI_BASE_URL` 为服务地址
 
 
 ### 3. Android 调试桥 (ADB)（仅移动端需要）
 
-如果您计划在 Android 设备上运行自动化任务，需要安装 ADB：
+如果计划在 Android 设备上运行自动化任务，需要安装 ADB：
 
 #### Windows
 
@@ -99,6 +102,7 @@ brew install android-platform-tools
 sudo apt-get install android-tools-adb
 ```
 
+
 ### 4. MinIO（可选，用于报告存储）
 
 如果您需要存储和共享测试报告，可以配置 MinIO：
@@ -112,9 +116,10 @@ docker run -p 9000:9000 -p 9001:9001 \
   minio/minio server /data --console-address ":9001"
 ```
 
+
 ## 验证安装
 
-安装完成后，您可以运行以下简单测试来验证 PageEyes Agent 是否正确安装：
+安装完成后，可运行以下简单测试来验证 PageEyes Agent 是否正确安装：
 
 ```python
 import asyncio
@@ -135,42 +140,89 @@ if __name__ == "__main__":
 
 ## 配置
 
-### 配置文件
+PageEyes Agent 采用灵活的配置管理系统，支持通过环境变量、`.env`文件或代码参数进行配置。配置优先级从高到低依次为：代码传入参数 > 环境变量 > `.env`文件 > 默认值。
 
-PageEyes Agent 支持通过环境变量进行配置：
+### 1. 核心功能配置
+
+这些配置控制 PageEyes Agent 的基本行为和功能：
 
 ```bash
-# --- Agent 行为配置 ---
-# (可选) 指定使用的模型, 格式为 '提供商:模型名'。例如: openai:gpt-4o, 不指定时默认使用deepseek-v3
-AGENT_MODEL=openai:your-model-name
-# (调试) 是否开启调试模式，会打印更详细的日志
-AGENT_DEBUG=True
-# (调试) 浏览器是否以非无头模式运行 (False 表示会显示浏览器界面)
+# --- Agent 核心功能配置 ---
+# 指定使用的大模型, 格式为 '提供商:模型名'
+# 例如: openai:gpt-4o, 不指定时默认使用 openai:deepseek-v3
+AGENT_MODEL="openai:your-model-name"
+
+# 浏览器是否以无头模式运行 (True 表示不显示浏览器界面，False 表示显示)
+# 默认值: True
 AGENT_HEADLESS=False
-# (调试) 是否在日志中打印 Agent 的决策图节点
-AGENT_LOG_GRAPH_NODE=True
 
-# --- 必填: 服务依赖配置 ---
-# 你的 OmniParser 服务 API Key
-AGENT_OMNI_KEY="your_omni_parser_api_key_here"
+# 模拟特定设备（可选）
+# 可选值: 'iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6', 'Desktop Chrome' 等
+# 不设置则使用默认浏览器配置
+AGENT_SIMULATE_DEVICE="Desktop Chrome"
+```
 
+### 2. 服务依赖配置
 
-# 你的大模型服务基础 URL (例如 LiteLLM 代理地址或云服务商提供的地址)
+这些配置用于连接 PageEyes Agent 依赖的外部服务：
+
+```bash
+# --- OmniParser 服务配置 ---
+# OmniParser 服务基础 URL (如果使用自部署服务，需要设置)
+# 默认值: http://21.6.91.201:8000
+AGENT_OMNI_BASE_URL="http://your.omniparser.service:8000"
+
+# OmniParser 服务 API Key
+# 如果使用 PageEyes Agent 官方服务或官方 Docker 镜像，使用以下值:
+AGENT_OMNI_KEY="test-UfcWMpXW"
+# 如果使用从 Hugging Face 自行部署的 OmniParser 服务，无需设置此项 Key
+
+# --- 大模型服务配置 ---
+# 大模型服务基础 URL (例如 LiteLLM 代理地址或云服务商提供的地址)
 OPENAI_BASE_URL="https://your.llm.provider.com/v1/"
-# 你的大模型服务 API Key
+
+# 大模型服务 API Key
 OPENAI_API_KEY="your_llm_api_key_here"
+```
 
+### 3. 存储与调试配置
 
-# --- 可选: 报告存储配置 (minIO) ---
-# 如果不需要将报告上传到对象存储，可以忽略以下配置
-xxxx_SECRET_ID="your_minio_secret_id"
-xxxx_SECRET_KEY="your_minio_secret_key"
+这些配置用于测试报告存储和调试目的：
+
+```bash
+# --- 报告存储配置 ---
+# PageEyes Agent 优先使用腾讯云 COS，如未配置则尝试从系统内提取 MinIO配置
+
+# 腾讯云 COS 配置 (推荐)
+COS_SECRET_ID="your_cos_secret_id"
+COS_SECRET_KEY="your_cos_secret_key"
+COS_REGION="ap-guangzhou"  # 默认值，可根据需要修改
+COS_ENDPOINT="cos-internal.ap-guangzhou.tencentcos.cn"  # 默认值，可根据需要修改
+COS_BUCKET="your_cos_bucket"  # 默认: tme-dev-test-cos-1257943044
+
+# MinIO 配置 (备选)
+# 仅当未配置腾讯云 COS 时使用
+MINIO_ACCESS_KEY="your_minio_access_key"
+MINIO_SECRET_KEY="your_minio_secret_key"
+MINIO_ENDPOINT="your_minio_endpoint"  # 例如: minio.example.com:9000
+MINIO_BUCKET="your_minio_bucket"
+MINIO_REGION="your_minio_region"  # 可选
+MINIO_SECURE="False"  # 是否使用 HTTPS，默认 False
+
+# --- 调试配置 ---
+# 是否开启调试模式，会打印更详细的日志
+# 默认值: False
+AGENT_DEBUG=True
+
+# 是否在日志中打印 Agent 的决策图节点
+# 默认值: False
+AGENT_LOG_GRAPH_NODE=True
 ```
 
 
 ## 故障排除
 
-如果您在安装过程中遇到问题，请尝试以下解决方案：
+如果在安装过程中遇到问题，请尝试以下解决方案：
 
 
 ### 常见问题
@@ -183,7 +235,7 @@ xxxx_SECRET_KEY="your_minio_secret_key"
 
 2. **OmniParser 连接问题**
    ```bash
-   # 如果是您自行部署的服务，请检查 OmniParser 服务是否正在运行
+   # 如果是自行部署的服务，请检查 OmniParser 服务是否正在运行
    curl http://localhost:8000/health
    ```
 
@@ -199,17 +251,17 @@ xxxx_SECRET_KEY="your_minio_secret_key"
 
 ### 获取帮助
 
-如果您仍然遇到问题，可以通过以下方式获取帮助：
+如果你仍然遇到问题，可以通过以下方式获取帮助：
 
 - 在 [GitHub Issues](https://github.com/tencentmusic/page-eyes-agent/issues) 提交问题
-- 查阅 [常见问题解答](../faq/index.md)
+- 查阅 [常见问题解答](../faq/faq.md)
 - 加入我们的 [开发者社区](https://github.com/tencentmusic/page-eyes-agent#community)
 
 
 ## 下一步
 
-成功安装 PageEyes Agent 后，您可以：
+成功安装 PageEyes Agent 后，你可以：
 
-- 查看 [快速开始指南](demo.md) 了解如何创建您的第一个自动化任务
+- 查看 [快速开始指南](demo.md) 了解如何创建你的第一个自动化任务
 - 探索 [核心概念](../guides/core-concepts.md) 深入了解 PageEyes Agent 的工作原理
 - 查看 [API 参考](../api/index.md) 获取详细的 API 文档

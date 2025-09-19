@@ -5,29 +5,37 @@ site_url: https://xxxx.com
 theme:
   name: material
   language: zh
+
+  # 左侧导航
   features:
-    - navigation.tabs
-    - navigation.sections
+    - navigation.expand  # 默认展开所有导航
+    - navigation.sections  # 启用导航分组
     - navigation.instant
+    - navigation.tracking
+    - navigation.indexes
     - content.code.copy
     - content.tabs.link
     - search.highlight
     - search.share
 
   palette:
+    # 夜间模式
     - scheme: slate
       primary: black
-      accent: blue
+      accent: lime
       toggle:
         icon: material/brightness-4
-        name: Switch to light mode
+        name: 切换为日间模式
     # 日间模式
     - scheme: default
-      primary: indigo
-      accent: blue
+      primary: blue
+      accent: light gray
       toggle:
         icon: material/brightness-7
-        name: Switch to dark mode
+        name: 切换为夜间模式
+
+extra_css:
+  - stylesheets/extra.css
 
 
 markdown_extensions:
@@ -48,7 +56,7 @@ nav:
   - 主页: index.md
   - 快速开始:
       - 介绍: getting-started/index.md
-      - 安装: getting-started/installation.md
+      - 安装指南: getting-started/installation.md
       - 第一个Demo: getting-started/demo.md
   - 指南:
       - 核心概念: guides/core-concepts.md
@@ -62,12 +70,11 @@ nav:
   - 教程:
       - 快速上手: tutorials/quickstart.md
       - 实战案例: tutorials/examples.md
-      - 视频教程: tutorials/videos.md
   - 关联项目:
       - 相关工具: related/tools.md
       - 集成方案: related/integrations.md
   - 常见问题:
-      - FAQ: faq/index.md
+      - FAQ: faq/faq.md
       - 故障排查: faq/troubleshooting.md
   - 贡献指南:
       - 如何贡献: contributing/index.md
@@ -76,7 +83,7 @@ nav:
   - 版本信息:
       - 更新日志: changelog.md
       - 安全策略: security.md
-      - 路线图: roadmap.md
+      - 规划: roadmap.md
   - 关于:
       - 团队: about/team.md
       - 许可证: about/license.md

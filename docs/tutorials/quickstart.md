@@ -11,7 +11,7 @@
 
 在开始之前，请确保你已经完成了以下两项基本安装。
 
-> 如果需要更详细的环境要求（如移动端 ADB、报告存储 MinIO 等），请参考我们的 **[安装指南](../getting-started/installation.md)**。
+> 如果需要更详细的环境要求（如移动端 ADB、报告存储 MinIO 等），请参考 **[安装指南](../getting-started/installation.md)**。
 
 1.  **安装 Page Eyes Agent**
     打开你的终端，运行以下命令：
@@ -62,7 +62,6 @@ xxxx_SECRET_ID="your_minio_secret_id"
 xxxx_SECRET_KEY="your_minio_secret_key"
 ```
 
----
 
 ### 第 3 步：编写你的第一个脚本
 
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
----
+
 
 ### 第 4 步：运行脚本
 
@@ -102,7 +101,8 @@ if __name__ == "__main__":
 ```bash
 python my_first_test.py
 ```
----
+
+
 
 ### 第 5 步：观察结果
 
