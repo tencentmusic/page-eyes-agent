@@ -21,6 +21,20 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 ```shell
 pip install page-eyes
 ```
+## 快速开始
+配置环境变量
+
+| 环境变量          | 默认值                           | 说明                                                                 |
+|:------------------|-------------------------------|----------------------------------------------------------------------|
+| AGENT_MODEL       | openai:deepseek-v3            | 使用的AI模型，当前设置为deepseek-v3                                  |
+| AGENT_DEBUG       | False                         | 是否启用调试模式                                                     |
+| AGENT_HEADLESS    | False                         | 是否使用无头模式                                                     |
+| AGENT_LOG_GRAPH_NODE | False                         | 是否记录图节点日志                                                   |
+| AGENT_OMNI_KEY    | test-UfcWMpXW                 | Omni服务的认证密钥                                                   |
+| OPENAI_BASE_URL   | http://deepseek.tmeoa.com/v1/ | DeepSeek API的服务端点                                               |
+| OPENAI_API_KEY    | a22a37d7-xxx                  | 调用DeepSeek API所需的认证密钥                                       |
+| COS_SECRET_ID     | xxx                           | 腾讯云COS服务的Secret ID                                             |
+| COS_SECRET_KEY    | xxx                           | 腾讯云COS服务的Secret Key                                            |
 
 ## 使用示例
 
@@ -49,41 +63,3 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 ```
-
-## 更新日志
-
-- 2025-09-03
-  1. 支持等待、停留等自然语言操作
-  2. 支持传递 OmniParser Key 鉴权
-  3. 断言支持判断页面/屏幕中是否存在某个关键字
-
-- 2025-08-01
-  
-  1. 精简了系统提示词，每次调用使用更少的token
-  2. 优化报告的记录和生成逻辑，解决步骤偶然错乱的问题
-  3. 优化工具的参数，实现最小化参数，减少token
-  4. 优化了等待逻辑，实现更精准的等待，不需要统一等待1s
-  5. 截图、解析改成异步,并发不阻塞
-  6. 优化浏览器配置，支持使用持久化缓存，二次启动页面速度更快
-
-- 2025-07-28
-  
-  1. 增加滚动和滑动操作
-  2. 支持H5 swiper 组件滑动
-
-- 2025-06-25
-  
-  1. 优化 LLM Graph 控制
-  2. 更新配置模式
-
-- 2025-06-09
-  
-  1. 支持 Web Agent 模式
-  2. 增加执行报告和过程实时渲染
-  3. 重构同步方法为异步
-
-- 2025-06-04
-  
-  1. 支持移动端 Agent 模式
-  2. 增加`click` `input` `open_url` 工具
-  3. 支持接入 OmniParser 进行元素解析
