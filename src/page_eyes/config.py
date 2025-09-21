@@ -54,7 +54,7 @@ class Settings(BaseSettings):
 
     headless: Optional[bool] = True
     model: Optional[str] = 'openai:deepseek-v3'
-    omni_base_url: Optional[str] = 'http://21.6.91.201:8000'
+    omni_base_url: Optional[str] = ''
     omni_key: Optional[str] = ''
     storage_client: StorageClient = Field(default_factory=create_storage_client)
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
