@@ -30,17 +30,17 @@ pip install page-eyes
 ## 快速开始
 配置环境变量
 
-| 环境变量          | 默认值                           | 说明                                                                 |
-|:------------------|-------------------------------|----------------------------------------------------------------------|
-| AGENT_MODEL       | openai:deepseek-v3            | 使用的AI模型，当前设置为deepseek-v3                                  |
-| AGENT_DEBUG       | False                         | 是否启用调试模式                                                     |
-| AGENT_HEADLESS    | False                         | 是否使用无头模式                                                     |
-| AGENT_LOG_GRAPH_NODE | False                         | 是否记录图节点日志                                                   |
-| AGENT_OMNI_KEY    | test-UfcWMpXW                 | Omni服务的认证密钥                                                   |
-| OPENAI_BASE_URL   | http://deepseek.tmeoa.com/v1/ | DeepSeek API的服务端点                                               |
-| OPENAI_API_KEY    | a22a37d7-xxx                  | 调用DeepSeek API所需的认证密钥                                       |
-| COS_SECRET_ID     | xxx                           | 腾讯云COS服务的Secret ID                                             |
-| COS_SECRET_KEY    | xxx                           | 腾讯云COS服务的Secret Key                                            |
+| 环境变量          | 默认值       | 说明                                                                 |
+|:------------------|-----------|----------------------------------------------------------------------|
+| AGENT_MODEL       | openai:deepseek-v3 | 使用的AI模型，当前设置为deepseek-v3                                  |
+| AGENT_DEBUG       | False     | 是否启用调试模式                                                     |
+| AGENT_HEADLESS    | False     | 是否使用无头模式                                                     |
+| AGENT_LOG_GRAPH_NODE | False     | 是否记录图节点日志                                                   |
+| AGENT_OMNI_KEY    | test-UfcWMpXW | Omni服务的认证密钥                                                   |
+| OPENAI_BASE_URL   | https://api.deepseek.com/v1          | DeepSeek API的服务端点                                               |
+| OPENAI_API_KEY    | a22a37d7-xxx | 调用DeepSeek API所需的认证密钥                                       |
+| COS_SECRET_ID     | xxx       | 腾讯云COS服务的Secret ID                                             |
+| COS_SECRET_KEY    | xxx       | 腾讯云COS服务的Secret Key                                            |
 
 使用示例
 
