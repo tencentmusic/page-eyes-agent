@@ -12,7 +12,7 @@ hide:
 *基于自然语言指令驱动的跨平台 UI 自动化解决方案*
 
 [![PyPI version](https://img.shields.io/pypi/v/page-eyes)](https://pypi.org/project/page-eyes/) 
-[![License](https://img.shields.io/github/license/tencentmusic/page-eyes-agent)](https://github.com/tencentmusic/page-eyes-agent/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/tencentmusic/page-eyes-agent)](https://github.com/tencentmusic/page-eyes-agent/blob/master/LICENSE)
 [![CI](https://img.shields.io/github/actions/workflow/status/tencentmusic/page-eyes-agent/ci.yml)](https://github.com/tencentmusic/page-eyes-agent/actions)
 
 

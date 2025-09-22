@@ -3,6 +3,12 @@
 ![](https://img.shields.io/badge/build-passing-brightgreen)
 ![](https://img.shields.io/badge/python-12-blue?logo=python)
 
+---
+
+**中文文档**: [PageEyes Agent](https://tencentmusic.github.io/page-eyes-agent/)
+
+---
+
 PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydanticai) 框架开发的一个轻量级 UI Agent，
 其中元素信息感知能力依靠 [OmniParserV2](https://huggingface.co/microsoft/OmniParser-v2.0) 模型，整个 Agent 的优势在于不依赖视觉语言大模型，
 即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android），目前主要包含以下功能：
@@ -36,7 +42,7 @@ pip install page-eyes
 | COS_SECRET_ID     | xxx                           | 腾讯云COS服务的Secret ID                                             |
 | COS_SECRET_KEY    | xxx                           | 腾讯云COS服务的Secret Key                                            |
 
-## 使用示例
+使用示例
 
 ```python
 import asyncio
