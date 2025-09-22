@@ -69,3 +69,6 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+## 如有需要，加入我们的交流群
+![](./docs/about/contact_qr.png)
