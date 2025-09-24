@@ -36,7 +36,6 @@ pip install page-eyes
 | AGENT_DEBUG       | False     | 是否启用调试模式                                                     |
 | AGENT_HEADLESS    | False     | 是否使用无头模式                                                     |
 | AGENT_LOG_GRAPH_NODE | False     | 是否记录图节点日志                                                   |
-| AGENT_OMNI_KEY    | test-UfcWMpXW | Omni服务的认证密钥                                                   |
 | OPENAI_BASE_URL   | https://api.deepseek.com/v1          | DeepSeek API的服务端点                                               |
 | OPENAI_API_KEY    | a22a37d7-xxx | 调用DeepSeek API所需的认证密钥                                       |
 
