@@ -55,22 +55,45 @@ playwright install chromium
 
 [OmniParser V2](https://huggingface.co/microsoft/OmniParser-v2.0) 是 PageEyes Agent 用于解析 UI 元素的核心模型。
 
-#### 方法 1：直接使用 PageEyes Agent 搭建好的OmniParser V2 服务（推荐）
+#### 方法 1：如您已部署好 OmniParser V2 服务，则只需要在你的项目中配置环境变量
 
 ```bash
-# （必需）设置环境变量， 调用OmniParser V2 服务时使用
-AGENT_OMNI_KEY=test-UfcWMpXW
+# （必需）设置环境变量， 调用 OmniParser V2 服务时使用
+AGENT_OMNI_BASE_URL=http://host:port
 ```
 
-#### 方法 2：使用 Docker 部署
+#### 方法 2：使用 Docker 完整部署，支持 GPU（推荐）或 CPU 设备
 
 1. 拉取镜像并部署服务 
 ```bash
-docker pull xxxxx/omniparser:v2.0
-docker run -d -p 8000:8000 xxxxx/omniparser:v2.0
+docker run -d \
+  --name omniparser \
+  -p 8000:8000 \
+  -e COS_SECRET_ID=xxx \
+  -e COS_SECRET_KEY=xxx \
+  -e COS_ENDPOINT=xxx \
+  -e COS_BUCKET=xxx \
+  lighthouseac/omniparser:latest
 ```
-2. 设置环境变量 `AGENT_OMNI_BASE_URL` 为服务地址
-3. 设置环境变量 `AGENT_OMNI_KEY` 为服务的 API 密钥
+> COS_SECRET_ID: 腾讯云COS服务的Secret ID  
+> COS_SECRET_KEY: 腾讯云COS服务的Secret Key   
+> COS_ENDPOINT: 腾讯云COS服务的 endpoint  
+> COS_BUCKET: 腾讯云COS服务的 bucket
+
+如您没有申请 腾讯云COS 服务，也可参考第4步快速搭建一个开源的对象存储服务，然后执行下面的命令：
+
+```bash
+docker run -d \
+  --name omniparser \
+  -p 8000:8000 \
+  -e MINIO_ACCESS_KEY=xxx \
+  -e MINIO_SECRET_KEY=xxx \
+  -e MINIO_BUCKET=xxx \
+  -e MINIO_ENDPOINT=xxx \
+  -e MINIO_SECURE=false \
+  lighthouseac/omniparser:latest
+```
+
 
 
 #### 方法 3：从 Hugging Face 部署
@@ -102,20 +125,34 @@ brew install android-platform-tools
 sudo apt-get install android-tools-adb
 ```
 
-
 ### 4. MinIO（可选，用于报告存储）
 
 如果您需要存储和共享测试报告，可以配置 MinIO：
 
 ```bash
 # 使用 Docker 安装 MinIO
-docker run -p 9000:9000 -p 9001:9001 \
+docker run -d \
+  --name minio \
   -e "MINIO_ROOT_USER=minioadmin" \
   -e "MINIO_ROOT_PASSWORD=minioadmin" \
+  -p 9000:9000 \
+  -p 9001:9001 \
   -v /path/to/data:/data \
-  minio/minio server /data --console-address ":9001"
+  minio/minio:RELEASE.2025-04-22T22-12-26Z server /data --console-address ":9001" --address ":9000"
+```
+`/path/to/data` 为您宿主机上持久化数据的路径
+
+> 注意：安装完后需要进入管理后台分别创建 Access Key 和 Bucket
+
+管理地址: http://host:9001  
+```bash
+MINIO_ENDPOINT=http://host:9000  
+MINIO_ACCESS_KEY=xxx  # 您在后台创建的 Access Key
+MINIO_SECRET_KEY=xxx  # 创建 Access Key 时会生成 SECRET_KEY
+MINIO_BUCKET=xxx  # 您在后台创建的 Bucket
 ```
 
+更多配置可参考 [MinIO 开源项目](https://github.com/minio/minio)
 
 ## 验证安装
 
@@ -141,6 +178,38 @@ if __name__ == "__main__":
 ## 配置
 
 PageEyes Agent 采用灵活的配置管理系统，支持通过环境变量、`.env`文件或代码参数进行配置。配置优先级从高到低依次为：代码传入参数 > 环境变量 > `.env`文件 > 默认值。
+
+环境变量
+
+| 环境变量          | 默认值       | 说明                                                                 |
+|:------------------|-----------|----------------------------------------------------------------------|
+| AGENT_MODEL       | openai:deepseek-v3 | 使用的AI模型，当前设置为deepseek-v3                                  |
+| AGENT_DEBUG       | False     | 是否启用调试模式                                                     |
+| AGENT_HEADLESS    | False     | 是否使用无头模式                                                     |
+| AGENT_LOG_GRAPH_NODE | False     | 是否记录图节点日志                                                   |
+| AGENT_OMNI_KEY    | test-UfcWMpXW | Omni服务的认证密钥                                                   |
+| OPENAI_BASE_URL   | https://api.deepseek.com/v1          | DeepSeek API的服务端点                                               |
+| OPENAI_API_KEY    | a22a37d7-xxx | 调用DeepSeek API所需的认证密钥                                       |
+
+
+使用腾讯云COS服务（与MinIO二选一）
+
+| 环境变量 | 默认值 | 说明                                                                 |
+|:-----|-----|----------------------------------------------------------------------|
+| COS_SECRET_ID     | -   | 腾讯云COS服务的Secret ID                                    |
+| COS_SECRET_KEY     | -   | 腾讯云COS服务的Secret Key                                    |
+| COS_ENDPOINT     | -   | 腾讯云COS服务的 endpoint                                  |
+| COS_BUCKET     | -   | 腾讯云COS服务的 bucket                                  |
+
+使用MinIO服务（与腾讯云COS二选一）
+
+| 环境变量 | 默认值 | 说明                            |
+|:-----|-----|-------------------------------|
+| MINIO_ENDPOINT     | -   | MinIO 端点 host:port            |
+| MINIO_ACCESS_KEY     | -   | 您在后台创建的 Access Key            |
+| MINIO_SECRET_KEY     | -   | 创建 Access Key 时会生成 SECRET_KEY |
+| MINIO_BUCKET     | -   | 您在后台创建的 Bucket                |
+
 
 ### 1. 核心功能配置
 

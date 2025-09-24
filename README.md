@@ -39,8 +39,27 @@ pip install page-eyes
 | AGENT_OMNI_KEY    | test-UfcWMpXW | Omni服务的认证密钥                                                   |
 | OPENAI_BASE_URL   | https://api.deepseek.com/v1          | DeepSeek API的服务端点                                               |
 | OPENAI_API_KEY    | a22a37d7-xxx | 调用DeepSeek API所需的认证密钥                                       |
-| COS_SECRET_ID     | xxx       | 腾讯云COS服务的Secret ID                                             |
-| COS_SECRET_KEY    | xxx       | 腾讯云COS服务的Secret Key                                            |
+
+
+使用腾讯云COS服务（与MinIO二选一）
+
+| 环境变量 | 默认值 | 说明                                                                 |
+|:-----|-----|----------------------------------------------------------------------|
+| COS_SECRET_ID     | -   | 腾讯云COS服务的Secret ID                                    |
+| COS_SECRET_KEY     | -   | 腾讯云COS服务的Secret Key                                    |
+| COS_ENDPOINT     | -   | 腾讯云COS服务的 endpoint                                  |
+| COS_BUCKET     | -   | 腾讯云COS服务的 bucket                                  |
+
+使用MinIO服务（与腾讯云COS二选一）
+
+| 环境变量 | 默认值 | 说明                            |
+|:-----|-----|-------------------------------|
+| MINIO_ENDPOINT     | -   | MinIO 端点 host:port            |
+| MINIO_ACCESS_KEY     | -   | 您在后台创建的 Access Key            |
+| MINIO_SECRET_KEY     | -   | 创建 Access Key 时会生成 SECRET_KEY |
+| MINIO_BUCKET     | -   | 您在后台创建的 Bucket                |
+
+[详细部署参考](docs/getting-started/installation.md)
 
 使用示例
 
