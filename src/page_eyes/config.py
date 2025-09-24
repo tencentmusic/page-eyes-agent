@@ -24,11 +24,11 @@ load_dotenv(override=True)
 class CosConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='cos_', extra='ignore')
 
-    region: str = Field(default='ap-guangzhou')
+    region: str = Field(default='')
     secret_id: str = Field(default='')
     secret_key: str = Field(default='')
-    endpoint: str = Field(default='cos-internal.ap-guangzhou.tencentcos.cn')
-    bucket: str = Field(default='tme-dev-test-cos-1257943044')
+    endpoint: str = Field(default='')
+    bucket: str = Field(default='')
 
 
 class MinioConfig(BaseSettings):
@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     model: Optional[str] = 'openai:deepseek-v3'
     omni_base_url: Optional[str] = ''
     omni_key: Optional[str] = ''
-    storage_client: StorageClient = Field(default_factory=create_storage_client)
+    storage_client: StorageClient = Field(default=create_storage_client())
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
     debug: Optional[bool] = False
     log_graph_node: Optional[bool] = False
