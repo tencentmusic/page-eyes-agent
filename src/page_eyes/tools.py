@@ -178,17 +178,49 @@ class AgentTool(ABC):
         await self._get_screen_info(ctx, parse_element=False)
         return ToolResult.success()
 
-    @tool(delay=0)
-    async def assert_screen_contains(self, ctx: RunContext[AgentDeps[WebDevice]],
-                                     action: AssertContainsActionInfo) -> ToolResult:
-        """
-        断言屏幕中是否出现、存在、包含指定关键字内容，如果是则 is_success=True, 否则 is_success=False
-        """
+    async def get_screen_contains(
+            self,
+            ctx: RunContext[AgentDeps],
+            action: AssertContainsActionInfo
+    ) -> tuple[list, list]:
         screen_info: ScreenInfo = await self._get_screen_info(ctx, parse_element=True)
-        if action.keyword in str(screen_info.screen_elements):
-            logger.info(f'Screen contains keyword "{action.keyword}"')
+        elements_str = str(screen_info.screen_elements)
+        contains, not_contains = [], []
+        for keyword in action.keywords:
+            if keyword in elements_str:
+                contains.append(keyword)
+            else:
+                not_contains.append(keyword)
+        return contains, not_contains
+
+    @tool(delay=0)
+    async def assert_screen_contains(
+            self,
+            ctx: RunContext[AgentDeps],
+            action: AssertContainsActionInfo
+    ) -> ToolResult:
+        """
+        检查屏幕中是否出现或包含指定的多个关键词内容，如果是则 is_success=True, 否则 is_success=False
+        """
+        contains, not_contains = await self.get_screen_contains(ctx, action)
+        if len(not_contains) == 0:
             return ToolResult.success()
-        logger.warning(f'Screen not contains keyword "{action.keyword}"')
+        logger.warning(f'Screen does not contain expected keywords "{not_contains}"')
+        return ToolResult.failed()
+
+    @tool(delay=0)
+    async def assert_screen_not_contains(
+            self,
+            ctx: RunContext[AgentDeps],
+            action: AssertContainsActionInfo
+    ) -> ToolResult:
+        """
+        检查屏幕中是否不出现或不包含指定的多个关键词内容，如果是则 is_success=True, 否则 is_success=False
+        """
+        contains, not_contains = await self.get_screen_contains(ctx, action)
+        if len(contains) == 0:
+            return ToolResult.success()
+        logger.warning(f'Screen unexpectedly contains keywords:"{contains}"')
         return ToolResult.failed()
 
 
@@ -228,7 +260,7 @@ class WebAgentTool(AgentTool):
         """
         使用设备打开URL {action.url}
         """
-        await ctx.deps.device.page.goto(action.url, wait_until='load')
+        await ctx.deps.device.page.goto(action.url, wait_until='networkidle')
         await self._get_screen_info(ctx, parse_element=False)
         return ToolResult.success()
 
