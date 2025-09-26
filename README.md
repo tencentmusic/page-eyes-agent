@@ -2,10 +2,16 @@
 
 ![](https://img.shields.io/badge/build-passing-brightgreen)
 ![](https://img.shields.io/badge/python-12-blue?logo=python)
+<a href="https://github.com/tencentmusic/page-eyes-agent/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-blue?labelColor=d4eaf7" alt="License">
+</a>
+<a href="./CHANGELOG.md">
+    <img alt="Version" src="https://img.shields.io/badge/version-0.2.6-blue?labelColor=d4eaf7">
+</a>
 
 ---
 
-**中文文档**: [PageEyes Agent](https://tencentmusic.github.io/page-eyes-agent/)
+**Documentation**: [PageEyes Agent](https://tencentmusic.github.io/page-eyes-agent/)
 
 ---
 

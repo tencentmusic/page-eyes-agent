@@ -1,6 +1,11 @@
-site_name: page-eyes-agent
-site_description: gui-agent项目
-site_url: https://xxxx.com
+site_name: PageEyes Agent
+site_description: 一个轻量级 UI Agent，通过自然语言指令驱动，无需编写脚本既可实现Web、Android平台的UI自动化任务
+site_url: https://tencentmusic.github.io/page-eyes-agent/
+
+repo_name: page-eyes-agent
+repo_url: https://github.com/tencentmusic/page-eyes-agent
+
+copyright: Copyright (c) 2025 Tencent Music Entertainment Group
 
 theme:
   name: material
@@ -19,13 +24,6 @@ theme:
     - search.share
 
   palette:
-    # 夜间模式
-    - scheme: slate
-      primary: black
-      accent: lime
-      toggle:
-        icon: material/brightness-4
-        name: 切换为日间模式
     # 日间模式
     - scheme: default
       primary: blue
@@ -33,10 +31,19 @@ theme:
       toggle:
         icon: material/brightness-7
         name: 切换为夜间模式
+    # 夜间模式
+    - scheme: slate
+      primary: black
+      accent: lime
+      toggle:
+        icon: material/brightness-4
+        name: 切换为日间模式
 
 extra_css:
   - stylesheets/extra.css
 
+extra:
+  generator: false
 
 markdown_extensions:
   - admonition

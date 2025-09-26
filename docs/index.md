@@ -11,12 +11,17 @@ hide:
 ### 轻量级 UI 自动化 Agent  
 *基于自然语言指令驱动的跨平台 UI 自动化解决方案*
 
-[![PyPI version](https://img.shields.io/pypi/v/page-eyes)](https://pypi.org/project/page-eyes/) 
-[![License](https://img.shields.io/github/license/tencentmusic/page-eyes-agent)](https://github.com/tencentmusic/page-eyes-agent/blob/master/LICENSE)
-[![CI](https://img.shields.io/github/actions/workflow/status/tencentmusic/page-eyes-agent/ci.yml)](https://github.com/tencentmusic/page-eyes-agent/actions)
-
+![](https://img.shields.io/badge/build-passing-brightgreen)
+![](https://img.shields.io/badge/python-12-blue?logo=python)
+<a href="https://github.com/tencentmusic/page-eyes-agent/blob/master/LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-blue?labelColor=d4eaf7" alt="License">
+</a>
+<a href="./CHANGELOG.md">
+    <img alt="Version" src="https://img.shields.io/badge/version-0.2.6-blue?labelColor=d4eaf7">
+</a>
 
 </div>
+
 ---
 ## 简介
 
