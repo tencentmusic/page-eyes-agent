@@ -193,7 +193,7 @@ class AgentTool(ABC):
                 not_contains.append(keyword)
         return contains, not_contains
 
-    @tool(delay=0)
+    @tool(delay=2)
     async def assert_screen_contains(
             self,
             ctx: RunContext[AgentDeps],
@@ -208,7 +208,7 @@ class AgentTool(ABC):
         logger.warning(f'Screen does not contain expected keywords "{not_contains}"')
         return ToolResult.failed()
 
-    @tool(delay=0)
+    @tool(delay=2)
     async def assert_screen_not_contains(
             self,
             ctx: RunContext[AgentDeps],

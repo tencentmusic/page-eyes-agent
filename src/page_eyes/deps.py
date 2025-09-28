@@ -107,7 +107,7 @@ class WaitActionInfo(StepActionInfo):
 
 
 class AssertContainsActionInfo(StepActionInfo):
-    keyword: str
+    keywords: list[str]
 
 
 class ToolResult(BaseModel, Generic[T]):
