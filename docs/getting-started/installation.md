@@ -63,7 +63,10 @@ AGENT_OMNI_BASE_URL=http://host:port
 ```
 
 #### 方法 2：使用 Docker 完整部署
-`推荐`使用支持 CUDA 的 GPU 设备来部署, 显存10G既可, 当然您也可以使用 CPU 设备来部署，但单图解析可能需要20+s，而GPU设备在1~2s内
+
+!!! tip
+    推荐使用支持 CUDA 的 GPU 设备来部署, 显存10G既可, 当然您也可以使用 CPU 设备来部署，但单图解析可能需要20+s，而GPU设备在1~2s内
+
 
 1. 拉取镜像并部署服务 
 ```bash
@@ -76,12 +79,14 @@ docker run -d \
   -e COS_BUCKET=xxx \
   lighthouseac/omniparser:latest
 ```
-> COS_SECRET_ID: 腾讯云COS服务的Secret ID  
-> COS_SECRET_KEY: 腾讯云COS服务的Secret Key   
-> COS_ENDPOINT: 腾讯云COS服务的 endpoint  
-> COS_BUCKET: 腾讯云COS服务的 bucket
+```
+COS_SECRET_ID: 腾讯云COS服务的Secret ID  
+COS_SECRET_KEY: 腾讯云COS服务的Secret Key   
+COS_ENDPOINT: 腾讯云COS服务的 endpoint  
+COS_BUCKET: 腾讯云COS服务的 bucket
+```
 
-如您没有申请 腾讯云COS 服务，也可参考第4步快速搭建一个开源的对象存储服务，然后执行下面的命令：
+如您没有申请 腾讯云COS 服务，也可参考下方第4步快速搭建一个开源的对象存储服务，然后再执行以下命令：
 
 ```bash
 docker run -d \
@@ -94,15 +99,6 @@ docker run -d \
   -e MINIO_SECURE=false \
   lighthouseac/omniparser:latest
 ```
-
-
-
-#### 方法 3：从 Hugging Face 部署
-
-1. 访问 [OmniParser V2 模型页面](https://huggingface.co/microsoft/OmniParser-v2.0)
-2. 按照说明下载模型并部署服务
-3. 确保服务在 `http://localhost:8000` 或其他可访问的地址上运行
-4. 设置环境变量 `AGENT_OMNI_BASE_URL` 为服务地址
 
 
 ### 3. Android 调试桥 (ADB)（仅移动端需要）
@@ -238,13 +234,7 @@ AGENT_SIMULATE_DEVICE="Desktop Chrome"
 ```bash
 # --- OmniParser 服务配置 ---
 # OmniParser 服务基础 URL (如果使用自部署服务，需要设置)
-# 默认值: http://21.6.91.201:8000
 AGENT_OMNI_BASE_URL="http://your.omniparser.service:8000"
-
-# OmniParser 服务 API Key
-# 如果使用 PageEyes Agent 官方服务或官方 Docker 镜像，使用以下值:
-AGENT_OMNI_KEY="test-UfcWMpXW"
-# 如果使用从 Hugging Face 自行部署的 OmniParser 服务，无需设置此项 Key
 
 # --- 大模型服务配置 ---
 # 大模型服务基础 URL (例如 LiteLLM 代理地址或云服务商提供的地址)
@@ -256,7 +246,7 @@ OPENAI_API_KEY="your_llm_api_key_here"
 
 ### 3. 存储与调试配置
 
-这些配置用于测试报告存储和调试目的：
+这些配置用于测试报告存储和调试目的，更多参考项目根目录下的 `.env.example` 文件
 
 ```bash
 # --- 报告存储配置 ---
