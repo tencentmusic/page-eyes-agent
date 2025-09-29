@@ -62,7 +62,8 @@ playwright install chromium
 AGENT_OMNI_BASE_URL=http://host:port
 ```
 
-#### 方法 2：使用 Docker 完整部署，支持 GPU（推荐）或 CPU 设备
+#### 方法 2：使用 Docker 完整部署
+`推荐`使用支持 CUDA 的 GPU 设备来部署, 显存10G既可, 当然您也可以使用 CPU 设备来部署，但单图解析可能需要20+s，而GPU设备在1~2s内
 
 1. 拉取镜像并部署服务 
 ```bash
