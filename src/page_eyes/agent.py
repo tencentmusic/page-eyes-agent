@@ -91,7 +91,7 @@ class UiAgent:
             result = agent_run.result
 
         logger.info(result.output)
-        logger.info(f"steps: {self.deps.context.steps}")
+        logger.debug(f"steps: {self.deps.context.steps}")
 
         is_success_output = all([step.is_success for step in self.deps.context.steps.values()])
         if is_success_output != result.output.is_success:

@@ -52,14 +52,15 @@ class ToolHandler:
         """工具的前置处理"""
         if not all([self.ctx, self.step_action]):
             return
-        logger.info(f'🕹 {self.step_action}')
+        logger.info(f'▶️ {self.step_action}')
         if self.ctx.deps.settings.debug and isinstance(self.step_action, LocationActionInfo):
             if isinstance(self.ctx.deps.device, WebDevice):
                 await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_action.element_bbox)
-
+        info = self.step_action.model_dump(include={'step', 'description', 'action'})
+        params = self.step_action.model_dump(exclude={'step', 'description', 'action'})
         self.step_info = self.ctx.deps.context.steps.setdefault(
             self.step_action.step,
-            StepInfo.model_validate(self.step_action)
+            StepInfo(**info, params=params)
         )
 
     async def post_handle(self, tool_result: ToolResult):
@@ -69,7 +70,12 @@ class ToolHandler:
         self.step_info.image_url = self.context.screen_info.image_url
         self.step_info.screen_elements = self.context.screen_info.screen_elements
         self.step_info.is_success = tool_result.is_success
-        self.context.screen_info.reset()  # 步骤结束后，重置当前屏幕信息
+        if self.context:
+            self.context.screen_info = ScreenInfo()  # 步骤结束后，重置当前屏幕信息
+        logger.info(f'{"✅" if self.step_info.is_success else "❌"} '
+                    f'step={self.step_action.step} '
+                    f'action={self.step_action.action} '
+                    f'is_success={self.step_info.is_success}')
 
 
 def tool(f=None, *, delay=1):
@@ -146,15 +152,15 @@ class AgentTool(ABC):
             parsed_data = await self._parse_element(image_buffer)
             image_url = parsed_data.get('labeled_image_url') or ''
             parsed_content_list = parsed_data.get('parsed_content_list') or []
-            logger.info(f'👁‍🗨 Get screen info：{image_url}')
+            logger.info(f'👁‍🗨 Get screen element：{image_url}')
         else:
             image_url = await self._upload_cos(image_buffer, suffix=Path(image_buffer.name).suffix)
             parsed_content_list = []
+            logger.info(f'👁‍🗨 Get screen url：{image_url}')
 
-        screen_info = ScreenInfo(image_url=image_url, screen_elements=parsed_content_list)
         # 将当前屏幕信息记录到上下文
-        ctx.deps.context.screen_info = screen_info.model_copy(deep=True)
-        return screen_info
+        ctx.deps.context.screen_info = ScreenInfo(image_url=image_url, screen_elements=parsed_content_list)
+        return ctx.deps.context.screen_info
 
     @abstractmethod
     async def open_url(self, ctx: RunContext[AgentDeps], action: OpenUrlActionInfo) -> ToolResult:

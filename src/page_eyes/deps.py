@@ -35,11 +35,10 @@ class StepInfo(BaseModel):
     step: int
     description: str = ''
     action: str = ''
-    element_bbox: list[float] = Field(default_factory=list)
-    coordinates: list[tuple[int, int]] = Field(default_factory=list)  # 考虑多个坐标点的场景 [(x1, y1), (x2, y2), ...]
+    params: dict = Field(default_factory=dict)
     image_url: str = ''
-    is_success: bool = True
     screen_elements: list[dict] = Field(default_factory=list)
+    is_success: bool = True
 
 
 @dataclass

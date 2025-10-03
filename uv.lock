@@ -891,7 +891,7 @@ wheels = [
 
 [[package]]
 name = "page-eyes"
-version = "0.2.5"
+version = "0.2.7"
 source = { editable = "." }
 dependencies = [
     { name = "adbutils" },
