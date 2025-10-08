@@ -74,7 +74,6 @@ class ToolHandler:
             self.context.screen_info = ScreenInfo()  # 步骤结束后，重置当前屏幕信息
         logger.info(f'{"✅" if self.step_info.is_success else "❌"} '
                     f'step={self.step_action.step} '
-                    f'action={self.step_action.action} '
                     f'is_success={self.step_info.is_success}')
 
 
