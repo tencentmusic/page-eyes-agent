@@ -58,6 +58,7 @@ class TinyImg:
             logger.error(f'图片转换失败：错误文件 {error_file}')
             raise e
 
+
 # 策略接口
 class StorageStrategy(ABC):
     @abstractmethod
@@ -73,6 +74,7 @@ class StorageStrategy(ABC):
         file.seek(0)
         m = hashlib.md5()
         m.update(file.read())
+        file.seek(0)
         return m.hexdigest()
 
 
@@ -104,7 +106,8 @@ class CosStrategy(StorageStrategy):
 # MinIO策略实现
 class MinioStrategy(StorageStrategy):
     def __init__(self, access_key, secret_key, endpoint, bucket, region=None, secure=False):
-        self._client = Minio(access_key=access_key, secret_key=secret_key, region=region, endpoint=endpoint, secure=secure)
+        self._client = Minio(access_key=access_key, secret_key=secret_key, region=region, endpoint=endpoint,
+                             secure=secure)
         self.endpoint = endpoint
         self.bucket = bucket
         self.protocol = 'https' if secure else 'http'

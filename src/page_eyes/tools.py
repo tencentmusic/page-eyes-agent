@@ -13,7 +13,7 @@ from typing import IO, Optional, cast
 
 from httpx import AsyncClient
 from loguru import logger
-from pydantic_ai import ModelRetry, RunContext
+from pydantic_ai import ModelRetry, RunContext, Agent
 from playwright.async_api import TimeoutError
 
 from .config import global_settings
@@ -473,4 +473,31 @@ class AndroidAgentTool(AgentTool):
             x2, y2 = end_coordinate
             logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
             ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+        return ToolResult.success()
+
+    @tool
+    async def start_app(
+            self,
+            ctx: RunContext[AgentDeps[AndroidDevice]],
+            action: StepActionInfo,
+    ):
+        """
+        在设备中打开或启动指定的应用(APP)
+        """
+        packages: list[str] = ctx.deps.device.adb_device.list_packages(filter_list=['-e'])
+        sub_agent = Agent(
+            ctx.model,
+            output_type=str,
+            system_prompt='你是一个移动端应用助手，负责根据用户输入的指令从提供的应用包名列表找出用户指令对应的包名，并仅返回包名，如果都不匹配则返回空字符串'
+        )
+        prompt = (f'用户指令：{action.description}\n'
+                  f'应用包名列表：{packages}')
+        result = await sub_agent.run(prompt, output_type=str)
+        package_name = result.output
+        if not package_name:
+            return ToolResult.failed(description='在该设备中未找到对应的应用')
+        logger.info(f'Find App package name：{package_name}')
+        ctx.deps.device.adb_device.app_start(package_name)
+        await asyncio.sleep(2)
+        await self._get_screen_info(ctx, parse_element=False)
         return ToolResult.success()
