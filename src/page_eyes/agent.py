@@ -25,12 +25,10 @@ from .util.platform import Platform
 
 class OutputType(BaseModel):
     """
-    执行指令完成后的需判断整个任务是否成功，并总结各个步骤执行结果，结果格式如下：
+    执行指令完成后判断整个任务是否成功，结果格式如下：
     - is_success: 任务否成功
-    - summary: 总结各个步骤执行结果
     """
     is_success: bool
-    # summary: str  # 加上步骤总结会增加结果输出耗时 3~5s
 
 
 @dataclass

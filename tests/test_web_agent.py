@@ -46,3 +46,15 @@ async def test_web_pc_04(web_agent_pc):
         3. 检查屏幕中出现"编曲"、"作词"、"制作中"
         """
     )
+
+
+async def test_web_mobile_01(web_agent_mobile):
+    """TODO 验证步骤"""
+    await web_agent_mobile.run(
+        """
+        1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        2. 点击 "查找" 按钮
+        3. 等待1s
+        4. 在搜索输入框中输入"小美满"
+        """
+    )
