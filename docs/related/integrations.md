@@ -27,32 +27,27 @@ from page_eyes.agent import WebAgent
 async def web_agent():
     agent = await WebAgent.create(simulate_device='Desktop Chrome', debug=True)
     yield agent
-    # 测试完成后清理资源
-    await agent.deps.device.context.close()
-    await agent.deps.device.playwright.stop()
+    
 
 @pytest.mark.asyncio
 async def test_login_flow(web_agent):
-    report = await web_agent.run(
+    await web_agent.run(
         ('1.打开 url "https://your-application-url.com"\n'
          '2.点击"登录"按钮\n'
          '3.在用户名输入框中输入"test@example.com"\n'
          '4.在密码输入框中输入"password123"\n'
          '5.点击"提交"按钮\n')
     )
-    
-    assert report['is_success'] == True
 
 @pytest.mark.asyncio
 async def test_search_functionality(web_agent):
-    report = await web_agent.run(
+    await web_agent.run(
         ('1.打开 url "https://your-application-url.com"\n'
          '2.在搜索框中输入"测试产品"\n'
          '3.点击"搜索"按钮\n'
-         '4.断言页面包含"搜索结果"文本\n')
+         '4.检查页面包含"搜索结果"文本\n')
     )
-    
-    assert report['is_success'] == True
+
 ```
 
 3. 运行测试：
