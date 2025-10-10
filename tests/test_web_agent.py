@@ -4,6 +4,7 @@
 # @Email : aidenmo@tencent.com
 # @Time : 2025/9/28 16:35
 import pytest
+
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 
 
@@ -49,12 +50,20 @@ async def test_web_pc_04(web_agent_pc):
 
 
 async def test_web_mobile_01(web_agent_mobile):
-    """TODO 验证步骤"""
     await web_agent_mobile.run(
         """
         1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
         2. 点击 "查找" 按钮
         3. 等待1s
         4. 在搜索输入框中输入"小美满"
+        """
+    )
+
+
+async def test_web_mobile_02(web_agent_mobile):
+    await web_agent_mobile.run(
+        """
+        1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search/"
+        2. 在搜索输入框中输入"小美满"
         """
     )
