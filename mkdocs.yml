@@ -10,7 +10,8 @@ copyright: Copyright (c) 2025 Tencent Music Entertainment Group
 theme:
   name: material
   language: zh
-  logo: logo.svg
+  logo: img/logo.svg
+  favicon: img/favicon.png
 
   # 左侧导航
   features:
