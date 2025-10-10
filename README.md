@@ -14,8 +14,9 @@
 **Documentation**: [PageEyes Agent](https://tencentmusic.github.io/page-eyes-agent/)
 
 ---
-<p style="text-align:center">
-<img src="./docs/img/logo-ai.png" height="100" alt="" />
+
+<p style="display: flex; justify-content: center">
+    <img src="./docs/img/logo-ai.png" height="100" alt="" />
 </p>
 
 PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydanticai) 框架开发的一个轻量级 UI Agent，
@@ -27,10 +28,9 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 3. 支持多种大模型接入，包括DeepSeek、OpenAI、千问等，默认使用 DeepSeek V3 模型，后续会支持更多大模型接入
 4. 可通过自然语言进行断言，并生成详细的执行日志和报告，方便测试人员查看执行过程和结果
 
-<p style="text-align:center">
+<p style="display: flex; justify-content: center">
 <img title="" src="https://cdn-y.tencentmusic.com/1e1e171e6dd06b6808489acd381db735.png" alt="" width="610" data-align="center">
 </p>
-***
 
 ## 安装
 
