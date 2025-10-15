@@ -198,7 +198,7 @@ class AgentTool(ABC):
                 not_contains.append(keyword)
         return contains, not_contains
 
-    @tool(delay=2)
+    @tool
     async def assert_screen_contains(
             self,
             ctx: RunContext[AgentDeps],
@@ -207,6 +207,7 @@ class AgentTool(ABC):
         """
         检查屏幕中是否出现或包含指定的多个关键词内容，如果是则 is_success=True, 否则 is_success=False
         """
+        await asyncio.sleep(2)
         contains, not_contains = await self.get_screen_contains(ctx, action)
         if len(not_contains) == 0:
             return ToolResult.success()
@@ -222,6 +223,7 @@ class AgentTool(ABC):
         """
         检查屏幕中是否不出现或不包含指定的多个关键词内容，如果是则 is_success=True, 否则 is_success=False
         """
+        await asyncio.sleep(2)
         contains, not_contains = await self.get_screen_contains(ctx, action)
         if len(contains) == 0:
             return ToolResult.success()
@@ -307,11 +309,11 @@ class WebAgentTool(AgentTool):
             steps: int = 1000
     ):
         if action.to == 'top':
-            x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.2 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.7 * height, 0.5 * width, 0.1 * height
         elif action.to == 'left':
             x1, y1, x2, y2 = 0.8 * width, 0.5 * height, 0.2 * width, 0.5 * height
         elif action.to == 'bottom':
-            x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.8 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.3 * height, 0.5 * width, 0.9 * height
         elif action.to == 'right':
             x1, y1, x2, y2 = 0.2 * width, 0.5 * height, 0.8 * width, 0.5 * height
         else:
@@ -441,11 +443,11 @@ class AndroidAgentTool(AgentTool):
         logger.info(f'swipe to {action.to}')
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         if action.to == 'top':
-            x1, y1, x2, y2 = 0.5 * width, 0.8 * height, 0.5 * width, 0.1 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.7 * height, 0.5 * width, 0.1 * height
         elif action.to == 'left':
             x1, y1, x2, y2 = 0.9 * width, 0.5 * height, 0.1 * width, 0.5 * height
         elif action.to == 'bottom':
-            x1, y1, x2, y2 = 0.5 * width, 0.2 * height, 0.5 * width, 0.9 * height
+            x1, y1, x2, y2 = 0.5 * width, 0.3 * height, 0.5 * width, 0.9 * height
         elif action.to == 'right':
             x1, y1, x2, y2 = 0.1 * width, 0.5 * height, 0.9 * width, 0.5 * height
         else:
