@@ -16,8 +16,8 @@ hide:
 <a href="https://github.com/tencentmusic/page-eyes-agent/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-blue?labelColor=d4eaf7" alt="License">
 </a>
-<a href="./CHANGELOG.md">
-    <img alt="Version" src="https://img.shields.io/badge/version-0.2.6-blue?labelColor=d4eaf7">
+<a href="https://pypi.org/project/page-eyes/">
+    <img alt="Version" src="https://img.shields.io/pypi/v/page-eyes.svg?labelColor=d4eaf7&label=version&color=blue">
 </a>
 
 </div>
