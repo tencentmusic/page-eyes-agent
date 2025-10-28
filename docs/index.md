@@ -19,7 +19,8 @@ hide:
 <a href="https://pypi.org/project/page-eyes/">
     <img alt="Version" src="https://img.shields.io/pypi/v/page-eyes.svg?labelColor=d4eaf7&label=version&color=blue">
 </a>
-
+![](https://img.shields.io/github/stars/tencentmusic/page-eyes-agent)
+![](https://img.shields.io/github/forks/tencentmusic/page-eyes-agent)
 </div>
 
 ---
