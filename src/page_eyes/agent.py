@@ -55,7 +55,7 @@ class UiAgent:
         content = template.read_text().replace('{reportData}', report_data)
 
         output_path = report_dir / f'report_{datetime.now():%Y%m%d%H%M%S}.html'
-        output_path.write_text(content)
+        output_path.write_text(content, encoding='utf-8')
         logger.info(f"报告：{output_path.resolve().as_uri()}")
         return output_path
 
