@@ -52,7 +52,7 @@ class UiAgent:
         report_dir.mkdir(parents=True, exist_ok=True)
 
         template = Path(__file__).parent / "report_template.html"
-        content = template.read_text().replace('{reportData}', report_data)
+        content = template.read_text(encoding='utf-8').replace('{reportData}', report_data)
 
         output_path = report_dir / f'report_{datetime.now():%Y%m%d%H%M%S}.html'
         output_path.write_text(content, encoding='utf-8')
