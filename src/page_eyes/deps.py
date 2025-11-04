@@ -5,13 +5,17 @@
 # @Time : 2025/5/23 18:30
 from collections import OrderedDict
 from dataclasses import dataclass, field
-from typing import Optional, TypeVar, Literal, Generic
+from typing import Optional, TypeVar, Literal, Generic, TypeAlias
 
 from pydantic import BaseModel, Field, confloat, conlist, ConfigDict
 
 from .config import Settings
 
 T = TypeVar('T')
+DeviceT = TypeVar('DeviceT')
+ToolT = TypeVar('ToolT')
+
+SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str
 
 
 class DeviceSize(BaseModel):
@@ -32,31 +36,35 @@ class ScreenInfo(BaseModel):
 
 class StepInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    step: int
+    step: int = 0
     description: str = ''
     action: str = ''
     params: dict = Field(default_factory=dict)
     image_url: str = ''
+    planning: Optional['PlanningStep'] = None
     screen_elements: list[dict] = Field(default_factory=list)
     is_success: bool = True
 
 
 @dataclass
-class ToolContext:
+class AgentContext:
     """
-    工具额外的上下文信息
+    Agent 额外的上下文信息
     steps: 所有步骤信息
+    current_step: 当前步骤信息
     screen_info: 当前屏幕信息
     """
     steps: OrderedDict[int, StepInfo] = field(default_factory=OrderedDict)
+    current_step: StepInfo = field(default_factory=StepInfo)
     screen_info: ScreenInfo = field(default_factory=ScreenInfo)
 
 
 @dataclass
-class AgentDeps(Generic[T]):
-    device: T
+class AgentDeps(Generic[DeviceT, ToolT]):
     settings: Settings
-    context: ToolContext = field(default_factory=ToolContext)
+    device: DeviceT
+    tool: ToolT
+    context: AgentContext = field(default_factory=AgentContext)
 
 
 class ActionInfo(BaseModel):
@@ -121,3 +129,23 @@ class ToolResult(BaseModel, Generic[T]):
     @classmethod
     def failed(cls, output: T = None, description: str = None):
         return cls(is_success=False, output=output, description=description)
+
+
+class PlanningStep(BaseModel):
+    instruction: str = Field(description='步骤指令，用一句话描述该步骤要做什么')
+    need_get_screen_info: bool = Field(description='是否需要获取界面元素信息')
+
+
+class PlanningOutputType(BaseModel):
+    """
+    用户指令分解后，规划出的指令序列
+    """
+    steps: list[PlanningStep] = Field(description='步骤序列')
+
+
+class StepOutputType(BaseModel):
+    """
+    执行指令完成后判断任务是否成功，结果格式如下：
+    - is_success: 任务否成功
+    """
+    is_success: bool

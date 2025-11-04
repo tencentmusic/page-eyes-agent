@@ -9,8 +9,7 @@ import sys
 import pytest
 import pytest_asyncio
 from loguru import logger
-
-from src.page_eyes.agent import WebAgent, MobileAgent
+from src.page_eyes.agent import WebAgent, MobileAgent, PlanningAgent
 from src.page_eyes.util.platform import Platform
 
 logger.remove()
@@ -19,6 +18,11 @@ logger.add(sys.stdout, level="INFO")
 debug = True
 
 serial = ''
+
+
+@pytest.fixture(scope="session")
+def planning_agent():
+    return PlanningAgent()
 
 
 @pytest_asyncio.fixture(scope="session")
