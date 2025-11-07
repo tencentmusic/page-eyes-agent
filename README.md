@@ -85,18 +85,25 @@ async def main():
     # 移动端
     # ui_agent = await MobileAgent.create(serial='android-udid')
 
-    report = await ui_agent.run(
-        ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
-         '2.点击"查找icon"\n'
-         '3.在搜索输入框中输入"小美满"\n'
-         '4.点击"小美满> "\n'
-         '5.点击"日榜"'
-         ))
+    report = await ui_agent.run("""
+            1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+            2.点击"查找icon"
+            3.在搜索输入框中输入"小美满"
+            4.点击"小美满> "
+            5.点击"日榜"
+            """)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+## 贡献指南
+1. 检查现有 issues 或提交新 issue 来讨论功能想法或缺陷
+2. 在GitHub上Fork[代码仓库](https://github.com/tencentmusic/page-eyes-agent)，基于主分支创建修改分支（或从其创建新分支）
+3. 编写测试用例：通过测试验证缺陷已修复或新功能符合预期
+4. 添加更新日志：按规范提交[更新日志](./CHANGELOG.md)
+5. 完善文档：优化文档（增强细节、提升可读性等）
 
 ## 如有需要，加入我们的交流群
 ![](./docs/about/contact_qr.png)
