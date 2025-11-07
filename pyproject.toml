@@ -72,4 +72,10 @@ url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
 name = "tencent_pypi"
 publish-url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+]
+
 

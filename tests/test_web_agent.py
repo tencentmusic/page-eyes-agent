@@ -124,3 +124,15 @@ async def test_web_mobile_02(web_agent_mobile):
         2. 在搜索输入框中输入"小美满"
         """
     )
+
+
+async def test_web_mobile_03(web_agent_mobile):
+    await web_agent_mobile.run(
+        """
+        1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        2. 点击"日榜"
+        3. 点击"搜索"按钮
+        4. 在搜索输入框中输入"任素汐"
+        5. 检查页面出现"亲爱的你啊"
+        """
+    )

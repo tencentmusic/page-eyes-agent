@@ -19,9 +19,9 @@ PLANNING_SYSTEM_PROMPT = """
 - 所有操作必须按照指令的顺序进行规划 
 
 ## 示例
-- 点击"close"关闭弹窗，若弹窗不存在则跳过 -> {'instruction': '点击"close"关闭弹窗，若"close"元素不存在则跳过', 'need_get_screen_info': True}
-- 向上滑动3次 -> {'instruction': '向上滑动 3 次', 'need_get_screen_info': False}
-- 打开QQ音乐APP -> {'instruction': '打开 "QQ音乐" APP', 'need_get_screen_info': False}
+- 点击"close"关闭弹窗，若弹窗不存在则跳过 -> {'instruction': '点击"close"关闭弹窗，若"close"元素不存在则跳过'}
+- 向上滑动3次 -> {'instruction': '向上滑动 3 次'}
+- 打开QQ音乐APP -> {'instruction': '打开 "QQ音乐" APP'}
 """
 
 SYSTEM_PROMPT = """
