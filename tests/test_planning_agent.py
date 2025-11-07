@@ -47,3 +47,15 @@ async def test_02(planning_agent):
     )
     logger.info(result.output)
     logger.info(result.output.model_dump().get('steps'))
+
+
+async def test_03(planning_agent):
+    """
+    """
+    result = await planning_agent.run(
+        """
+        上滑多次，直到出现"查看浪潮评委会"元素
+        """
+    )
+    logger.info(result.output)
+    logger.info(result.output.model_dump().get('steps'))

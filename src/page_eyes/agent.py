@@ -10,13 +10,14 @@ from typing import Optional, Union
 
 from loguru import logger
 from pydantic import TypeAdapter
-from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext
+from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior
 from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.usage import Usage
 
 from .config import global_settings
-from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, StepActionInfo
+from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
+    MarkFailedParams
 from .device import AndroidDevice, WebDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType
@@ -36,19 +37,11 @@ class PlanningAgent:
         return await agent.run(prompt.strip(), deps=self.deps)
 
 
-def extra_system_prompt(ctx: RunContext[AgentDepsType]):
-    """动态添加额外的系统提示词"""
-    context = ctx.deps.context
-    step = context.current_step.step
-    planning = context.current_step.planning
-    return f'当前步骤序号是：{step}，是否需要获取屏幕元素信息：{planning.need_get_screen_info}'
-
-
 @dataclass
 class UiAgent:
     model: str
     deps: AgentDepsType
-    agent: Agent
+    agent: Agent[AgentDepsType]
 
     @classmethod
     async def create(cls, *args, **kwargs):
@@ -72,58 +65,87 @@ class UiAgent:
         logger.info(f"报告：{output_path.resolve().as_uri()}")
         return output_path
 
-    @staticmethod
-    def format_logger_node(node):
+    def handle_graph_node(self, node):
         """Format the logger node based on the given node type."""
         if isinstance(node, UserPromptNode):
-            logger.info(f"🤖Agent start user task: {repr(node.user_prompt)}")
+            logger.log('DETAIL', f"🤖Agent start user task: {repr(node.user_prompt)}")
 
         elif isinstance(node, ModelRequestNode):
             for part in node.request.parts:
                 if isinstance(part, ToolReturnPart):
-                    logger.info(f"🤖Agent tool feedback: {part.tool_name} -> {part.content}")
+                    logger.log('DETAIL', f"🤖Agent tool result: {part.tool_name} -> {part.content}")
 
         elif isinstance(node, CallToolsNode):
-            for part in node.model_response.parts:
-                if isinstance(part, ToolCallPart):
-                    logger.info(f"🤖Agent tool call: {part.tool_name}({part.args.replace('{}', '')})")
+            parts = node.model_response.parts
+            tool_parts = [part for part in parts if isinstance(part, ToolCallPart)]
+            self.deps.context.current_step.parallel_tool_calls = False
+            self.deps.context.current_step.parallel_tool_calls = len(tool_parts) > 1
+            for part in tool_parts:
+                logger.log('DETAIL', f"🤖Agent tool call: {part.tool_name}, args: {part.args}")
+
+    async def _sub_agent_run(self, planning, usage) -> AgentRunResult:
+        async with self.agent.iter(user_prompt=planning.instruction, deps=self.deps, usage=usage) as agent_run:
+            async for node in agent_run:
+                self.handle_graph_node(node)
+            return agent_run.result
 
     async def run(self, prompt: str, system_prompt: Optional[str] = None, report_dir: str = "./report"):
         # TODO: 给用户添加额外的自定义系统提示词，某些场景需要，如：如果出现位置、权限、用户协议等弹窗，点击同意。如果出现登录页面，关闭它。
+        logger.info(f"🤖Agent start planning...")
+
         planning_agent = PlanningAgent(model=self.model, deps=self.deps)
         planning_result = await planning_agent.run(prompt)
         planning_steps = planning_result.output.steps
 
-        logger.info(f"🤖Agent planning result: {planning_result.output}")
+        planning_steps = [*planning_steps, PlanningStep(instruction='结束任务')]
+        logger.info(f"🤖Agent planning finished.")
+        for index, step in enumerate(planning_steps, 1):
+            logger.info(f'◽️step{index}. {step.instruction}')
 
-        self.agent.system_prompt(extra_system_prompt)
         if system_prompt:
             self.agent.system_prompt(lambda: system_prompt)
 
-        for step, planning in enumerate(planning_steps, start=1):
-            self.deps.context.current_step.step = step
-            self.deps.context.current_step.planning = planning
+        usage = planning_result.usage()
+        ctx = RunContext(deps=self.deps, model=self.agent.model, usage=Usage(), prompt=None)
 
-            async with self.agent.iter(
-                    user_prompt=planning.instruction,
-                    deps=self.deps,
-                    usage=planning_result.usage()) as agent_run:
-                async for node in agent_run:
-                    if self.deps.settings.log_graph_node:
-                        self.format_logger_node(node)
-                assert agent_run.result is not None, 'The graph run did not finish properly'
-        await self.deps.tool.tear_down(
-            RunContext(deps=self.deps, model=self.agent.model, usage=Usage(), prompt=None),
-            action=StepActionInfo(action='tear_down', description='任务完成', step=len(planning_steps) + 1)
-        )
+        logger.info(f"🤖Agent start executing steps...")
+        for step, planning in enumerate(planning_steps, start=1):
+            self.deps.context.add_step_info(StepInfo(step=step, planning=planning, description=planning.instruction))
+            logger.info('')
+            logger.info(f'▶️ step={step} {planning.instruction}')
+
+            if planning.instruction != '结束任务':
+                try:
+                    result = await self._sub_agent_run(planning, usage)
+                    usage = result.usage()
+                    logger.info(f"💬 {result.output}")
+                except UnexpectedModelBehavior as e:
+                    await self.deps.tool.mark_failed(ctx, MarkFailedParams(
+                        reason=str(e),
+                    ))
+                    logger.error(f'step={step} {planning.instruction}: {e}')
+
+                logger.info(f'{"✅" if self.deps.context.current_step.is_success else "❌"} '
+                            f'step={step} {planning.instruction}')
+            else:
+                await self.deps.tool.tear_down(ctx, params=ToolParams(action='tear_down', instruction='任务完成'))
+
+            # 步骤执行后如果没有截图则自动补上，比如滑动、等待
+            if not self.deps.context.current_step.image_url:
+                await self.deps.tool.get_screen(ctx, parse_element=False)
+
+            if not self.deps.context.current_step.is_success:
+                break
+
         logger.debug(f"steps: {self.deps.context.steps}")
+        logger.log('DETAIL', f"usage: {usage}")
 
         is_success_output = all([step.is_success for step in self.deps.context.steps.values()])
 
         report_data = {'is_success': is_success_output,
                        'device_size': self.deps.device.device_size,
                        'steps': self.deps.context.steps}
-        report_json = TypeAdapter(dict).dump_json(report_data).decode()
+        report_json = TypeAdapter(dict).dump_json(report_data).decode(encoding='utf-8')
         report_path = await self.create_report(report_json, report_dir)
 
         steps_output = [

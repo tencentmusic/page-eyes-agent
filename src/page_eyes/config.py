@@ -6,6 +6,7 @@
 from typing import Literal, Optional
 
 from dotenv import load_dotenv
+from loguru import logger
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -59,11 +60,11 @@ class Settings(BaseSettings):
     storage_client: StorageClient = Field(default=create_storage_client())
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
     debug: Optional[bool] = False
-    log_graph_node: Optional[bool] = False
 
     def copy_and_update(self, **kwargs):
         # TODO: 这里又会实例化一次 StorageClient，建议改成单例模式 @lancefayang
         validated_settings = self.model_validate(kwargs)
+        logger.level('DETAIL', no=20) if validated_settings.debug else logger.level('DETAIL', no=10)
         # 不对 storage_client 进行深拷贝，而是重用原来的实例
         update_dict = validated_settings.model_dump(exclude_none=True)
         if 'storage_client' not in update_dict:

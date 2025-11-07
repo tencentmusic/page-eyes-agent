@@ -18,11 +18,34 @@ const script = {
         box.style.height = (y2 - y1) * 100 + "%"
         return box
     },
-    // remove_highlight_element: () => document.querySelector("#option-el-box")?.remove(),
     remove_highlight_element: () => {
         const box = document.querySelector("#option-el-box");
         if (box) {
             box.remove();
+        }
+    },
+    add_highlight_position: ([x, y]) => {
+        let position = document.querySelector("#option-el-position")
+        if (!position) {
+            position = document.createElement("div")
+            position.id = "option-el-position"
+            position.style.position = "absolute"
+            position.style.zIndex = "1000"
+            position.style.height = "10px"
+            position.style.width = "10px"
+            position.style.background = "red"
+            position.style.borderRadius = "50%"
+            position.style.pointerEvents = "none"
+            document.body.appendChild(position)
+        }
+        position.style.left = `${x}px`
+        position.style.top = `${y}px`
+        return position
+    },
+    remove_highlight_position: () => {
+        const position = document.querySelector("#option-el-position");
+        if (position) {
+            position.remove();
         }
     },
     has_vertical_scrollbar: () => document.body.scrollHeight > window.innerHeight,

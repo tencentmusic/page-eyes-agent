@@ -41,8 +41,9 @@ class StepInfo(BaseModel):
     action: str = ''
     params: dict = Field(default_factory=dict)
     image_url: str = ''
-    planning: Optional['PlanningStep'] = None
+    planning: Optional['PlanningStep'] = Field(default=None, exclude=True)
     screen_elements: list[dict] = Field(default_factory=list)
+    parallel_tool_calls: bool = Field(default=False, exclude=True)
     is_success: bool = True
 
 
@@ -56,7 +57,21 @@ class AgentContext:
     """
     steps: OrderedDict[int, StepInfo] = field(default_factory=OrderedDict)
     current_step: StepInfo = field(default_factory=StepInfo)
-    screen_info: ScreenInfo = field(default_factory=ScreenInfo)
+
+    def set_step_failed(self, reason: str):
+        self.steps[self.current_step.step].is_success = False
+        self.steps[self.current_step.step].action = 'mark_failed'
+        self.steps[self.current_step.step].params = {'reason': reason}
+
+    def add_step_info(self, step_info: StepInfo):
+        self.current_step = self.steps.setdefault(step_info.step, step_info)
+        return self.current_step
+
+    def update_step_info(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self.current_step, key):
+                setattr(self.current_step, key, value)
+        return self.current_step
 
 
 @dataclass
@@ -67,73 +82,92 @@ class AgentDeps(Generic[DeviceT, ToolT]):
     context: AgentContext = field(default_factory=AgentContext)
 
 
-class ActionInfo(BaseModel):
-    action: str
-    description: str
+class ToolParams(BaseModel):
+    instruction: str = Field(description='用户指令，描述该步骤要做什么', exclude=True)
+    action: str = Field(description='要执行的动作，如 click、input、swipe 等, 是调用的工具名称')
 
 
-class StepActionInfo(ActionInfo):
-    step: int = Field(ge=1)
-
-    def __repr_args__(self):
-        return sorted(super().__repr_args__(), key=lambda item: {'step': 0}.get(item[0], 1))
+class OpenUrlToolParams(ToolParams):
+    url: str = Field(description='要打开的url网址')
 
 
-class OpenUrlActionInfo(StepActionInfo):
-    url: Optional[str] = None
+PositionType: TypeAlias = Literal['left', 'right', 'top', 'bottom']
 
 
-class LocationActionInfo(StepActionInfo):
-    element_bbox: conlist(confloat(ge=0.0, le=1.0), min_length=4, max_length=4)
+class LocationToolParams(ToolParams):
+    element_bbox: conlist(confloat(ge=0.0, le=1.0), min_length=4, max_length=4) = Field(description='要操作的元素 bbox')
 
-    def get_coordinate(self, device_size: DeviceSize) -> tuple[int, int]:
+    def get_coordinate(self,
+                       device_size: DeviceSize,
+                       position: Optional[PositionType] = None,
+                       offset: Optional[float] = None) -> tuple[int, int]:
         """计算坐标, 返回 (x, y)"""
         x1, y1, x2, y2 = self.element_bbox
         width, height = device_size.width, device_size.height
-        return int((x1 + x2) / 2 * width), int((y1 + y2) / 2 * height)
+        x, y = (x1 + x2) / 2, (y1 + y2) / 2
+        offset = 0.25 if offset is None else offset
+        if position == 'left':
+            x = x1 + (x2 - x1) * offset
+        elif position == 'right':
+            x = x2 - (x2 - x1) * offset
+        elif position == 'top':
+            y = y1 + (y2 - y1) * offset
+        elif position == 'bottom':
+            y = y2 - (y2 - y1) * offset
+
+        return int(x * width), int(y * height)
 
 
-class ClickActionInfo(LocationActionInfo):
-    pass
+class ClickToolParams(LocationToolParams):
+    """示例：
+    - 点击"确定"按钮 -> position=None, offset=None
+    - 点击"确定"按钮左侧 -> position='left', offset=None
+    - 点击"确定"按钮左侧1/2处 -> position='left', offset=0.5
+    """
+    position: Optional[PositionType] = Field(default=None, description='点击元素的相对位置')
+    offset: Optional[float] = Field(default=None, description='相对位置的偏移量')
 
 
-class InputActionInfo(LocationActionInfo):
-    text: str
+class InputToolParams(LocationToolParams):
+    text: str = Field(description='要输入的文本')
 
 
-class SwipeActionInfo(StepActionInfo):
-    to: Literal['left', 'right', 'top', 'bottom']
+class SwipeToolParams(ToolParams):
+    to: Literal['left', 'right', 'top', 'bottom'] = Field(description='滑动方向')
+    keywords: Optional[list[str]] = Field(description='要检查出现的关键词列表')
 
 
-class SwipeFromCoordinateActionInfo(StepActionInfo):
-    coordinates: conlist(item_type=tuple[int, int], min_length=2)
+class SwipeFromCoordinateToolParams(ToolParams):
+    coordinates: conlist(item_type=tuple[int, int], min_length=2) = Field(description='滑动起始坐标列表')
 
 
-class WaitActionInfo(StepActionInfo):
-    timeout: int
+class WaitToolParams(ToolParams):
+    timeout: int = Field(description='等待时间，单位为秒')
 
 
-class AssertContainsActionInfo(StepActionInfo):
-    keywords: list[str]
+class AssertContainsParams(ToolParams):
+    keywords: list[str] = Field(description='要匹配的关键词列表')
+
+
+class MarkFailedParams(BaseModel):
+    reason: str = Field(description='失败原因')
 
 
 class ToolResult(BaseModel, Generic[T]):
     is_success: bool
-    description: Optional[str] = None
     output: Optional[T] = None
 
     @classmethod
     def success(cls, output: T = None, description: str = None):
-        return cls(is_success=True, output=output, description=description)
+        return cls(is_success=True, output=output)
 
     @classmethod
     def failed(cls, output: T = None, description: str = None):
-        return cls(is_success=False, output=output, description=description)
+        return cls(is_success=False, output=output)
 
 
 class PlanningStep(BaseModel):
     instruction: str = Field(description='步骤指令，用一句话描述该步骤要做什么')
-    need_get_screen_info: bool = Field(description='是否需要获取界面元素信息')
 
 
 class PlanningOutputType(BaseModel):
@@ -145,7 +179,6 @@ class PlanningOutputType(BaseModel):
 
 class StepOutputType(BaseModel):
     """
-    执行指令完成后判断任务是否成功，结果格式如下：
-    - is_success: 任务否成功
+    用户指令完成后判断是否成功
     """
-    is_success: bool
+    is_success: bool = Field(description='所有操作是否成功')
