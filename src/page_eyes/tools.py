@@ -5,11 +5,12 @@
 # @Time : 2025/5/23 17:47
 import asyncio
 import io
+import time
 from abc import ABC, abstractmethod
 from functools import wraps
 from pathlib import Path
 from traceback import print_exc
-from typing import IO, Optional, cast, TypeAlias, Union
+from typing import IO, Optional, cast, TypeAlias, Union, Callable, Awaitable
 
 from httpx import AsyncClient
 from loguru import logger
@@ -19,7 +20,7 @@ from playwright.async_api import TimeoutError
 from .config import global_settings
 from .deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
-    WaitToolParams, AssertContainsParams, MarkFailedParams
+    WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
 from .util.js_tool import JSTool
@@ -191,11 +192,27 @@ class AgentTool(ABC):
         return ScreenInfo(image_url=image_url, screen_elements=parsed_content_list)
 
     @abstractmethod
+    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResult:
+        raise NotImplementedError
+
+    @abstractmethod
     async def open_url(self, ctx: RunContext[AgentDepsType], params: OpenUrlToolParams) -> ToolResult:
         raise NotImplementedError
 
     @abstractmethod
     async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResult[ScreenInfo]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def click(self, ctx: RunContext[AgentDepsType], params: ClickToolParams) -> ToolResult:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def input(self, ctx: RunContext[AgentDepsType], params: InputToolParams) -> ToolResult:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
         raise NotImplementedError
 
     @abstractmethod
@@ -205,26 +222,58 @@ class AgentTool(ABC):
     @tool(after_delay=0)
     async def wait_for_timeout(self, ctx: RunContext[AgentDepsType], params: WaitToolParams) -> ToolResult:
         """
-        在任务中等待或停留指定的超时时间（timeout），单位：秒
+        在任务中等待或停留指定的超时时间（timeout），单位：秒，等待过程中可期望指定的关键字出现
         """
-        logger.info(f'Wait for timeout {params.timeout}s')
-        await asyncio.sleep(params.timeout)
-        return ToolResult.success()
-
-    async def get_screen_contains(
-            self,
-            ctx: RunContext[AgentDepsType],
-            params: AssertContainsParams
-    ) -> tuple[list, list]:
+        if params.expect_keywords is None:
+            logger.info(f'Wait for timeout {params.timeout}s')
+            await asyncio.sleep(params.timeout)
+            return ToolResult.success()
+        else:
+            logger.info(f'Wait up to {params.timeout}s '
+                        f'for the keywords {params.expect_keywords} to appear on the screen.')
+            st = time.time()
+            while time.time() - st < params.timeout:
+                result = await self.expect_screen_contains(ctx, params.expect_keywords)
+                if result.is_success:
+                    return result
+                await asyncio.sleep(2)
+            else:
+                return ToolResult.failed()
+    
+    async def _parse_screen_keywords(self, ctx: RunContext[AgentDepsType], keywords: list[str]) -> tuple[list, list]:
         screen_info: ScreenInfo = await self.get_screen(ctx, parse_element=True)
         elements_str = str(screen_info.screen_elements)
         contains, not_contains = [], []
-        for keyword in params.keywords:
+        for keyword in keywords:
             if keyword in elements_str:
                 contains.append(keyword)
             else:
                 not_contains.append(keyword)
         return contains, not_contains
+
+    async def expect_screen_contains(
+            self,
+            ctx: RunContext[AgentDepsType],
+            keywords: list[str]
+    ) -> ToolResult:
+        contains, not_contains = await self._parse_screen_keywords(ctx, keywords)
+        if len(not_contains) > 0:
+            logger.warning(f'Screen does not contain expected keywords:"{not_contains}"')
+            return ToolResult.failed()
+        else:
+            return ToolResult.success()
+
+    async def expect_screen_not_contains(
+            self,
+            ctx: RunContext[AgentDepsType],
+            keywords: list[str]
+    ) -> ToolResult:
+        contains, not_contains = await self._parse_screen_keywords(ctx, keywords)
+        if len(contains) > 0:
+            logger.warning(f'Screen contains unexpected keywords:"{contains}"')
+            return ToolResult.failed()
+        else:
+            return ToolResult.success()
 
     @tool(before_delay=2)
     async def assert_screen_contains(
@@ -233,29 +282,20 @@ class AgentTool(ABC):
             params: AssertContainsParams
     ) -> ToolResult:
         """
-        检查屏幕中是否出现或包含指定的多个关键词内容，如果是则 is_success=True, 否则 is_success=False
+        检查屏幕中是否出现或包含指定的多个关键字内容，如果是则 is_success=True, 否则 is_success=False
         """
-        await asyncio.sleep(2)
-        contains, not_contains = await self.get_screen_contains(ctx, params)
-        if len(not_contains) == 0:
-            return ToolResult.success()
-        logger.warning(f'Screen does not contain expected keywords "{not_contains}"')
-        return ToolResult.failed()
+        return await self.expect_screen_contains(ctx, params.expect_keywords)
 
     @tool(before_delay=2)
     async def assert_screen_not_contains(
             self,
             ctx: RunContext[AgentDepsType],
-            params: AssertContainsParams
+            params: AssertNotContainsParams
     ) -> ToolResult:
         """
-        检查屏幕中是否不出现或不包含指定的多个关键词内容，如果是则 is_success=True, 否则 is_success=False
+        检查屏幕中是否不出现或不包含指定的多个关键字内容，如果是则 is_success=True, 否则 is_success=False
         """
-        contains, not_contains = await self.get_screen_contains(ctx, params)
-        if len(contains) == 0:
-            return ToolResult.success()
-        logger.warning(f'Screen unexpectedly contains keywords:"{contains}"')
-        return ToolResult.failed()
+        return await self.expect_screen_not_contains(ctx, params.unexpect_keywords)
 
     @tool
     async def mark_failed(
@@ -385,13 +425,13 @@ class WebAgentTool(AgentTool):
             height: int,
     ):
         if params.to == 'top':
-            delta_x, delta_y = 0, 0.9 * height
+            delta_x, delta_y = 0, 0.7 * height
         elif params.to == 'left':
-            delta_x, delta_y = 0.9 * width, 0
+            delta_x, delta_y = 0.7 * width, 0
         elif params.to == 'bottom':
-            delta_x, delta_y = 0, -0.9 * height
+            delta_x, delta_y = 0, -0.7 * height
         elif params.to == 'right':
-            delta_x, delta_y = -0.9 * width, 0
+            delta_x, delta_y = -0.7 * width, 0
         else:
             raise ValueError(f'Invalid Parameter: to={params.to}')
 
@@ -399,7 +439,7 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
 
     @tool(after_delay=1)
-    @limit_recursion(max_depth=30)
+    @limit_recursion(max_depth=50)
     async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
         """
         在设备屏幕中滑动或滚动
@@ -411,14 +451,22 @@ class WebAgentTool(AgentTool):
             await self._swipe_by_mouse(ctx, params, width, height)
         else:
             await self._swipe_by_scroll(ctx, params, width, height)
-        if params.keywords:
-            contains, not_contains = await self.get_screen_contains(
-                ctx, AssertContainsParams(instruction='', action='', keywords=params.keywords))
-            if len(contains) == 0:
+        if params.expect_keywords:
+            await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
+            result = await self.expect_screen_contains(ctx, params.expect_keywords)
+            if result.is_success:
+                return result
+            else:
                 return await self.swipe(ctx, params)
-            if len(not_contains) == 0:
-                return ToolResult.success()
+        return ToolResult.success()
 
+    @tool(after_delay=1)
+    async def goback(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
+        """
+        操作返回到上一个页面
+        """
+        logger.info(f'go to previous page')
+        await ctx.deps.device.page.go_back()
         return ToolResult.success()
 
 
@@ -487,6 +535,7 @@ class AndroidAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool
+    @limit_recursion(max_depth=50)
     async def swipe(
             self,
             ctx: RunContext[AgentDepsType],
@@ -500,16 +549,24 @@ class AndroidAgentTool(AgentTool):
         if params.to == 'top':
             x1, y1, x2, y2 = 0.5 * width, 0.7 * height, 0.5 * width, 0.1 * height
         elif params.to == 'left':
-            x1, y1, x2, y2 = 0.9 * width, 0.5 * height, 0.1 * width, 0.5 * height
+            x1, y1, x2, y2 = 0.7 * width, 0.5 * height, 0.1 * width, 0.5 * height
         elif params.to == 'bottom':
             x1, y1, x2, y2 = 0.5 * width, 0.3 * height, 0.5 * width, 0.9 * height
         elif params.to == 'right':
-            x1, y1, x2, y2 = 0.1 * width, 0.5 * height, 0.9 * width, 0.5 * height
+            x1, y1, x2, y2 = 0.3 * width, 0.5 * height, 0.9 * width, 0.5 * height
         else:
             raise ValueError(f'Invalid Parameter: to={params.to}')
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+        if params.expect_keywords:
+            await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
+            result = await self.expect_screen_contains(ctx, params.expect_keywords)
+            if result.is_success:
+                return result
+            else:
+                return await self.swipe(ctx, params)
+
         return ToolResult.success()
 
     @tool

@@ -26,6 +26,12 @@ dependencies = [
     "pydantic-ai==0.3.4",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+]
+
 classifiers = [
     # 这个项目的成熟度如何？常见的值有：
     #   3 - Alpha
@@ -71,11 +77,5 @@ default = true
 url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
 name = "tencent_pypi"
 publish-url = "https://mirrors.tencent.com/repository/pypi/tencent_pypi/simple"
-
-[dependency-groups]
-dev = [
-    "pytest>=8.4.2",
-    "pytest-asyncio>=1.2.0",
-]
 
 

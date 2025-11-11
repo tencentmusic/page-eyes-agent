@@ -134,7 +134,7 @@ class InputToolParams(LocationToolParams):
 
 class SwipeToolParams(ToolParams):
     to: Literal['left', 'right', 'top', 'bottom'] = Field(description='滑动方向')
-    keywords: Optional[list[str]] = Field(description='要检查出现的关键词列表')
+    expect_keywords: Optional[list[str]] = Field(description='期望出现的关键字列表')
 
 
 class SwipeFromCoordinateToolParams(ToolParams):
@@ -142,11 +142,21 @@ class SwipeFromCoordinateToolParams(ToolParams):
 
 
 class WaitToolParams(ToolParams):
+    """
+    示例：
+    等待2秒 -> timeout=2，expect_keywords=None
+    等待5秒，直到出现"确定"按钮 -> timeout=5，expect_keywords=['确定']
+    """
     timeout: int = Field(description='等待时间，单位为秒')
+    expect_keywords: Optional[list[str]] = Field(description='期望出现的关键字列表')
 
 
 class AssertContainsParams(ToolParams):
-    keywords: list[str] = Field(description='要匹配的关键词列表')
+    expect_keywords: list[str] = Field(description='期望包含的关键字列表')
+
+
+class AssertNotContainsParams(ToolParams):
+    unexpect_keywords: list[str] = Field(description='期望不包含的关键字列表')
 
 
 class MarkFailedParams(BaseModel):

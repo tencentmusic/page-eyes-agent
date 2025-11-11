@@ -9,10 +9,15 @@ pytestmark = pytest.mark.asyncio(loop_scope="session")
 
 
 async def test_web_pc_01(web_agent_pc):
+    """综合交互测试"""
     await web_agent_pc.run(
         """
         1. 打开 url "https://wma.wavecommittee.com/"
-        2. 点击"浪潮评委会成员"
+        2. 向上滑动，直到出现"立即注册"按钮
+        3. 点击"立即注册"
+        4. 在手机号输入框中输入"13800138000"
+        5. 返回上一个页面
+        6. 等待1秒
         """
     )
 
@@ -24,12 +29,13 @@ async def test_web_pc_02(web_agent_pc):
         1. 打开 url "https://wma.wavecommittee.com/"
         2. 等待2秒
         3. 点击"浪潮评委会成员"
+        4. 等待3秒，直到出现"查看浪潮评委会"
         """
     )
 
 
 async def test_web_pc_03(web_agent_pc):
-    """批量断言"""
+    """测试批量断言"""
     await web_agent_pc.run(
         """
         1. 打开 url "https://wma.wavecommittee.com/"
@@ -106,33 +112,15 @@ async def test_web_pc_09(web_agent_pc):
     )
 
 
-async def test_web_mobile_01(web_agent_mobile):
-    await web_agent_mobile.run(
-        """
-        1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
-        2. 点击 "查找" 按钮
-        3. 等待1s
-        4. 在搜索输入框中输入"小美满"
-        """
-    )
-
-
-async def test_web_mobile_02(web_agent_mobile):
-    await web_agent_mobile.run(
-        """
-        1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search/"
-        2. 在搜索输入框中输入"小美满"
-        """
-    )
-
-
 async def test_web_mobile_03(web_agent_mobile):
+    """测试web H5 交互"""
     await web_agent_mobile.run(
         """
         1. 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
-        2. 点击"日榜"
+        2. 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
         3. 点击"搜索"按钮
         4. 在搜索输入框中输入"任素汐"
-        5. 检查页面出现"亲爱的你啊"
+        5. 等待3秒，直到出现"在腾讯音乐由你榜内相关歌曲"
+        6. 向上滑动，直到出现"胡广生"
         """
     )
