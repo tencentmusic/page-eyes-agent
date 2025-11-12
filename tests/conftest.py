@@ -17,7 +17,7 @@ logger.add(sys.stdout, level="INFO")
 
 debug = True
 
-serial = ''
+serial = ''  # Android 设备序列号
 
 
 @pytest.fixture(scope="session")

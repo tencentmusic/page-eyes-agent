@@ -112,6 +112,17 @@ async def test_web_pc_09(web_agent_pc):
     )
 
 
+async def test_web_pc_10(web_agent_pc):
+    """测试点击上传文件"""
+    await web_agent_pc.run(
+        """
+        - 打开 url "https://www.google.com/"
+        - 点击"相机"按钮
+        - 点击"将图片放到此处或上传文件"右侧1/4处，上传文件："/Users/aidenmo/Downloads/pic.png"
+        """
+    )
+
+
 async def test_web_mobile_03(web_agent_mobile):
     """测试web H5 交互"""
     await web_agent_mobile.run(

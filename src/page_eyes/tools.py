@@ -366,11 +366,17 @@ class WebAgentTool(AgentTool):
         logger.info(f'click coordinate ({x}, {y})')
         await JSTool.add_highlight_position(ctx.deps.device.page, x, y)
         try:
-            async with ctx.deps.device.page.context.expect_page(timeout=1000) as new_page_info:
-                await ctx.deps.device.page.mouse.click(x, y)
-            old_page = ctx.deps.device.page
-            ctx.deps.device.page = await new_page_info.value
-            await old_page.close()
+            if params.file_path:
+                async with ctx.deps.device.page.expect_file_chooser(timeout=5000) as fc_info:
+                    await ctx.deps.device.page.mouse.click(x, y)
+                    file_chooser = await fc_info.value
+                    await file_chooser.set_files(Path(params.file_path))
+            else:
+                async with ctx.deps.device.page.context.expect_page(timeout=1000) as new_page_info:
+                    await ctx.deps.device.page.mouse.click(x, y)
+                old_page = ctx.deps.device.page
+                ctx.deps.device.page = await new_page_info.value
+                await old_page.close()
         except TimeoutError:
             pass
         await JSTool.remove_highlight_position(ctx.deps.device.page)

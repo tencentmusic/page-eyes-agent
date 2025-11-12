@@ -123,9 +123,11 @@ class ClickToolParams(LocationToolParams):
     - 点击"确定"按钮 -> position=None, offset=None
     - 点击"确定"按钮左侧 -> position='left', offset=None
     - 点击"确定"按钮左侧1/2处 -> position='left', offset=0.5
+    - 点击"上传"按钮，上传文件:"/Users/Desktop/1.png" -> position=None, offset=None, file_path='/Users/Desktop/1.png'
     """
     position: Optional[PositionType] = Field(default=None, description='点击元素的相对位置')
     offset: Optional[float] = Field(default=None, description='相对位置的偏移量')
+    file_path: Optional[str] = Field(default=None, description='要上传的文件路径')
 
 
 class InputToolParams(LocationToolParams):
