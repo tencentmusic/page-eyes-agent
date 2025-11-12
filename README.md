@@ -33,10 +33,22 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 </p>
 
 ## 安装
-
+您可以通过 [pip](https://pypi.org/project/page-eyes/) 安装
 ```shell
 pip install page-eyes
 ```
+```python
+from page_eyes.agent import WebAgent, MobileAgent
+...
+```
+
+或者克隆项目源码安装
+```shell
+git clone https://github.com/tencentmusic/page-eyes-agent.git
+cd page-eyes-agent
+uv sync  # 安装依赖
+```
+
 ## 快速开始
 配置环境变量
 
@@ -86,17 +98,18 @@ async def main():
     # ui_agent = await MobileAgent.create(serial='android-udid')
 
     report = await ui_agent.run("""
-            1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
-            2.点击"查找icon"
-            3.在搜索输入框中输入"小美满"
-            4.点击"小美满> "
-            5.点击"日榜"
+            - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+            - 点击"查找icon"
+            - 在搜索输入框中输入"小美满"
+            - 点击"小美满> "
+            - 点击"日榜"
             """)
 
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+更多示例请参考[示例代码](https://github.com/tencentmusic/page-eyes-agent/tree/master/tests)
 
 ## 贡献指南
 1. 检查现有 issues 或提交新 issue 来讨论功能想法或缺陷

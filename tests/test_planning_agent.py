@@ -19,8 +19,8 @@ async def test_01(planning_agent):
     """
     result = await planning_agent.run(
         """
-        1. 打开 url "https://wma.wavecommittee.com/"
-        2. 点击浪潮评委会成员按钮
+        - 打开 url "https://wma.wavecommittee.com/"
+        - 点击浪潮评委会成员按钮
         """
     )
     logger.info(result.output)
