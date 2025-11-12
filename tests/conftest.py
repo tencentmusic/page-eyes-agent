@@ -3,19 +3,19 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/9/30 11:56
-import asyncio
 import sys
 
 import pytest
 import pytest_asyncio
 from loguru import logger
-from src.page_eyes.agent import WebAgent, MobileAgent, PlanningAgent
-from src.page_eyes.util.platform import Platform
+
+from page_eyes.agent import WebAgent, MobileAgent, PlanningAgent
+from page_eyes.util.platform import Platform
 
 logger.remove()
 logger.add(sys.stdout, level="INFO")
 
-debug = True
+debug = False
 
 serial = ''  # Android 设备序列号
 
