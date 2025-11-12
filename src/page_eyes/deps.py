@@ -5,6 +5,7 @@
 # @Time : 2025/5/23 18:30
 from collections import OrderedDict
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional, TypeVar, Literal, Generic, TypeAlias
 
 from pydantic import BaseModel, Field, confloat, conlist, ConfigDict
@@ -127,7 +128,7 @@ class ClickToolParams(LocationToolParams):
     """
     position: Optional[PositionType] = Field(default=None, description='点击元素的相对位置')
     offset: Optional[float] = Field(default=None, description='相对位置的偏移量')
-    file_path: Optional[str] = Field(default=None, description='要上传的文件路径')
+    file_path: Optional[Path] = Field(default=None, description='要上传的文件路径')
 
 
 class InputToolParams(LocationToolParams):

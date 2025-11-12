@@ -118,7 +118,7 @@ async def test_web_pc_10(web_agent_pc):
         """
         - 打开 url "https://www.google.com/"
         - 点击"相机"按钮
-        - 点击"将图片放到此处或上传文件"右侧1/4处，上传文件："/Users/aidenmo/Downloads/pic.png"
+        - 点击"将图片放到此处或上传文件"右侧1/4处，上传文件："./pic.png"
         """
     )
 

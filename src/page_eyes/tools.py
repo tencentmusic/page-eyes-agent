@@ -367,10 +367,11 @@ class WebAgentTool(AgentTool):
         await JSTool.add_highlight_position(ctx.deps.device.page, x, y)
         try:
             if params.file_path:
+                logger.info(f'upload file ({params.file_path.absolute()})')
                 async with ctx.deps.device.page.expect_file_chooser(timeout=5000) as fc_info:
                     await ctx.deps.device.page.mouse.click(x, y)
                     file_chooser = await fc_info.value
-                    await file_chooser.set_files(Path(params.file_path))
+                    await file_chooser.set_files(params.file_path)
             else:
                 async with ctx.deps.device.page.context.expect_page(timeout=1000) as new_page_info:
                     await ctx.deps.device.page.mouse.click(x, y)
