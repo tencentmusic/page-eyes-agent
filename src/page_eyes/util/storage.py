@@ -149,12 +149,14 @@ class StorageClient:
     def __init__(self, strategy: StorageStrategy):
         self._strategy = strategy
 
+    def __repr__(self):
+        return f"StorageClient(strategy={self._strategy})"
+
     @classmethod
     def create_from_config(cls, cos_config, minio_config):
         """根据配置创建存储客户端"""
         # 优先使用COS，如果COS配置完整
         if cos_config.secret_id and cos_config.secret_key:
-            logger.info("使用COS客户端")
             strategy = CosStrategy(
                 secret_id=cos_config.secret_id,
                 secret_key=cos_config.secret_key,
@@ -164,7 +166,6 @@ class StorageClient:
             )
         # 如果COS配置不完整，使用MinIO
         elif minio_config.access_key and minio_config.secret_key:
-            logger.info("使用MinIO客户端")
             strategy = MinioStrategy(
                 access_key=minio_config.access_key,
                 secret_key=minio_config.secret_key,

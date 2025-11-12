@@ -5,21 +5,11 @@
 # @Time : 2025/6/24 12:18
 from typing import Literal, Optional
 
-from dotenv import load_dotenv
 from loguru import logger
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .util.storage import StorageClient
-
-"""
-优先级规则（从高到低）：
-1. 代码中传入的参数（如 Settings(headless=False)）
-2. 环境变量
-3. .env 文件
-4. 类属性默认值
-"""
-load_dotenv(override=True)
 
 
 class CosConfig(BaseSettings):
