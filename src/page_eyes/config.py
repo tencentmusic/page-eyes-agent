@@ -7,6 +7,7 @@ from typing import Literal, Optional
 
 from loguru import logger
 from pydantic import Field
+from pydantic_ai.settings import ModelSettings
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from .util.storage import StorageClient
@@ -63,3 +64,5 @@ class Settings(BaseSettings):
 
 
 global_settings = Settings()
+
+model_settings = ModelSettings(max_tokens=20000, temperature=1)

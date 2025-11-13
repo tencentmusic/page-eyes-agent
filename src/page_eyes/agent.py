@@ -13,10 +13,9 @@ from pydantic import TypeAdapter
 from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior
 from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
-from pydantic_ai.settings import ModelSettings
 from pydantic_ai.usage import Usage
 
-from .config import global_settings
+from .config import global_settings, model_settings
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
 from .device import AndroidDevice, WebDevice
@@ -38,7 +37,7 @@ class PlanningAgent:
             model=model,
             system_prompt=PLANNING_SYSTEM_PROMPT,
             output_type=PlanningOutputType,
-            model_settings=ModelSettings(max_tokens=100000, temperature=1)
+            model_settings=model_settings
         )
         return await agent.run(prompt.strip(), deps=self.deps)
 
@@ -195,6 +194,7 @@ class WebAgent(UiAgent):
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
+            model_settings=model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
             retries=3
@@ -226,6 +226,7 @@ class MobileAgent(UiAgent):
         agent = Agent[AgentDeps, StepOutputType](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
+            model_settings=model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
             output_type=StepOutputType,
