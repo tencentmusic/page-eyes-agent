@@ -13,6 +13,7 @@ from pydantic import TypeAdapter
 from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior
 from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
+from pydantic_ai.settings import ModelSettings
 from pydantic_ai.usage import Usage
 
 from .config import global_settings
@@ -33,7 +34,12 @@ class PlanningAgent:
     async def run(self, prompt: str) -> AgentRunResult[PlanningOutputType]:
         """Run the agent with the given prompt."""
         model = self.model or global_settings.model
-        agent = Agent(model=model, system_prompt=PLANNING_SYSTEM_PROMPT, output_type=PlanningOutputType)
+        agent = Agent(
+            model=model,
+            system_prompt=PLANNING_SYSTEM_PROMPT,
+            output_type=PlanningOutputType,
+            model_settings=ModelSettings(max_tokens=100000, temperature=1)
+        )
         return await agent.run(prompt.strip(), deps=self.deps)
 
 
