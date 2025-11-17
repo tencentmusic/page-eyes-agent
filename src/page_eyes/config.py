@@ -55,7 +55,10 @@ class Settings(BaseSettings):
     def copy_and_update(self, **kwargs):
         # TODO: 这里又会实例化一次 StorageClient，建议改成单例模式 @lancefayang
         validated_settings = self.model_validate(kwargs)
-        logger.level('DETAIL', no=20) if validated_settings.debug else logger.level('DETAIL', no=10)
+        try:
+            logger.level('DETAIL', no=20) if validated_settings.debug else logger.level('DETAIL', no=10)
+        except ValueError:
+            pass
         # 不对 storage_client 进行深拷贝，而是重用原来的实例
         update_dict = validated_settings.model_dump(exclude_none=True)
         if 'storage_client' not in update_dict:

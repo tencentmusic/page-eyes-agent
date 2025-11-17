@@ -12,8 +12,8 @@ pytestmark = pytest.mark.asyncio(loop_scope="session")
 async def test_01(planning_agent):
     """
     [
-        {'instruction': '打开 url "https://wma.wavecommittee.com/"', 'need_get_screen_info': False},
-        {'instruction': '点击 "浪潮评委会成员" 按钮', 'need_get_screen_info': True}
+        {'instruction': '打开 url "https://wma.wavecommittee.com/"'},
+        {'instruction': '点击 "浪潮评委会成员" 按钮'}
     ]
 
     """
@@ -30,13 +30,13 @@ async def test_01(planning_agent):
 async def test_02(planning_agent):
     """
     [
-        {'instruction': '打开 "QQ音乐" APP', 'need_get_screen_info': False},
-        {'instruction': '点击"close"关闭弹窗，若"close"元素不存在则跳过', 'need_get_screen_info': True},
-        {'instruction': '向上滑动最多 10 次，直到页面中出现"搜索2025年上榜歌手"元素', 'need_get_screen_info': True},
-        {'instruction': '点击"搜索"', 'need_get_screen_info': True},
-        {'instruction': '等待 2 秒', 'need_get_screen_info': False},
-        {'instruction': '输入"周杰伦"', 'need_get_screen_info': True},
-        {'instruction': '向上滑动 3 次', 'need_get_screen_info': False}
+        {'instruction': '打开 "QQ音乐" APP'},
+        {'instruction': '点击"close"关闭弹窗，若"close"元素不存在则跳过'},
+        {'instruction': '向上滑动最多 10 次，直到页面中出现"搜索2025年上榜歌手"元素'},
+        {'instruction': '点击"搜索"'},
+        {'instruction': '等待 2 秒'},
+        {'instruction': '输入"周杰伦"'},
+        {'instruction': '向上滑动 3 次'}
     ]
     """
     result = await planning_agent.run(
@@ -55,6 +55,21 @@ async def test_03(planning_agent):
     result = await planning_agent.run(
         """
         上滑多次，直到出现"查看浪潮评委会"元素
+        """
+    )
+    logger.info(result.output)
+    logger.info(result.output.model_dump().get('steps'))
+
+
+async def test_04(planning_agent):
+    """
+    """
+    result = await planning_agent.run(
+        """
+        - 打开 url "https://wma.wavecommittee.com/"
+        - 等待5s
+        - 点击"IP管理"菜单
+        - 展开的菜单列表中点击"IP维护"
         """
     )
     logger.info(result.output)
