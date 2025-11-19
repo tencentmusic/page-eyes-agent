@@ -6,16 +6,18 @@
 import asyncio
 import io
 import time
+import traceback
 from abc import ABC, abstractmethod
 from functools import wraps
 from pathlib import Path
-from traceback import print_exc
-from typing import IO, Optional, cast, TypeAlias, Union, Callable, Awaitable
+from typing import IO, Optional, cast, TypeAlias, Union
 
 from httpx import AsyncClient
 from loguru import logger
-from pydantic_ai import ModelRetry, RunContext, Agent
+# noinspection PyProtectedMember
+from loguru._logger import context as logger_context
 from playwright.async_api import TimeoutError
+from pydantic_ai import ModelRetry, RunContext, Agent
 
 from .config import global_settings
 from .deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
@@ -126,8 +128,11 @@ def tool(f=None, *, after_delay=0, before_delay=0):
                 await tool_handler.post_handle(result)
                 return result
             except Exception as e:
-                print_exc()
                 logger.error(f"Error occurred in tool '{func.__name__}': {str(e)}")
+                format_exc = traceback.format_exc()
+                for line in format_exc.splitlines():
+                    logger.error(line)
+
                 raise ModelRetry(f"Error occurred, try call '{func.__name__}' again")
 
         wrapper.is_tool = True
@@ -162,7 +167,9 @@ class AgentTool(ABC):
         url = f'{self.OMNI_BASE_URL}/omni/parse/'
         if not file and not image_url:
             raise ValueError('请提供file或image_url')
-        async with AsyncClient(timeout=120) as client:
+        trace_id = logger_context.get().get('trace_id')
+        headers = {'X-Trace-Id': trace_id} if trace_id else None
+        async with AsyncClient(timeout=300, headers=headers) as client:
             response = await client.post(url, files={'file': file}, data={'key': self.OMNI_KEY})
             response.raise_for_status()
             return response.json()
@@ -392,7 +399,6 @@ class WebAgentTool(AgentTool):
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
         await ctx.deps.device.page.mouse.click(x, y)
         await ctx.deps.device.page.keyboard.type(params.text)
-        await ctx.deps.device.page.keyboard.press('Enter')
         return ToolResult.success()
 
     @staticmethod

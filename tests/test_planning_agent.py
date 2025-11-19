@@ -66,10 +66,7 @@ async def test_04(planning_agent):
     """
     result = await planning_agent.run(
         """
-        - 打开 url "https://wma.wavecommittee.com/"
-        - 等待5s
-        - 点击"IP管理"菜单
-        - 展开的菜单列表中点击"IP维护"
+        点击"推荐"按钮, 等待3秒, 点击"去酷我音乐推荐"
         """
     )
     logger.info(result.output)

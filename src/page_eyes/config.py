@@ -68,4 +68,4 @@ class Settings(BaseSettings):
 
 global_settings = Settings()
 
-model_settings = ModelSettings(max_tokens=20000, temperature=1)
+model_settings = ModelSettings(max_tokens=20000, temperature=0.0)
