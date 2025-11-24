@@ -135,3 +135,13 @@ async def test_web_mobile_03(web_agent_mobile):
         - 向上滑动，直到出现"胡广生"
         """
     )
+
+
+async def test_web_mobile_04(web_agent_mobile):
+    """测试web H5 输入交互， 输入后默认会自动回车，如果不需要回车可以要求不要发送回车/Enter"""
+    await web_agent_mobile.run(
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search"
+        - 输入框中输入"任素汐", 且不要回车
+        """
+    )

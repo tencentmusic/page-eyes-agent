@@ -15,7 +15,7 @@ from page_eyes.util.platform import Platform
 logger.remove()
 logger.add(sys.stdout, level="INFO")
 
-debug = False
+debug = True
 
 serial = ''  # Android 设备序列号
 

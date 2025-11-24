@@ -133,6 +133,7 @@ class ClickToolParams(LocationToolParams):
 
 class InputToolParams(LocationToolParams):
     text: str = Field(description='要输入的文本')
+    send_enter: bool = Field(default=True, description='是否发送回车键')
 
 
 class SwipeToolParams(ToolParams):

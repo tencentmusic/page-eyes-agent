@@ -399,6 +399,8 @@ class WebAgentTool(AgentTool):
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
         await ctx.deps.device.page.mouse.click(x, y)
         await ctx.deps.device.page.keyboard.type(params.text)
+        if params.send_enter:
+            await ctx.deps.device.page.keyboard.press('Enter')
         return ToolResult.success()
 
     @staticmethod
@@ -544,7 +546,8 @@ class AndroidAgentTool(AgentTool):
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
         ctx.deps.device.adb_device.click(x, y)
         AdbDeviceProxy(ctx.deps.device.adb_device).input_text(params.text)
-        ctx.deps.device.adb_device.keyevent('KEYCODE_ENTER')
+        if params.send_enter:
+            ctx.deps.device.adb_device.keyevent('KEYCODE_ENTER')
         return ToolResult.success()
 
     @tool
