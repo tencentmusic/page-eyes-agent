@@ -120,3 +120,5 @@ if __name__ == "__main__":
 
 ## 如有需要，加入我们的交流群
 ![](./docs/about/contact_qr.png)
+
+[![Star History Chart](https://api.star-history.com/svg?repos=tencentmusic/page-eyes-agent&type=date&legend=top-left)](https://www.star-history.com/#tencentmusic/page-eyes-agent&type=date&legend=top-left)
