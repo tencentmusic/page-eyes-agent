@@ -223,13 +223,12 @@ class MobileAgent(UiAgent):
         tool = AndroidAgentTool() if tool_cls is None else tool_cls()
         deps: AgentDeps[AndroidDevice, AndroidAgentTool] = AgentDeps(settings, device, tool)
 
-        agent = Agent[AgentDeps, StepOutputType](
+        agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
             model_settings=model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
-            output_type=StepOutputType,
             retries=2
         )
         return cls(model, deps, agent)
