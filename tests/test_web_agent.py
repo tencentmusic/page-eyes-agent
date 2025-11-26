@@ -145,3 +145,19 @@ async def test_web_mobile_04(web_agent_mobile):
         - 输入框中输入"任素汐", 且不要回车
         """
     )
+
+
+async def test_web_mobile_05(web_agent_mobile):
+    """测试点击相对元素"""
+    await web_agent_mobile.run(
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        - 点击"浪潮榜"左侧的元素
+        - 点击"浪潮榜"右侧的元素
+        - 点击"浪潮榜"左侧第2个元素
+        - 点击"由你榜"右侧第4个元素
+        - 点击"LIVE榜"上方的元素
+        - 点击"里程碑"下方的元素
+        - 在"搜索历史"上方的元素中输入"任素汐"
+        """
+    )

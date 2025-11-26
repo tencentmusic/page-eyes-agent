@@ -97,6 +97,7 @@ PositionType: TypeAlias = Literal['left', 'right', 'top', 'bottom']
 
 class LocationToolParams(ToolParams):
     element_bbox: conlist(confloat(ge=0.0, le=1.0), min_length=4, max_length=4) = Field(description='要操作的元素 bbox')
+    element_content: str = Field(description='要操作的元素内容')
 
     def get_coordinate(self,
                        device_size: DeviceSize,

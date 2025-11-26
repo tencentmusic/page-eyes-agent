@@ -187,7 +187,7 @@ class AgentTool(ABC):
             parsed_content_list = parsed_data.get('parsed_content_list') or []
             logger.info(f'👁‍🗨 Get screen element：{image_url}')
             if not parsed_content_list:
-                raise Exception('Screen parsed error!')
+                raise Exception(f'Screen parsed error! {parsed_data}')
         else:
             image_url = await self._upload_cos(image_buffer, suffix=Path(image_buffer.name).suffix)
             parsed_content_list = []
@@ -227,7 +227,7 @@ class AgentTool(ABC):
         raise NotImplementedError
 
     @tool(after_delay=0)
-    async def wait_for_timeout(self, ctx: RunContext[AgentDepsType], params: WaitToolParams) -> ToolResult:
+    async def wait(self, ctx: RunContext[AgentDepsType], params: WaitToolParams) -> ToolResult:
         """
         在任务中等待或停留指定的超时时间（timeout），单位：秒，等待过程中可期望指定的关键字出现
         """
@@ -606,7 +606,7 @@ class AndroidAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool
-    async def start_app(
+    async def open_app(
             self,
             ctx: RunContext[AgentDepsType],
             params: ToolParams,
