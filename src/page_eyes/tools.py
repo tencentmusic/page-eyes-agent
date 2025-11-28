@@ -22,7 +22,7 @@ from pydantic_ai import ModelRetry, RunContext, Agent
 from .config import global_settings
 from .deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
-    WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams
+    WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput
 from .device import AndroidDevice, WebDevice
 from .util.adb_tool import AdbDeviceProxy
 from .util.js_tool import JSTool
@@ -199,15 +199,11 @@ class AgentTool(ABC):
         return ScreenInfo(image_url=image_url, screen_elements=parsed_content_list)
 
     @abstractmethod
-    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResult:
+    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
         raise NotImplementedError
 
     @abstractmethod
     async def open_url(self, ctx: RunContext[AgentDepsType], params: OpenUrlToolParams) -> ToolResult:
-        raise NotImplementedError
-
-    @abstractmethod
-    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResult[ScreenInfo]:
         raise NotImplementedError
 
     @abstractmethod
@@ -328,7 +324,7 @@ class WebAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResult[dict]:
+    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
         """
         获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，列表顺序即为屏幕元素的排列顺序，从左到右，从上到下
         每个元素包含以下字段：
@@ -341,7 +337,7 @@ class WebAgentTool(AgentTool):
         bottom_elem_ids: 该元素下方的元素列表
         """
         screen_info = await self.get_screen(ctx)
-        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}))
+        return ToolResultWithOutput.success(screen_info.model_dump(include={'screen_elements'}))
 
     @tool
     async def tear_down(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
@@ -497,13 +493,13 @@ class AndroidAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResult:
+    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
         """
         获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
         该工具禁止作为一个单独步骤
         """
         screen_info = await self.get_screen(ctx)
-        return ToolResult.success(screen_info.model_dump(include={'screen_elements'}))
+        return ToolResultWithOutput.success(screen_info.model_dump(include={'screen_elements'}))
 
     async def tear_down(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
         """
@@ -625,7 +621,7 @@ class AndroidAgentTool(AgentTool):
         result = await sub_agent.run(prompt, output_type=str)
         package_name = result.output
         if not package_name:
-            return ToolResult.failed(output='在该设备中未找到对应的应用')
+            return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
         logger.info(f'Find App package name：{package_name}')
         ctx.deps.device.adb_device.app_start(package_name)
         await asyncio.sleep(2)

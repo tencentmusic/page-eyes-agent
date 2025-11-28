@@ -170,14 +170,25 @@ class MarkFailedParams(BaseModel):
 
 class ToolResult(BaseModel, Generic[T]):
     is_success: bool
-    output: Optional[T] = None
 
     @classmethod
-    def success(cls, output: T = None, description: str = None):
+    def success(cls):
+        return cls(is_success=True)
+
+    @classmethod
+    def failed(cls):
+        return cls(is_success=False)
+
+
+class ToolResultWithOutput(ToolResult, Generic[T]):
+    output: Optional[T] = Field(default=None)
+
+    @classmethod
+    def success(cls, output: T = None):
         return cls(is_success=True, output=output)
 
     @classmethod
-    def failed(cls, output: T = None, description: str = None):
+    def failed(cls, output: T = None):
         return cls(is_success=False, output=output)
 
 
