@@ -71,3 +71,16 @@ async def test_04(planning_agent):
     )
     logger.info(result.output)
     logger.info(result.output.model_dump().get('steps'))
+
+
+async def test_06(planning_agent):
+    """
+    """
+    result = await planning_agent.run(
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search"
+        - 输入框中输入"任素汐", 不要发送回车键
+        """
+    )
+    logger.info(result.output)
+    logger.info(result.output.model_dump().get('steps'))

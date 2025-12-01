@@ -128,7 +128,7 @@ async def test_web_mobile_03(web_agent_mobile):
     await web_agent_mobile.run(
         """
         - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
-        - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
+        - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮，否则跳过
         - 点击"搜索"按钮
         - 在搜索输入框中输入"任素汐"
         - 等待3秒，直到出现"在腾讯音乐由你榜内相关歌曲"
@@ -142,12 +142,22 @@ async def test_web_mobile_04(web_agent_mobile):
     await web_agent_mobile.run(
         """
         - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search"
-        - 输入框中输入"任素汐", 且不要回车
+        - 输入框中输入"任素汐", 不要发送回车
         """
     )
 
 
 async def test_web_mobile_05(web_agent_mobile):
+    """测试web H5 输入交互"""
+    await web_agent_mobile.run(
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search"
+        - 输入框中输入"任素汐"
+        """
+    )
+
+
+async def test_web_mobile_06(web_agent_mobile):
     """测试点击相对元素"""
     await web_agent_mobile.run(
         """

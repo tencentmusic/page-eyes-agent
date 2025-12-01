@@ -133,6 +133,11 @@ class ClickToolParams(LocationToolParams):
 
 
 class InputToolParams(LocationToolParams):
+    """
+    示例：
+    - 输入"123456" -> text="123456"，send_enter=True
+    - 输入"123456"，不发送回车键 -> text="123456"，send_enter=False
+    """
     text: str = Field(description='要输入的文本')
     send_enter: bool = Field(default=True, description='是否发送回车键')
 
