@@ -17,6 +17,7 @@ from loguru import logger
 # noinspection PyProtectedMember
 from loguru._logger import context as logger_context
 from playwright.async_api import TimeoutError
+from pydantic import TypeAdapter
 from pydantic_ai import ModelRetry, RunContext, Agent
 
 from .config import global_settings
@@ -196,7 +197,12 @@ class AgentTool(ABC):
         # 将当前屏幕信息记录到上下文
         ctx.deps.context.current_step.image_url = image_url
         ctx.deps.context.current_step.screen_elements = parsed_content_list
-        return ScreenInfo(image_url=image_url, screen_elements=parsed_content_list)
+        # 仅保留必要的字段给LLM
+        parsed_elements = TypeAdapter(list[dict]).dump_python(
+            parsed_content_list,
+            exclude={'__all__': {'type', 'interactivity', 'source'}}
+        )
+        return ScreenInfo(image_url=image_url, screen_elements=parsed_elements)
 
     @abstractmethod
     async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
