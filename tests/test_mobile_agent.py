@@ -32,3 +32,21 @@ async def test_mobile_02(mobile_agent):
         - 向上滑动，直到出现"胡广生"
         """
     )
+
+
+async def test_mobile_03(mobile_agent):
+    """测试多个交互"""
+    await mobile_agent.run(
+        """
+        - 打开 url "https://i2.y.qq.com/n3/coin_center/pages/client_v1/index.html"
+        - 如果出现“立即签到”则点击“立即签到”，否则跳过
+        - 如果出现"close"元素，则点击"close"元素，否则跳过
+        - 从 (350, 500) 滑动到 (350, 100)
+        - 点击“看视频”按钮
+        - 如果出现出现“点击浏览15秒”则点击“点击浏览15秒”，否则跳过
+        - 等待15秒。
+        - 则点击媒体元素右侧的"close"元素
+        - 如果出现2个"close"元素，则点击第2个"close"元素，否则点击第1个"close"元素
+        - 上滑屏幕，直到页面中出现 "金币抽奖" 元素
+        """
+    )

@@ -493,8 +493,8 @@ class AndroidAgentTool(AgentTool):
     async def screenshot(ctx: RunContext[AgentDepsType]) -> io.BytesIO:
         image_buffer = io.BytesIO()
         screenshot = ctx.deps.device.adb_device.screenshot()
-        screenshot.save(image_buffer, format='webp')
-        image_buffer.name = 'screen.webp'
+        screenshot.save(image_buffer, format='png')
+        image_buffer.name = 'screen.png'
         image_buffer.seek(0)
         return image_buffer
 
