@@ -482,7 +482,7 @@ class WebAgentTool(AgentTool):
                 if result.is_success:
                     return result
                 if times == params.repeat_times:
-                    return ToolResult.fail(f'Expect keywords not found: {params.expect_keywords}')
+                    return ToolResult.failed()
 
         return ToolResult.success()
 
@@ -598,7 +598,7 @@ class AndroidAgentTool(AgentTool):
                 if result.is_success:
                     return result
                 if times == params.repeat_times:
-                    return ToolResult.fail(f'Expect keywords not found: {params.expect_keywords}')
+                    return ToolResult.failed()
 
         return ToolResult.success()
 

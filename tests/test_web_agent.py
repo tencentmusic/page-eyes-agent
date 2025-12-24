@@ -171,3 +171,17 @@ async def test_web_mobile_06(web_agent_mobile):
         - 在"搜索历史"上方的元素中输入"任素汐"
         """
     )
+
+
+async def test_web_mobile_07(web_agent_mobile):
+    await web_agent_mobile.run(
+        """
+        - 打开 url "https://yobang-pre.tencentmusic.com/chart-h5/annual-report-2025-end/certificationChart?slideId=main"
+        - 如果出现弹窗则点击 "关闭" 或 "跳过" 或 "close"否则跳过直接进行下一步.
+        - 向上滑动最多 15 次，直到页面中出现 "搜索2025年上榜歌手" 相关元素
+        - 点击 "搜索2025年上榜歌手"
+        - 在 "搜索2025年上榜歌手" 输入框中输入 "周深"
+        - 点击 "周深>"
+        - 检查页面包含 "周深"
+        """
+    )
