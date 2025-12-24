@@ -456,25 +456,34 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
 
     @tool(after_delay=1)
-    @limit_recursion(max_depth=50)
     async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
         """
         在设备屏幕中滑动或滚动
         """
-        logger.info(f'swipe to {params.to}')
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.page, params.to)
-        if ctx.deps.device.is_mobile and not has_scroll_bar:
-            await self._swipe_by_mouse(ctx, params, width, height)
-        else:
-            await self._swipe_by_scroll(ctx, params, width, height)
-        if params.expect_keywords:
-            await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
-            result = await self.expect_screen_contains(ctx, params.expect_keywords)
-            if result.is_success:
-                return result
+
+        if params.repeat_times is None:
+            if params.expect_keywords:
+                params.repeat_times = 10
             else:
-                return await self.swipe(ctx, params)
+                params.repeat_times = 1
+        for times in range(1, params.repeat_times + 1):
+            logger.info(f'swipe to {params.to}, times={times}')
+
+            if ctx.deps.device.is_mobile and not has_scroll_bar:
+                await self._swipe_by_mouse(ctx, params, width, height)
+            else:
+                await self._swipe_by_scroll(ctx, params, width, height)
+
+            if params.expect_keywords:
+                await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
+                result = await self.expect_screen_contains(ctx, params.expect_keywords)
+                if result.is_success:
+                    return result
+                if times == params.repeat_times:
+                    return ToolResult.fail(f'Expect keywords not found: {params.expect_keywords}')
+
         return ToolResult.success()
 
     @tool(after_delay=1)
@@ -553,7 +562,6 @@ class AndroidAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool
-    @limit_recursion(max_depth=50)
     async def swipe(
             self,
             ctx: RunContext[AgentDepsType],
@@ -575,15 +583,22 @@ class AndroidAgentTool(AgentTool):
         else:
             raise ValueError(f'Invalid Parameter: to={params.to}')
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-        logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
-        ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
-        if params.expect_keywords:
-            await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
-            result = await self.expect_screen_contains(ctx, params.expect_keywords)
-            if result.is_success:
-                return result
+
+        if params.repeat_times is None:
+            if params.expect_keywords:
+                params.repeat_times = 10
             else:
-                return await self.swipe(ctx, params)
+                params.repeat_times = 1
+        for times in range(1, params.repeat_times + 1):
+            logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2}), times={times}')
+            ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+            if params.expect_keywords:
+                await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
+                result = await self.expect_screen_contains(ctx, params.expect_keywords)
+                if result.is_success:
+                    return result
+                if times == params.repeat_times:
+                    return ToolResult.fail(f'Expect keywords not found: {params.expect_keywords}')
 
         return ToolResult.success()
 

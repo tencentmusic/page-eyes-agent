@@ -1,6 +1,6 @@
 [project]
 name = "page-eyes"
-version = "1.1.1"
+version = "1.1.2"
 description = "PageEyes Agent 是一个轻量级 UI Agent，通过自然语言指令驱动，无需编写脚本既可实现Web、Android平台的UI自动化任务。"
 readme = "README.md"
 authors = [

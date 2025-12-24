@@ -143,7 +143,14 @@ class InputToolParams(LocationToolParams):
 
 
 class SwipeToolParams(ToolParams):
+    """
+    示例：
+    向上滑动 2 次 -> to='top', repeat_times=2
+    向上滑动最多 5 次，直到页面中出现 "确定" 元素 -> to='top', repeat_times=5, expect_keywords=['确定']
+    向上滑动，直到出现"胡广生"元素 -> to='top', repeat_times=None, expect_keywords=['胡广生']
+    """
     to: Literal['left', 'right', 'top', 'bottom'] = Field(description='滑动方向')
+    repeat_times: Optional[int] = Field(default=1, description='重复次数或最多重复次数，默认为1次')
     expect_keywords: Optional[list[str]] = Field(description='期望出现的关键字列表')
 
 
