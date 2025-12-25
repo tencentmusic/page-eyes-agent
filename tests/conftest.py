@@ -38,5 +38,5 @@ async def web_agent_mobile():
 @pytest_asyncio.fixture(scope="session")
 async def mobile_agent():
     if not serial:
-        pytest.skip("未指定 Android 设备")
+        logger.info("未指定 Android 设备, 将使用默认第一个设备")
     return await MobileAgent.create(serial=serial, platform=Platform.QY, debug=debug)

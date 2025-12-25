@@ -73,13 +73,13 @@ class AndroidDevice:
         client = AdbClient()
         current_devices = client.device_list()
         if serial:
-            if serial not in current_devices:
+            if serial not in [item.serial for item in current_devices]:
                 output = client.connect(serial, timeout=10)
                 if 'connected' not in output:
                     raise Exception(f"adb connect failed: {output}")
             adb_device: AdbDevice = client.device(serial=serial)
         elif current_devices:
-            adb_device: AdbDevice = client.device_list()[0]
+            adb_device: AdbDevice = current_devices[0]
         else:
             raise Exception("No adb device found")
 
