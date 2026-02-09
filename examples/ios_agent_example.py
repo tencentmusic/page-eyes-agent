@@ -25,7 +25,13 @@ async def example_basic():
         debug=True
     )
     
-    prompt = "打开设置应用，打开通用tab，打开关于手机，查看iOS版本"
+    prompt = """ 
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
+        - 在搜索输入框中输入"蔡徐坤"
+        - 等待3秒，直到出现"在腾讯音乐由你榜内相关歌曲"
+        - 向上滑动，直到出现"没有意外"
+        """
     
     print(f"\n执行指令: {prompt}\n")
     result = await ios_agent.run(prompt)
@@ -74,16 +80,14 @@ async def example_custom_app():
     ios_agent = await IOSAgent.create()
     
     prompt = """
-    1. 打开Safari浏览器
-    2. 在地址栏输入"www.apple.com"
-    3. 等待页面加载完成
-    4. 截图保存
+    1. 打开url"apple.com"
+    2. 再打开url"baidu.com"
+    3. 向上滑动两次，再往下滑动一次
+    4. 返回上一页
     """
     
-    print(f"\n执行指令:\n{prompt}\n")
     result = await ios_agent.run(prompt)
     
-    print(f"\n执行完成: {result.data.is_success}")
 
 
 async def example_with_assertion():
@@ -95,19 +99,12 @@ async def example_with_assertion():
     ios_agent = await IOSAgent.create()
     
     prompt = """
-    1. 打开设置
-    2. 验证页面包含"通用"和"隐私"
-    3. 点击通用
-    4. 验证页面包含"关于本机"
+    1.打开“baidu.com”
+    2.搜索 “2026blast春决
     """
     
     print(f"\n执行测试:\n{prompt}\n")
     result = await ios_agent.run(prompt)
-    
-    if result.data.is_success:
-        print("✅ 测试通过")
-    else:
-        print("❌ 测试失败")
 
 
 async def compare_android_ios():
