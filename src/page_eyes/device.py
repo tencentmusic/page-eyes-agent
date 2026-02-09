@@ -98,13 +98,10 @@ class IOSDevice:
     @classmethod
     async def create(cls, wda_url: str = "http://10.91.215.96:8100", platform: Optional[Platform] = Platform.QY):
 
-        try:            
-
+        try:
             wda_client = wda.Client(wda_url)
-            
             window_size = wda_client.window_size()
             device_size = DeviceSize(width=window_size.width, height=window_size.height)
-            
             status = wda_client.status()
             if not status:
                 raise Exception(f"Failed to get device status from WebDriverAgent at {wda_url}")

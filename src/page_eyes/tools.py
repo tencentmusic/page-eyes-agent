@@ -837,18 +837,45 @@ class IOSAgentTool(AgentTool):
         return ToolResult.success() if not result.is_success else ToolResult.failed()
 
     @tool(after_delay=1)
+    #todo 好像有问题
     async def goback(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: ToolParams) -> ToolResult:
         """
-        返回到上一个页面（通过屏幕左边缘滑动实现）
+        返回到上一个页面
+        这里优先尝试查找并点击导航栏的返回按钮，如果没有则使用边缘滑动手势
         """
         logger.info('go to previous page')
 
         device = ctx.deps.device
         session = device.wda_client.session()
-        height = device.device_size.height
-
-        # 返回手势
-        session.swipe(10, height // 2, 200, height // 2)
+        try:
+            # 方法1：尝试查找并点击导航栏的返回按钮
+            back_button = None
+            
+            # 尝试通过不同的方式查找返回按钮
+            for selector in [
+                {'type': 'XCUIElementTypeButton', 'name': '返回'},
+                {'type': 'XCUIElementTypeButton', 'label': 'Back'},
+                {'type': 'XCUIElementTypeButton', 'name': 'Back'},
+            ]:
+                try:
+                    back_button = session(**selector)
+                    if back_button.exists:
+                        back_button.click()
+                        logger.info('点击导航栏返回按钮')
+                        return ToolResult.success()
+                except:
+                    continue
+            # 方法2：如果没找到返回按钮，使用屏幕左边缘滑动手势
+            logger.info('使用左边缘滑动手势返回')
+            height = device.device_size.height
+            width = device.device_size.width
+            session.swipe(10, height // 2, width // 2, height // 2, duration=0.3)
+            
+        except Exception as e:
+            logger.warning(f'返回操作失败: {e}，尝试备用方案')
+            # 备用方案：使用更简单的滑动
+            height = device.device_size.height
+            session.swipe(10, height // 2, 200, height // 2)
 
         return ToolResult.success()
 
@@ -886,28 +913,36 @@ class IOSAgentTool(AgentTool):
 
         return ToolResult.success()
 
-    @tool(after_delay=2)
+    @tool
     async def open_url(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']],
                        params: OpenUrlToolParams) -> ToolResult:
         """
-        使用iOS设备的Safari浏览器打开URL
+        使用iOS设备打开URL
         """
         logger.info(f'Open URL: {params.url}')
 
+        # 格式化URL，确保有正确的协议头
+        url = params.url.strip()
+        if not url.startswith(('http://', 'https://')):
+            # 如果没有协议头，添加https://
+            if '.' in url and not url.startswith('www.'):
+                url = f'https://{url}'
+            else:
+                url = f'https://www.{url}' if not url.startswith('www.') else f'https://{url}'
+        
+        logger.info(f'格式化后的URL: {url}')
+
         session = ctx.deps.device.wda_client.session()
-
-        session.home()
-        await asyncio.sleep(1)
-
-        # 打开Safari浏览器
+        
+        # 先启动Safari浏览器
         session.app_launch('com.apple.mobilesafari')
+        await asyncio.sleep(1)
+        
+        # 使用URL scheme打开网址
+        session.open_url(url)
+        
         await asyncio.sleep(2)
-
-        safari_url = f'safari-{params.url}'
-        session.app_launch(safari_url)
-
-        await asyncio.sleep(3)  # 等待页面加载
-
+        await self.get_screen(ctx, parse_element=False)
         return ToolResult.success()
 
     @tool
@@ -917,7 +952,7 @@ class IOSAgentTool(AgentTool):
             params: ToolParams,
     ):
         """
-        在iOS设备中打开或启动指定的应用
+        在设备中打开或启动指定的应用(APP)
         """
         logger.info(f'打开应用指令: {params.instruction}')
 
@@ -954,40 +989,51 @@ class IOSAgentTool(AgentTool):
             '测距仪': 'com.apple.measure',
             '翻译': 'com.apple.translation',
         }
-
-        # 从指令中提取应用名称
         instruction_lower = params.instruction.lower()
         app_name = None
-
-        # 尝试匹配应用名称
         for name, bundle_id in app_mapping.items():
             if name.lower() in instruction_lower:
                 app_name = name
                 bundle_id = app_mapping[name]
                 break
-
         if not app_name:
             return ToolResultWithOutput.failed(output=f'未找到匹配的应用: {params.instruction}')
-
         logger.info(f'打开应用: {app_name} (Bundle ID: {bundle_id})')
-
         try:
-            # 使用WDA打开应用
             session = ctx.deps.device.wda_client.session()
-
-            # 先返回主屏幕确保干净状态
             session.home()
             await asyncio.sleep(1)
-
-            # 启动应用
             session.app_launch(bundle_id)
-            await asyncio.sleep(3)  # 等待应用启动
-
-            # 获取屏幕信息
+            await asyncio.sleep(3)
             await self.get_screen(ctx, parse_element=False)
-
             return ToolResult.success()
 
         except Exception as e:
-            logger.error(f'打开应用失败: {e}')
-            return ToolResultWithOutput.failed(output=f'打开应用失败: {str(e)}')
+            # 获取设备上所有应用的Bundle ID列表
+            apps = ctx.deps.device.wda_client.app_list()
+            bundle_ids = [app.get('bundleId', '') for app in apps if app.get('bundleId')]
+
+            # 使用LLM从应用列表中智能匹配
+            sub_agent = Agent(
+                ctx.model,
+                output_type=str,
+                system_prompt='你是一个移动端应用助手，负责根据用户输入的指令从提供的应用Bundle ID列表找出用户指令对应的Bundle ID，并仅返回Bundle ID，如果都不匹配则返回空字符串'
+            )
+            prompt = (f'用户指令：{params.instruction}\n'
+                      f'应用Bundle ID列表：{bundle_ids}')
+            result = await sub_agent.run(prompt, output_type=str)
+            bundle_id = result.output
+
+            if not bundle_id:
+                return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
+
+            logger.info(f'Find App Bundle ID：{bundle_id}')
+
+            # 启动应用
+            session = ctx.deps.device.wda_client.session()
+            session.app_launch(bundle_id)
+            await asyncio.sleep(2)
+            await self.get_screen(ctx, parse_element=False)
+            return ToolResult.success()
+            await self.get_screen(ctx, parse_element=False)
+            return ToolResult.success()
