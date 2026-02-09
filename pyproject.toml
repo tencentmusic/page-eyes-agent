@@ -20,6 +20,7 @@ dependencies = [
     "adbutils>=2.8.10",
     "cos-python-sdk-v5>=1.9.38",
     "esprima2>=5.0.0",
+    "facebook-wda>=1.4.6",
     "loguru>=0.7.3",
     "minio>=7.2.16",
     "playwright>=1.52.0",

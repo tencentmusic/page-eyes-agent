@@ -19,9 +19,10 @@ from pydantic_ai.usage import Usage
 from .config import global_settings, model_settings
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
-from .device import AndroidDevice, WebDevice
+from .device import AndroidDevice, WebDevice, IOSDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType
+from .tools import IOSAgentTool
 from .util.platform import Platform
 
 
@@ -223,6 +224,32 @@ class MobileAgent(UiAgent):
         tool = AndroidAgentTool() if tool_cls is None else tool_cls()
         deps: AgentDeps[AndroidDevice, AndroidAgentTool] = AgentDeps(settings, device, tool)
 
+        agent = Agent[AgentDeps](
+            model=settings.model,
+            system_prompt=SYSTEM_PROMPT,
+            model_settings=model_settings,
+            deps_type=AgentDeps,
+            tools=tool.tools,
+            retries=2
+        )
+        return cls(model, deps, agent)
+
+
+class IOSAgent(UiAgent):
+    @classmethod
+    async def create(
+            cls, model: Optional[str] = None,
+            *,
+            wda_url: str = "http://10.91.215.96:8100",
+            platform: Optional[str | Platform] = None,
+            tool_cls: Optional[type[IOSAgentTool]] = None,
+            debug: Optional[bool] = None,
+    ):
+
+        settings = global_settings.copy_and_update(model=model, debug=debug)
+        device = await IOSDevice.create(wda_url=wda_url, platform=platform)
+        tool = IOSAgentTool() if tool_cls is None else tool_cls()
+        deps: AgentDeps[IOSDevice, IOSAgentTool] = AgentDeps(settings, device, tool)
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,

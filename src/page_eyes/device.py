@@ -10,6 +10,7 @@ from typing import Optional
 
 from adbutils import AdbClient, AdbDevice
 from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
+import wda
 
 from .deps import DeviceSize
 from .util.platform import Platform
@@ -36,9 +37,8 @@ class WebDevice:
             del context_params['has_touch']  # fix swipe scene
             del context_params['default_browser_type']  # launch_persistent_context not support default_browser_type
 
-        context = await playwright.chromium.launch_persistent_context(
+        context = await playwright.firefox.launch_persistent_context(
             user_data_dir=Path(tempfile.gettempdir()) / 'playwright',
-            channel='chrome',
             headless=headless,
             # devtools=True,
             **context_params
@@ -86,3 +86,30 @@ class AndroidDevice:
         window_size = adb_device.window_size()
         device_size = DeviceSize(width=window_size.width, height=window_size.height)
         return cls(client, adb_device, device_size, platform)
+
+
+@dataclass
+class IOSDevice:
+    """iOS 设备连接类，通过 WebDriverAgent 连接"""
+    wda_client: wda.Client
+    device_size: DeviceSize
+    platform: Platform
+
+    @classmethod
+    async def create(cls, wda_url: str = "http://10.91.215.96:8100", platform: Optional[Platform] = Platform.QY):
+
+        try:            
+
+            wda_client = wda.Client(wda_url)
+            
+            window_size = wda_client.window_size()
+            device_size = DeviceSize(width=window_size.width, height=window_size.height)
+            
+            status = wda_client.status()
+            if not status:
+                raise Exception(f"Failed to get device status from WebDriverAgent at {wda_url}")
+                
+            return cls(wda_client, device_size, platform)
+            
+        except Exception as e:
+            raise Exception(f"Failed to connect to WebDriverAgent at {wda_url}: {str(e)}")
