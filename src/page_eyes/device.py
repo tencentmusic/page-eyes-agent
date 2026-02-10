@@ -3,6 +3,7 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/6 14:58
+import os
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -98,7 +99,9 @@ class IOSDevice:
     platform: Platform
 
     @classmethod
-    async def create(cls, wda_url: str = "http://10.91.215.96:8100", platform: Optional[Platform] = Platform.QY):
+    async def create(cls, wda_url: str = None, platform: Optional[Platform] = Platform.QY):
+        if wda_url is None:
+            wda_url = os.getenv("IOS_WDA_URL", "http://localhost:8100")
 
         try:
 

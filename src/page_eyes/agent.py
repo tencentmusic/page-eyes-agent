@@ -3,16 +3,21 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 15:31
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Union
 from random import randint
 
+from dotenv import load_dotenv
 from loguru import logger
 from pydantic import TypeAdapter
 from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior
 from pydantic_ai.agent import AgentRunResult
+
+# 加载 .env 文件
+load_dotenv()
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.usage import Usage
 
@@ -248,11 +253,14 @@ class IOSAgent(UiAgent):
     async def create(
             cls, model: Optional[str] = None,
             *,
-            wda_url: str = "http://10.91.215.96:8100",
+            wda_url: str = None,
             platform: Optional[str | Platform] = None,
             tool_cls: Optional[type[IOSAgentTool]] = None,
             debug: Optional[bool] = None,
     ):
+        # 如果没有传入wda_url，从环境变量读取
+        if wda_url is None:
+            wda_url = os.getenv("IOS_WDA_URL", "http://localhost:8100")
 
         settings = global_settings.copy_and_update(model=model, debug=debug)
         device = await IOSDevice.create(wda_url=wda_url, platform=platform)

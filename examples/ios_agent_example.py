@@ -17,19 +17,19 @@ from page_eyes.agent import IOSAgent
 async def example_basic():
     """基础示例：使用 iOS Agent 执行简单任务"""
     print("=" * 60)
+    print("示例 1: iOS 打开URL，搜索，滑动测试")
     print("=" * 60)
     
-    ios_agent = await IOSAgent.create(
-        #改为自己的WDA运行地址
-        wda_url="http://10.91.215.96:8100",
-        debug=True
-    )
+    # WDA地址会自动从 .env 文件的 IOS_WDA_URL 读取
+    # 如果需要指定地址，可以传入 wda_url 参数
+    ios_agent = await IOSAgent.create(debug=True)
     
     prompt = """ 
         - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
         - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
-        - 在搜索输入框中输入"蔡徐坤"
-        - 等待3秒，直到出现"在腾讯音乐由你榜内相关歌曲"
+        - 找到并打开搜索框
+        - 搜索 “蔡徐坤”
+        - 等待3秒，直到出现相关歌曲
         - 向上滑动，直到出现"没有意外"
         """
     
@@ -42,13 +42,10 @@ async def example_basic():
 
 async def example_settings_automation():
     print("\n" + "=" * 60)
-    print("示例 2: iOS 设置自动化")
+    print("示例 2: iOS 回到桌面、打开应用测试")
     print("=" * 60)
     
-    ios_agent = await IOSAgent.create(
-        wda_url="http://10.91.215.96:8100",
-        debug=False
-    )
+    ios_agent = await IOSAgent.create(debug=False)
     
     prompt = """
     1. 回到桌面
@@ -74,7 +71,7 @@ async def example_settings_automation():
 async def example_custom_app():
     """示例 3: 操作自定义应用"""
     print("\n" + "=" * 60)
-    print("示例 3: 操作自定义应用")
+    print("示例 3: 打开URL、回退测试")
     print("=" * 60)
     
     ios_agent = await IOSAgent.create()
@@ -93,7 +90,7 @@ async def example_custom_app():
 async def example_with_assertion():
     """示例 4: 带断言的测试"""
     print("\n" + "=" * 60)
-    print("示例 4: 带断言的自动化测试")
+    print("示例 4: 打开URL，搜索测试")
     print("=" * 60)
     
     ios_agent = await IOSAgent.create()
@@ -110,7 +107,7 @@ async def example_with_assertion():
 async def compare_android_ios():
     """示例 5: 对比 Android 和 iOS 的使用方式"""
     print("\n" + "=" * 60)
-    print("示例 5: Android vs iOS Agent 对比")
+    print("示例 5: Android vs iOS Agent 对比（AI生成）")
     print("=" * 60)
     
     print("\n【Android Agent 使用方式】")
