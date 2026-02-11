@@ -21,7 +21,7 @@ load_dotenv()
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.usage import Usage
 
-from .config import default_settings, model_settings, Settings
+from .config import global_settings, model_settings, Settings
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
 from .device import AndroidDevice, WebDevice, IOSDevice
@@ -39,7 +39,7 @@ class PlanningAgent:
 
     async def run(self, prompt: str) -> AgentRunResult[PlanningOutputType]:
         """Run the agent with the given prompt."""
-        model = self.model or default_settings.model
+        model = self.model or global_settings.model
         agent = Agent(
             model=model,
             system_prompt=PLANNING_SYSTEM_PROMPT,
@@ -58,7 +58,7 @@ class UiAgent:
     @staticmethod
     def merge_settings(override_settings: Settings) -> Settings:
         settings = Settings(
-            **{**default_settings.model_dump(), **override_settings.model_dump(exclude_none=True)}
+            **{**global_settings.model_dump(), **override_settings.model_dump(exclude_none=True)}
         )
         logger.info(f'settings: {settings}')
         return settings

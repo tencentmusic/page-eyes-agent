@@ -6,5 +6,6 @@
 from .base import AgentDepsType
 from .android import AndroidAgentTool
 from .web import WebAgentTool
+from .ios import IOSAgentTool
 
-__all__ = ["AgentDepsType", "WebAgentTool", "AndroidAgentTool"]
+__all__ = ["AgentDepsType", "WebAgentTool", "AndroidAgentTool", "IOSAgentTool"]
