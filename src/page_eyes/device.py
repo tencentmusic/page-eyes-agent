@@ -12,7 +12,7 @@ from adbutils import AdbClient, AdbDevice
 from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
 
 from .deps import DeviceSize
-from .util.hdc import HdcClient, HdcDevice
+from .util.hdc_tool import HdcClient, HdcDevice
 from .util.platform import Platform
 
 
