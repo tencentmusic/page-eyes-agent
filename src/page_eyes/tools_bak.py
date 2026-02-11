@@ -157,8 +157,8 @@ def tool(f=None, *, after_delay=0, before_delay=0):
 
 
 class AgentTool(ABC):
-    OMNI_BASE_URL = default_settings.omni_base_url
-    OMNI_KEY = default_settings.omni_key
+    OMNI_BASE_URL = global_settings.omni_base_url
+    OMNI_KEY = global_settings.omni_key
 
     @property
     def tools(self) -> list:
@@ -851,7 +851,7 @@ class IOSAgentTool(AgentTool):
         try:
             # 方法1：尝试查找并点击导航栏的返回按钮
             back_button = None
-            
+
             # 尝试通过不同的方式查找返回按钮
             for selector in [
                 {'type': 'XCUIElementTypeButton', 'name': '返回'},
@@ -871,7 +871,7 @@ class IOSAgentTool(AgentTool):
             height = device.device_size.height
             width = device.device_size.width
             session.swipe(10, height // 2, width // 2, height // 2, duration=0.3)
-            
+
         except Exception as e:
             logger.warning(f'返回操作失败: {e}，尝试备用方案')
             # 备用方案：使用更简单的滑动
@@ -930,18 +930,18 @@ class IOSAgentTool(AgentTool):
                 url = f'https://{url}'
             else:
                 url = f'https://www.{url}' if not url.startswith('www.') else f'https://{url}'
-        
+
         logger.info(f'格式化后的URL: {url}')
 
         session = ctx.deps.device.wda_client.session()
-        
+
         # 先启动Safari浏览器
         session.app_launch('com.apple.mobilesafari')
         await asyncio.sleep(1)
-        
+
         # 使用URL scheme打开网址
         session.open_url(url)
-        
+
         await asyncio.sleep(2)
         await self.get_screen(ctx, parse_element=False)
         return ToolResult.success()
