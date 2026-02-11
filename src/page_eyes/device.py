@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from .deps import DeviceSize
-from .util.hdc import HdcClient, HdcDevice
+from .util.hdc_tool import HdcClient, HdcDevice
 from .util.platform import Platform
 
 # 加载 .env 文件
