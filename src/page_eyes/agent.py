@@ -263,9 +263,12 @@ class IOSAgent(UiAgent):
             wda_url = os.getenv("IOS_WDA_URL", "http://localhost:8100")
 
         settings = global_settings.copy_and_update(model=model, debug=debug)
+
         device = await IOSDevice.create(wda_url=wda_url, platform=platform)
+
         tool = IOSAgentTool() if tool_cls is None else tool_cls()
         deps: AgentDeps[IOSDevice, IOSAgentTool] = AgentDeps(settings, device, tool)
+
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
