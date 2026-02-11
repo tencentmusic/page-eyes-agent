@@ -95,6 +95,7 @@ PageEyes Agent 支持两种存储方式：
 配置存储服务后，测试报告和截图会自动上传到指定的存储桶中。
 
 ---
+
 ##  移动端（Android）支持
 
 ### Q: Android 设备adb连接不上怎么解决？
@@ -105,6 +106,74 @@ PageEyes Agent 支持两种存储方式：
 4. 首次连接时需要在设备上确认授权
 
 更多可参考文档[adb 连接设备](https://developer.android.com/studio/command-line/adb#connect-to-a-device-over-usb)
+
+---
+
+##  移动端（iOS）支持
+
+### Q: 如何连接 iOS 设备？
+
+iOS 设备需要通过 WebDriverAgent (WDA) 进行连接：
+
+1. **安装 WebDriverAgent**：
+   - 下载 [WebDriverAgent](https://github.com/appium/WebDriverAgent)
+   - 使用 Xcode 打开项目并配置签名
+   - 连接 iOS 设备并运行 WebDriverAgentRunner
+
+2. **获取 WDA URL**：
+   - WDA 启动后会显示服务地址，通常为 `http://xx.xx.xx.xx:8100`
+   - 如果是远程设备，需要配置端口转发
+
+3. **配置 IOSAgent**：
+   ```python
+   from page_eyes import IOSAgent
+   
+   agent = await IOSAgent.create(
+       wda_url="http://xx.xx.xx.xx:8100",  # WDA 服务地址（必填）
+       debug=True
+   )
+   ```
+
+### Q: WDA 连接失败怎么办？
+
+1. **检查 WDA 服务状态**：
+   - 确保 WebDriverAgent 在 iOS 设备上正常运行
+   - 访问 `http://localhost:8100/status` 检查服务是否可用
+
+2. **检查网络连接**：
+   - 确保设备与运行代码的机器在同一网络
+   - 或使用 USB 连接并配置端口转发：`iproxy 8100 8100`
+
+3. **检查设备信任**：
+   - iOS 设备需要信任开发者证书
+   - 在设备上：设置 → 通用 → VPN与设备管理 → 信任开发者
+
+4. **查看错误日志**：
+   ```bash
+   export AGENT_DEBUG=True
+   ```
+
+### Q: iOS 支持哪些操作？
+
+IOSAgent 支持以下操作：
+- ✅ 点击元素
+- ✅ 输入文本
+- ✅ 滑动屏幕（上下左右）
+- ✅ 打开应用（通过 Bundle ID）
+- ✅ 打开 URL（Safari）
+- ✅ 返回上一页
+- ✅ 返回主屏幕
+- ✅ 等待和断言
+
+### Q: 如何获取应用的 Bundle ID？
+
+1. **通过 WDA 获取已安装应用列表**：
+   ```python
+   import wda
+   client = wda.Client("http://xx.xx.xx.xx:8100")
+   apps = client.app_list()
+   ```
+
 
 ---
 

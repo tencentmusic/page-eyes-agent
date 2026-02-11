@@ -9,7 +9,7 @@ import pytest
 import pytest_asyncio
 from loguru import logger
 
-from page_eyes.agent import WebAgent, MobileAgent, PlanningAgent
+from page_eyes.agent import WebAgent, MobileAgent, PlanningAgent, IOSAgent
 from page_eyes.util.platform import Platform
 
 logger.remove()
@@ -40,3 +40,8 @@ async def mobile_agent():
     if not serial:
         logger.info("未指定 Android 设备, 将使用默认第一个设备")
     return await MobileAgent.create(serial=serial, platform=Platform.QY, debug=debug)
+
+
+@pytest_asyncio.fixture(scope="session")
+async def ios_agent():
+    return await IOSAgent.create(wda_url="http://10.91.215.85:8100",debug=debug)
