@@ -20,7 +20,7 @@ from playwright.async_api import TimeoutError
 from pydantic import TypeAdapter
 from pydantic_ai import ModelRetry, RunContext, Agent
 
-from .config import global_settings
+from .config import default_settings
 from .deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
     WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput
@@ -29,7 +29,7 @@ from .util.adb_tool import AdbDeviceProxy
 from .util.js_tool import JSTool
 from .util.platform import get_client_url_schema
 
-storage_client = global_settings.storage_client
+storage_client = default_settings.storage_client
 
 AgentDepsType: TypeAlias = AgentDeps[
     Union[WebDevice, AndroidDevice],
@@ -145,8 +145,8 @@ def tool(f=None, *, after_delay=0, before_delay=0):
 
 
 class AgentTool(ABC):
-    OMNI_BASE_URL = global_settings.omni_base_url
-    OMNI_KEY = global_settings.omni_key
+    OMNI_BASE_URL = default_settings.omni_base_url
+    OMNI_KEY = default_settings.omni_key
 
     @property
     def tools(self) -> list:

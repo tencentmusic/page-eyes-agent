@@ -18,13 +18,13 @@ adb devices
 ```Python
 import asyncio
 
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
+
 
 async def main():
-    
     # 移动端，serial=None为本地连接设备
-    ui_agent = await MobileAgent.create(serial=None,platform=Platform.QY)
-    
+    ui_agent = await AndroidAgent.create(serial=None, platform=Platform.QY)
+
     report = await ui_agent.run(
         ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
          '2.点击关闭弹窗，没有弹窗则跳过步骤\n'
@@ -77,7 +77,8 @@ if __name__ == "__main__":
 ```Python
 import asyncio
 
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
+
 
 async def main():
     # PC Web端

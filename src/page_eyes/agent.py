@@ -16,7 +16,7 @@ from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.usage import Usage
 
-from .config import global_settings, model_settings
+from .config import default_settings, model_settings, Settings
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
 from .device import AndroidDevice, WebDevice
@@ -33,7 +33,7 @@ class PlanningAgent:
 
     async def run(self, prompt: str) -> AgentRunResult[PlanningOutputType]:
         """Run the agent with the given prompt."""
-        model = self.model or global_settings.model
+        model = self.model or default_settings.model
         agent = Agent(
             model=model,
             system_prompt=PLANNING_SYSTEM_PROMPT,
@@ -48,6 +48,14 @@ class UiAgent:
     model: str
     deps: AgentDepsType
     agent: Agent[AgentDepsType]
+
+    @staticmethod
+    def merge_settings(override_settings: Settings) -> Settings:
+        settings = Settings(
+            **{**default_settings.model_dump(), **override_settings.model_dump(exclude_none=True)}
+        )
+        logger.info(f'settings: {settings}')
+        return settings
 
     @classmethod
     async def create(cls, *args, **kwargs):
@@ -73,12 +81,12 @@ class UiAgent:
     def handle_graph_node(self, node):
         """Format the logger node based on the given node type."""
         if isinstance(node, UserPromptNode):
-            logger.log('DETAIL', f"🤖Agent start user task: {repr(node.user_prompt)}")
+            logger.debug(f"🤖Agent start user task: {repr(node.user_prompt)}")
 
         elif isinstance(node, ModelRequestNode):
             for part in node.request.parts:
                 if isinstance(part, ToolReturnPart):
-                    logger.log('DETAIL', f"🤖Agent tool result: {part.tool_name} -> {part.content}")
+                    logger.debug(f"🤖Agent tool result: {part.tool_name} -> {part.content}")
 
         elif isinstance(node, CallToolsNode):
             parts = node.model_response.parts
@@ -86,7 +94,7 @@ class UiAgent:
             self.deps.context.current_step.parallel_tool_calls = False
             self.deps.context.current_step.parallel_tool_calls = len(tool_parts) > 1
             for part in tool_parts:
-                logger.log('DETAIL', f"🤖Agent tool call: {part.tool_name}, args: {part.args}")
+                logger.debug(f"🤖Agent tool call: {part.tool_name}, args: {part.args}")
 
     async def _sub_agent_run(self, planning, usage) -> AgentRunResult:
         async with self.agent.iter(user_prompt=planning.instruction, deps=self.deps, usage=usage) as agent_run:
@@ -143,7 +151,7 @@ class UiAgent:
                 break
 
         logger.debug(f"steps: {self.deps.context.steps}")
-        logger.log('DETAIL', f"usage: {usage}")
+        logger.debug(f"usage: {usage}")
 
         is_success_output = all([step.is_success for step in self.deps.context.steps.values()])
 
@@ -179,13 +187,12 @@ class WebAgent(UiAgent):
             tool_cls: Optional[type[WebAgentTool]] = None,
             debug: Optional[bool] = None,
     ):
-        settings = global_settings.copy_and_update(
+        settings = cls.merge_settings(Settings(
             model=model,
             simulate_device=simulate_device,
             headless=headless,
-            debug=debug)
-
-        logger.info(f'settings: {settings}')
+            debug=debug
+        ))
 
         device = device or await WebDevice.create(settings.headless, settings.simulate_device)
         tool = WebAgentTool() if tool_cls is None else tool_cls()
@@ -202,8 +209,8 @@ class WebAgent(UiAgent):
         return cls(model, deps, agent)
 
 
-class MobileAgent(UiAgent):
-    """MobileAgent class for mobile device automation."""
+class AndroidAgent(UiAgent):
+    """AndroidAgent class for mobile device automation."""
 
     @classmethod
     async def create(
@@ -214,9 +221,10 @@ class MobileAgent(UiAgent):
             tool_cls: Optional[type[AndroidAgentTool]] = None,
             debug: Optional[bool] = None,
     ):
-        settings = global_settings.copy_and_update(model=model, debug=debug)
-
-        logger.info(f'settings: {settings}')
+        settings = cls.merge_settings(Settings(
+            model=model,
+            debug=debug
+        ))
 
         device = await AndroidDevice.create(serial=serial, platform=platform)
 

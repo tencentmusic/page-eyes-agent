@@ -12,6 +12,7 @@ from adbutils import AdbClient, AdbDevice
 from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
 
 from .deps import DeviceSize
+from .util.hdc import HdcClient, HdcDevice
 from .util.platform import Platform
 
 
@@ -86,3 +87,31 @@ class AndroidDevice:
         window_size = adb_device.window_size()
         device_size = DeviceSize(width=window_size.width, height=window_size.height)
         return cls(client, adb_device, device_size, platform)
+
+
+@dataclass
+class HarmonyDevice:
+    client: HdcClient
+    hdc_device: HdcDevice
+    device_size: DeviceSize
+    platform: Platform
+
+    @classmethod
+    async def create(cls, connect_key: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
+        """异步工厂方法用于创建实例"""
+        client = HdcClient()
+        current_devices = client.device_list()
+        if connect_key:
+            if connect_key not in [item.connect_key for item in current_devices]:
+                output = client.connect(connect_key)
+                if 'Connect failed' in output:
+                    raise Exception(f"hdc connect failed: {output}")
+            hdc_device: HdcDevice = client.device(connect_key=connect_key)
+        elif current_devices:
+            hdc_device: HdcDevice = current_devices[0]
+        else:
+            raise Exception("No adb device found")
+
+        window_size = hdc_device.window_size()
+        device_size = DeviceSize(width=window_size.width, height=window_size.height)
+        return cls(client, hdc_device, device_size, platform)

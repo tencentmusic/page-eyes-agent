@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 from loguru import logger
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
 
 logger.remove()
 logger.add(sys.stdout, level="INFO")
@@ -13,7 +13,7 @@ async def main():
     ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro Max', debug=False)
 
     # # 移动端
-    # ui_agent = await MobileAgent.create(serial=None,platform=Platform.QY)
+    # ui_agent = await AndroidAgent.create(serial=None,platform=Platform.QY)
 
     await ui_agent.run("""
             - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"

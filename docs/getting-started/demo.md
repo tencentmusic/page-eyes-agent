@@ -6,12 +6,12 @@
 ```Python
 import asyncio
 
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
 
 
 async def main():
     # 移动端
-    ui_agent = await MobileAgent.create(serial='android-udid')
+    ui_agent = await AndroidAgent.create(serial='android-udid')
 
     report = await ui_agent.run(
         ('1.打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"\n'
@@ -28,10 +28,12 @@ if __name__ == "__main__":
 
 
 ## PC Web端
+
 ```Python
 import asyncio
 
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
+
 
 async def main():
     # PC Web端

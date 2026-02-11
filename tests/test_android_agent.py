@@ -8,8 +8,8 @@ import pytest
 pytestmark = pytest.mark.asyncio(loop_scope="session")
 
 
-async def test_mobile_01(mobile_agent):
-    await mobile_agent.run(
+async def test_mobile_01(android_agent):
+    await android_agent.run(
         """
         - 打开 "微信" APP
         - 等待1s
@@ -20,9 +20,9 @@ async def test_mobile_01(mobile_agent):
     )
 
 
-async def test_mobile_02(mobile_agent):
+async def test_mobile_02(android_agent):
     """测试多个交互"""
-    await mobile_agent.run(
+    await android_agent.run(
         """
         - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
         - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
@@ -34,9 +34,9 @@ async def test_mobile_02(mobile_agent):
     )
 
 
-async def test_mobile_03(mobile_agent):
+async def test_mobile_03(android_agent):
     """测试多个交互"""
-    await mobile_agent.run(
+    await android_agent.run(
         """
         - 打开 url "https://i2.y.qq.com/n3/coin_center/pages/client_v1/index.html"
         - 如果出现“立即签到”则点击“立即签到”，否则跳过
@@ -48,5 +48,15 @@ async def test_mobile_03(mobile_agent):
         - 则点击媒体元素右侧的"close"元素
         - 如果出现2个"close"元素，则点击第2个"close"元素，否则点击第1个"close"元素
         - 上滑屏幕，直到页面中出现 "金币抽奖" 元素
+        """
+    )
+
+
+async def test_mobile_04(android_agent):
+    """测试多个交互"""
+    await android_agent.run(
+        """
+        - 打开 url https://yobang.tencentmusic.com/chart/live-chart/rankList/
+        - 点击"全部播放"左侧的播放按钮
         """
     )

@@ -37,8 +37,10 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 ```shell
 pip install page-eyes
 ```
+
 ```python
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
+
 ...
 ```
 
@@ -87,7 +89,7 @@ uv sync  # 安装依赖
 ```python
 import asyncio
 
-from page_eyes.agent import WebAgent, MobileAgent
+from page_eyes.agent import WebAgent, AndroidAgent
 
 
 async def main():
@@ -95,7 +97,7 @@ async def main():
     ui_agent = await WebAgent.create(simulate_device='iPhone 15 Pro')
 
     # 移动端
-    # ui_agent = await MobileAgent.create(serial='android-udid')
+    # ui_agent = await AndroidAgent.create(serial='android-udid')
 
     report = await ui_agent.run("""
             - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
