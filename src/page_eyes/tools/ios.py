@@ -17,7 +17,7 @@ from ..deps import (
 )
 from ..device import IOSDevice
 from ..config import default_settings
-from .base import AgentTool, tool
+from ._base import AgentTool, tool
 
 storage_client = default_settings.storage_client
 

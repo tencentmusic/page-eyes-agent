@@ -12,7 +12,7 @@ from loguru import logger
 from playwright.async_api import TimeoutError
 from pydantic_ai import RunContext
 
-from .base import AgentTool, tool
+from ._base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
     InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
 from ..device import WebDevice

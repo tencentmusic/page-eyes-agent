@@ -7,8 +7,8 @@ from typing import TypeAlias
 
 from pydantic_ai import RunContext
 
-from .base import AgentTool
-from .mobile import MobileAgentTool
+from ._base import AgentTool
+from ._mobile import MobileAgentTool
 from ..deps import AgentDeps
 from ..device import AndroidDevice
 

@@ -10,7 +10,7 @@ from typing import TypeAlias, Union
 from loguru import logger
 from pydantic_ai import RunContext, Agent
 
-from .base import AgentTool, tool
+from ._base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
     InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
 from ..device import AndroidDevice, HarmonyDevice, IOSDevice
