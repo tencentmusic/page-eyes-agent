@@ -19,14 +19,14 @@ from loguru._logger import context as logger_context
 from pydantic import TypeAdapter
 from pydantic_ai import ModelRetry, RunContext
 
-from ..config import default_settings
+from ..config import global_settings
 from ..deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
     WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput
 from ..device import AndroidDevice, WebDevice, HarmonyDevice
 from ..util.js_tool import JSTool
 
-storage_client = default_settings.storage_client
+storage_client = global_settings.storage_client
 
 AgentDepsType: TypeAlias = AgentDeps[
     Union[WebDevice, AndroidDevice, HarmonyDevice],
@@ -121,8 +121,8 @@ def tool(f=None, *, after_delay=0, before_delay=0):
 
 
 class AgentTool(ABC):
-    OMNI_BASE_URL = default_settings.omni_base_url
-    OMNI_KEY = default_settings.omni_key
+    OMNI_BASE_URL = global_settings.omni_base_url
+    OMNI_KEY = global_settings.omni_key
 
     @property
     def tools(self) -> list:

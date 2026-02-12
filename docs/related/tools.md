@@ -53,7 +53,32 @@ PageEyes Agent 使用 OmniParser V2 分析屏幕截图，识别和定位 UI 元�
 PageEyes Agent 使用 ADB 执行 Android 端的所有自动化操作，包括应用启动、元素点击、文本输入和滑动等。通过 ADB 的命令，PageEyes Agent 能够模拟真实用户在 Android 设备上的交互行为。
 
 
-### 4. Pydantic AI
+### 4. WebDriverAgent (WDA)
+
+[WebDriverAgent (WDA)](https://github.com/appium/WebDriverAgent) 是 Facebook 开发的一个用于 iOS 自动化测试的框架，实现了 WebDriver 协议。
+
+**主要特性：**
+
+- 实现 WebDriver 协议，支持远程控制 iOS 设备
+- 支持真机和模拟器
+- 提供 HTTP API 接口进行设备操作
+- 支持应用启动、元素定位、手势操作等
+- 无需越狱即可使用（需要开发者证书）
+- 支持 XCUITest 框架
+
+**在 PageEyes Agent 中的应用：**
+
+PageEyes Agent 使用 WDA 执行 iOS 端的所有自动化操作，包括应用启动、元素点击、文本输入、滑动和导航等。通过 WDA 的 HTTP API，PageEyes Agent 能够模拟真实用户在 iOS 设备上的交互行为。主要操作包括：
+
+- **屏幕操作**：截图、点击、滑动、输入文本
+- **应用管理**：启动应用、打开 URL、返回主屏幕
+- **导航控制**：返回上一页、查找并点击导航按钮
+- **会话管理**：建立和维护与 iOS 设备的连接会话
+
+WDA 服务运行在 iOS 设备上，PageEyes Agent 通过指定的 `wda_url`（如 `http://localhost:8100`）与 WDA 服务通信，实现对 iOS 设备的远程控制。
+
+
+### 5. Pydantic AI
 
 [Pydantic AI](https://ai.pydantic.dev/) 是一个用于构建 AI 应用的框架，提供了类型安全的数据验证和序列化功能。
 
@@ -145,6 +170,7 @@ PageEyes Agent 使用 HTTPX 与 OmniParser V2 服务和其他 API 进行通信�
 - [Playwright 文档](https://playwright.dev/docs/intro)
 - [OmniParser V2 模型页面](https://huggingface.co/microsoft/OmniParser-v2.0)
 - [Android 调试桥 (ADB) 文档](https://developer.android.com/tools/adb)
+- [WebDriverAgent (WDA) 文档](https://github.com/appium/WebDriverAgent)
 - [Pydantic AI 文档](https://ai.pydantic.dev/)
 - [腾讯云对象存储 文档](https://cloud.tencent.com/document/product/436)
 - [MinIO 文档](https://min.io/docs/minio/container/index.html)

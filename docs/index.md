@@ -30,7 +30,7 @@ PageEyes Agent 是一个 **Python UI 自动化 Agent 框架**，帮助你用自�
 
 PageEyes Agent 以 *自然语言指令* 颠覆传统 UI 自动化：无需编写脚本，也能实现复杂的跨平台测试与巡检。基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydanticai) 框架开发，
 其中元素信息感知能力依靠 [OmniParserV2](https://huggingface.co/microsoft/OmniParser-v2.0) 模型，不依赖视觉语言大模型，
-即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android）
+即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android、iOS）
 
 ---
 
@@ -43,7 +43,7 @@ PageEyes Agent 以 *自然语言指令* 颠覆传统 UI 自动化：无需编写
   { .card .shadow .primary }
 
 - :material-devices:{ .lg .icon-color } **[跨平台支持](getting-started/installation.md)**  
-  支持 Web、Android 平台，未来将支持 iOS 平台。  
+  支持 Web、Android 平台、iOS 平台、Harmony平台。  
   { .card .shadow .indigo }
 
 - :material-brain:{ .lg .icon-color } **[多模型接入](guides/core-concepts.md)**  
@@ -78,7 +78,7 @@ PageEyes Agent 以 *自然语言指令* 颠覆传统 UI 自动化：无需编写
   { .card .shadow }
 
 - :material-devices:{ .lg } **强大的跨平台能力**  
-  同一套指令适用于 Web、Android，未来支持 iOS  
+  同一套指令适用于 Web、Android、Harmony、iOS  
   { .card .shadow }
 
 - :material-shield-check:{ .lg } **智能的故障恢复**  

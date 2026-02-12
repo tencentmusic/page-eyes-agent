@@ -19,9 +19,11 @@ from pydantic_ai.usage import Usage
 from .config import default_settings, model_settings, Settings
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
-from .device import AndroidDevice, WebDevice, HarmonyDevice
+from .device import AndroidDevice, WebDevice, HarmonyDevice, IOSDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType, HarmonyAgentTool
+from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType
+from .tools import IOSAgentTool
 from .util.platform import Platform
 
 
@@ -242,27 +244,26 @@ class AndroidAgent(UiAgent):
         return cls(model, deps, agent)
 
 
-class HarmonyAgent(UiAgent):
-    """HarmonyAgent class for mobile device automation."""
-
+class IOSAgent(UiAgent):
     @classmethod
     async def create(
             cls, model: Optional[str] = None,
             *,
-            connect_key: Optional[str] = None,
+            wda_url: str = None,
             platform: Optional[str | Platform] = None,
-            tool_cls: Optional[type[HarmonyAgentTool]] = None,
+            tool_cls: Optional[type[IOSAgentTool]] = None,
             debug: Optional[bool] = None,
     ):
-        settings = cls.merge_settings(Settings(
-            model=model,
-            debug=debug
-        ))
+        # 如果没有传入wda_url，从环境变量读取
+        if wda_url is None:
+            wda_url = os.getenv("IOS_WDA_URL", "http://localhost:8100")
 
-        device = await HarmonyDevice.create(connect_key=connect_key, platform=platform)
+        settings = global_settings.copy_and_update(model=model, debug=debug)
 
-        tool = HarmonyAgentTool() if tool_cls is None else tool_cls()
-        deps: AgentDeps[HarmonyDevice, HarmonyAgentTool] = AgentDeps(settings, device, tool)
+        device = await IOSDevice.create(wda_url=wda_url, platform=platform)
+
+        tool = IOSAgentTool() if tool_cls is None else tool_cls()
+        deps: AgentDeps[IOSDevice, IOSAgentTool] = AgentDeps(settings, device, tool)
 
         agent = Agent[AgentDeps](
             model=settings.model,

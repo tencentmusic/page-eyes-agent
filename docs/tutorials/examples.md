@@ -66,6 +66,62 @@ if __name__ == "__main__":
 
 
 
+## 由你榜iOS端自动化
+
+#### 目标
+打开腾讯音乐由你榜，查看日榜排名第一的歌曲
+
+
+
+> 首先确认 WebDriverAgent 服务已启动，并获取 WDA URL
+```bash
+# 查看 WDA 服务状态
+curl http://localhost:8100/status
+```
+
+
+#### 脚本
+
+```Python
+import asyncio
+
+from page_eyes.agent import IOSAgent
+from page_eyes.device import Platform
+
+async def main():
+    
+    # iOS端，wda_url为WebDriverAgent服务地址
+    ui_agent = await IOSAgent.create(wda_url='http://localhost:8100')
+    
+    report = await ui_agent.run(
+        ( 
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
+        - 进入日榜
+        - 点击
+        """
+         ))
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+#### 交互效果
+
+iOS 端的交互效果与 Android 端类似，通过 WebDriverAgent 实现对 iOS 设备的自动化控制。
+
+---
+#### 步骤报告
+
+报告内容为每个步骤对应页面的元素信息详情（包括元素位置、大小、识别内容、周围元素等），方便调试与回顾。报告格式与 Android 端保持一致。
+<a href="https://cdn-y.tencentmusic.com/uni/commonPic/cos_a11ada74ed44812322bed7fd9bd68bba70dcbda0.html" target="_blank" title="点击查看完整报告">
+    <img src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_81580d06dbdc357ee702e74577e2462a7d4b693c.png" alt="步骤报告示例" style="width: 800px; border: 1px solid #ccc; cursor: pointer; vertical-align: middle; margin-top: 10px; margin-bottom: 10px;">
+</a>
+
+
+
 ## Web浏览器自动化用例
 
 #### 目标
