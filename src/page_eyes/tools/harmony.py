@@ -4,26 +4,20 @@
 # @Email : aidenmo@tencent.com
 # @Time : 2026/2/11 15:52
 import asyncio
-# noinspection PyProtectedMember
-import io
 from typing import TypeAlias
 
 from loguru import logger
-# noinspection PyProtectedMember
 from pydantic_ai import RunContext, Agent
 
 from .base import AgentTool, tool
-from ..deps import ToolParams, ToolResult, ClickToolParams, \
-    InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
+from .mobile import MobileAgentTool
+from ..deps import ToolParams, ToolResult, InputToolParams, ToolResultWithOutput, AgentDeps
 from ..device import HarmonyDevice
-from ..util.adb_tool import AdbDeviceProxy
-from ..util.platform import get_client_url_schema
-from .android import AndroidAgentTool
 
 AgentDepsType: TypeAlias = AgentDeps[HarmonyDevice, AgentTool]
 
 
-class HarmonyAgentTool(AndroidAgentTool):
+class HarmonyAgentTool(MobileAgentTool):
 
     @staticmethod
     def _start_url(ctx: RunContext[AgentDepsType], url: str):

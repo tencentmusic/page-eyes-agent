@@ -18,7 +18,7 @@ logger.add(sys.stdout, level="INFO")
 debug = True
 
 serial = ''  # Android 设备序列号
-connect_key = '127.0.0.1:9002'  # Harmony 设备连接key
+connect_key = ''  # Harmony 设备连接key
 wda_url = 'http://10.91.215.64:8100'  # iOS 设备wda url
 
 
