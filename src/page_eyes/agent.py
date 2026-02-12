@@ -16,7 +16,7 @@ from pydantic_ai.agent import AgentRunResult
 from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.usage import Usage
 
-from .config import default_settings, model_settings, Settings
+from .config import default_settings, Settings, BrowserConfig
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
 from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
@@ -38,7 +38,7 @@ class PlanningAgent:
             model=model,
             system_prompt=PLANNING_SYSTEM_PROMPT,
             output_type=PlanningOutputType,
-            model_settings=model_settings
+            model_settings=default_settings.model_settings,
         )
         return await agent.run(prompt.strip(), deps=self.deps)
 
@@ -189,19 +189,18 @@ class WebAgent(UiAgent):
     ):
         settings = cls.merge_settings(Settings(
             model=model,
-            simulate_device=simulate_device,
-            headless=headless,
+            browser=BrowserConfig(headless=headless, simulate_device=simulate_device),
             debug=debug
         ))
 
-        device = device or await WebDevice.create(settings.headless, settings.simulate_device)
+        device = device or await WebDevice.create(settings.browser.headless, settings.browser.simulate_device)
         tool = WebAgentTool() if tool_cls is None else tool_cls()
         deps: AgentDeps[WebDevice, WebAgentTool] = AgentDeps(settings, device, tool)
 
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
-            model_settings=model_settings,
+            model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
             retries=3
@@ -234,7 +233,7 @@ class AndroidAgent(UiAgent):
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
-            model_settings=model_settings,
+            model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
             retries=2
@@ -298,7 +297,7 @@ class IOSAgent(UiAgent):
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
-            model_settings=model_settings,
+            model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
             retries=2

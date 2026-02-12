@@ -121,8 +121,8 @@ def tool(f=None, *, after_delay=0, before_delay=0):
 
 
 class AgentTool(ABC):
-    OMNI_BASE_URL = default_settings.omni_base_url
-    OMNI_KEY = default_settings.omni_key
+    OMNI_BASE_URL = default_settings.omni_parser.base_url
+    OMNI_KEY = default_settings.omni_parser.key
 
     @property
     def tools(self) -> list:
