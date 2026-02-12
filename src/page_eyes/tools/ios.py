@@ -224,63 +224,7 @@ class IOSAgentTool(MobileAgentTool):
         logger.info(f'打开应用指令: {params.instruction}')
 
         # 获取设备上所有应用的Bundle ID和显示名称
-        # 使用 pymobiledevice3 获取所有已安装应用的详细信息
-        app_list = []
-        try:
-            from pymobiledevice3.lockdown import create_using_usbmux
-            from pymobiledevice3.services.installation_proxy import InstallationProxyService
-
-            # 通过 USB 连接到设备
-            lockdown = create_using_usbmux()
-            installation_proxy = InstallationProxyService(lockdown=lockdown)
-
-            # 获取所有应用（用户应用和系统应用）
-            apps_info = installation_proxy.get_apps(application_type='Any')
-
-            # 提取 bundle ID 和显示名称
-            if apps_info:
-                for bundle_id, app_info in apps_info.items():
-                    display_name = app_info.get('CFBundleDisplayName') or app_info.get('CFBundleName', '')
-                    app_list.append({
-                        'bundle_id': bundle_id,
-                        'display_name': display_name
-                    })
-            logger.info(f'Found {len(app_list)} apps on device using pymobiledevice3')
-
-        except ImportError:
-            logger.warning('pymobiledevice3 not installed, falling back to WDA app_list')
-            # 如果 pymobiledevice3 未安装，回退到 WDA 方法
-            try:
-                user_apps = ctx.deps.device.target.app_list('user') or []
-                system_apps = ctx.deps.device.target.app_list('system') or []
-                apps = user_apps + system_apps
-                for app in apps:
-                    if app.get('bundleId'):
-                        app_list.append({
-                            'bundle_id': app.get('bundleId', ''),
-                            'display_name': app.get('label', '') or app.get('name', '')
-                        })
-                logger.info(f'Found {len(app_list)} apps on device using WDA')
-            except Exception as e:
-                logger.warning(f'Failed to get app list: {e}')
-                app_list = []
-        except Exception as e:
-            logger.warning(f'Failed to get app list with pymobiledevice3: {e}, falling back to WDA')
-            # 如果 pymobiledevice3 失败，回退到 WDA 方法
-            try:
-                user_apps = ctx.deps.device.target.app_list('user') or []
-                system_apps = ctx.deps.device.target.app_list('system') or []
-                apps = user_apps + system_apps
-                for app in apps:
-                    if app.get('bundleId'):
-                        app_list.append({
-                            'bundle_id': app.get('bundleId', ''),
-                            'display_name': app.get('label', '') or app.get('name', '')
-                        })
-                logger.info(f'Found {len(app_list)} apps on device using WDA fallback')
-            except:
-                app_list = []
-
+        app_list = ctx.deps.device.client.get_app_list()
         logger.info(f'Found {len(app_list)} apps on device')
 
         # 使用LLM从应用列表中智能匹配
@@ -291,7 +235,7 @@ class IOSAgentTool(MobileAgentTool):
         )
         prompt = (f'用户指令：{params.instruction}\n'
                   f'应用列表（Bundle ID | 显示名称）：\n' +
-                  '\n'.join([f"{app['bundle_id']} | {app['display_name']}" for app in app_list]))
+                  '\n'.join([f"{app.bundle_id} | {app.display_name}" for app in app_list]))
         result = await sub_agent.run(prompt, output_type=str)
         bundle_id = result.output
 

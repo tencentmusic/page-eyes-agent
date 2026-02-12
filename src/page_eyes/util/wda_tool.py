@@ -3,10 +3,12 @@
 # @Author : xinttan
 # @Email : xinttan@tencent.com
 # @Time : 2026/2/12 16:00
+import tempfile
 from dataclasses import dataclass
 from typing import List, NamedTuple, Optional
 
 import wda
+from PIL.Image import Image
 from loguru import logger
 
 
@@ -22,149 +24,103 @@ class WdaDeviceInfo:
     version: str
     state: str
 
+@dataclass
+class AppInfo:
+    """应用信息"""
+    bundle_id: str
+    display_name: str
 
-class WindowSize(NamedTuple):
-    """窗口尺寸"""
-    width: int
-    height: int
 
 
-class WdaDeviceProxy:
-    """WDA设备代理类，提供高级功能封装
+class WdaClient(wda.Client):
+    """扩展WDA Client，添加更多便捷方法"""
 
-    参考adb_tool.AdbDeviceProxy和hdc_tool的设计
-    封装WDA常用操作，提供更友好的API
-    """
-
-    def __init__(self, client: wda.Client):
-        """初始化代理
-
-        Args:
-            client: WDA Client对象
+    def long_press(self, x: float, y: float, duration: float = 2.0):
+        """长按指定坐标
         """
-        self._client = client
+        self.tap_hold(x, y, duration)
+        logger.info(f'Long press at ({x}, {y}) for {duration}s')
 
-    @property
-    def client(self) -> wda.Client:
-        """获取WDA客户端"""
-        return self._client
-
-    def get_app_list(self, app_type: str = 'all') -> List[dict]:
-        """获取应用列表（改进版本，支持获取所有应用）
-
-        Args:
-            app_type: 应用类型
-                - 'user': 仅用户安装的应用
-                - 'system': 仅系统应用
-                - 'all': 所有应用（默认）
-
-        Returns:
-            应用列表，每个应用包含bundleId、name等信息
+    def double_tap(self, x: float, y: float):
+        """双击指定坐标
         """
-        try:
-            if app_type == 'all':
-                # 获取所有应用：用户应用 + 系统应用
-                user_apps = self._client.app_list('user') or []
-                system_apps = self._client.app_list('system') or []
-                apps = user_apps + system_apps
-                logger.info(f'Found {len(user_apps)} user apps and {len(system_apps)} system apps')
-            else:
-                # 获取指定类型的应用
-                apps = self._client.app_list(app_type) or []
-                logger.info(f'Found {len(apps)} {app_type} apps')
+        self.double_tap(x, y)
+        logger.info(f'Double tap at ({x}, {y})')
 
-            return apps
-        except Exception as e:
-            logger.warning(f'Failed to get app list: {e}')
-            # 如果带参数失败，尝试不带参数（某些WDA版本的默认行为）
-            try:
-                apps = self._client.app_list() or []
-                logger.info(f'Found {len(apps)} apps (fallback method)')
-                return apps
-            except Exception as e2:
-                logger.error(f'Failed to get app list (fallback): {e2}')
-                return []
-
-    def get_bundle_ids(self, app_type: str = 'all') -> List[str]:
-        """获取应用Bundle ID列表
-
-        Args:
-            app_type: 应用类型（user/system/all）
-
-        Returns:
-            Bundle ID列表
+    def input_text_with_clear(self, text: str, clear: bool = True):
+        """输入文本，支持先清空
         """
-        apps = self.get_app_list(app_type)
-        bundle_ids = [app.get('bundleId', '') for app in apps if app.get('bundleId')]
-        return bundle_ids
-
-    def smart_input_text(self, text: str, element_x: float, element_y: float, clear: bool = True):
-        """智能输入文本
-
-        Args:
-            text: 要输入的文本
-            element_x: 输入框x坐标
-            element_y: 输入框y坐标
-            clear: 是否先清空（默认True）
-        """
-        session = self._client.session()
-
-        # 点击输入框获取焦点
-        session.tap(element_x, element_y)
-        logger.info(f'Tap input field at ({element_x}, {element_y})')
-
-        # 输入文本
         if clear:
-            # 尝试清空现有内容
             try:
-                session.send_keys('')
+                self.send_keys('')
             except:
                 pass
 
-        session.send_keys(text)
+        self.send_keys(text)
         logger.info(f'Input text: {text}')
 
-    def device_info(self) -> WdaDeviceInfo:
-        """获取设备信息"""
-        try:
-            info = self._client.status()
-            ios_info = info.get('value', {}).get('ios', {}) if 'value' in info else info.get('ios', {})
+    def swipe_with_direction(self, direction: str, distance: float = 0.5):
+        """按方向滑动
+        """
+        size = self.window_size()
+        width, height = size.width, size.height
+        center_x, center_y = width / 2, height / 2
 
-            return WdaDeviceInfo(
-                name=ios_info.get('name', 'Unknown'),
-                udid=ios_info.get('udid', 'Unknown'),
-                version=ios_info.get('version', 'Unknown'),
-                state=info.get('state', 'Unknown')
-            )
-        except Exception as e:
-            logger.warning(f'Failed to get device info: {e}')
-            return WdaDeviceInfo(name='Unknown', udid='Unknown', version='Unknown', state='Unknown')
+        swipe_map = {
+            'up': (center_x, height * (0.5 + distance / 2), center_x, height * (0.5 - distance / 2)),
+            'down': (center_x, height * (0.5 - distance / 2), center_x, height * (0.5 + distance / 2)),
+            'left': (width * (0.5 + distance / 2), center_y, width * (0.5 - distance / 2), center_y),
+            'right': (width * (0.5 - distance / 2), center_y, width * (0.5 + distance / 2), center_y),
+        }
 
-    def battery_info(self) -> dict:
-        """获取电池信息"""
-        try:
-            info = self._client.status()
-            ios_info = info.get('value', {}).get('ios', {}) if 'value' in info else info.get('ios', {})
-            battery = ios_info.get('battery', {})
+        if direction not in swipe_map:
+            raise ValueError(f"Invalid direction: {direction}. Must be one of: up/down/left/right")
 
-            return {
-                'level': battery.get('level', -1),
-                'state': battery.get('state', 'Unknown')
-            }
-        except Exception as e:
-            logger.warning(f'Failed to get battery info: {e}')
-            return {'level': -1, 'state': 'Unknown'}
+        x1, y1, x2, y2 = swipe_map[direction]
+        self.swipe(x1, y1, x2, y2)
+        logger.info(f'Swipe {direction} with distance {distance}')
 
-    def healthcheck(self) -> bool:
-        """WDA服务健康检查
+    def get_app_list(self) -> List[AppInfo]:
+        """获取设备上所有应用的Bundle ID和显示名称
+
+        优先使用 pymobiledevice3 获取详细信息，失败则回退到 WDA 方法
+
+        Args:
+            wda_client: WDA客户端实例
 
         Returns:
-            True表示WDA服务正常，False表示异常
+            应用信息列表
         """
+        app_list = []
+
         try:
-            status = self._client.status()
-            return status is not None
+            from pymobiledevice3.lockdown import create_using_usbmux
+            from pymobiledevice3.services.installation_proxy import InstallationProxyService
+
+            # 通过 USB 连接到设备
+            lockdown = create_using_usbmux()
+            installation_proxy = InstallationProxyService(lockdown=lockdown)
+
+            # 获取所有应用（用户应用和系统应用）
+            apps_info = installation_proxy.get_apps(application_type='Any')
+
+            # 提取 bundle ID 和显示名称
+            if apps_info:
+                for bundle_id, app_info in apps_info.items():
+                    display_name = app_info.get('CFBundleDisplayName') or app_info.get('CFBundleName', '')
+                    app_list.append(AppInfo(
+                        bundle_id=bundle_id,
+                        display_name=display_name
+                    ))
+            logger.info(f'Found {len(app_list)} apps on device using pymobiledevice3')
+
+        except ImportError:
+            logger.warning('pymobiledevice3 not installed, falling back to WDA app_list')
         except Exception as e:
-            logger.error(f'WDA healthcheck failed: {e}')
-            return False
+            logger.warning(f'Failed to get app list with pymobiledevice3: {e}, falling back to WDA')
+
+
+        return app_list
+
+
 
