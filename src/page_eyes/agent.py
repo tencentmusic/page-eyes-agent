@@ -266,7 +266,7 @@ class HarmonyAgent(UiAgent):
         agent = Agent[AgentDeps](
             model=settings.model,
             system_prompt=SYSTEM_PROMPT,
-            model_settings=model_settings,
+            model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
             retries=2
