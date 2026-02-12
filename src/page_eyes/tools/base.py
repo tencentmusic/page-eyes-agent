@@ -23,13 +23,13 @@ from ..config import default_settings
 from ..deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
     WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput
-from ..device import AndroidDevice, WebDevice
+from ..device import AndroidDevice, WebDevice, HarmonyDevice
 from ..util.js_tool import JSTool
 
 storage_client = default_settings.storage_client
 
 AgentDepsType: TypeAlias = AgentDeps[
-    Union[WebDevice, AndroidDevice],
+    Union[WebDevice, AndroidDevice, HarmonyDevice],
     'AgentTool',
 ]
 
@@ -73,7 +73,7 @@ class ToolHandler:
 
         if self.ctx.deps.settings.debug and isinstance(self.step_params, LocationToolParams):
             if isinstance(self.ctx.deps.device, WebDevice):
-                await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_params.element_bbox)
+                await JSTool.add_highlight_element(self.ctx.deps.device.target, self.step_params.element_bbox)
 
     async def post_handle(self, tool_result: ToolResult):
         """工具的后置处理"""

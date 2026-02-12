@@ -25,8 +25,8 @@ async def test_mobile_02(android_agent):
     await android_agent.run(
         """
         - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
-        - 检查页面是否有 "close" 按钮，如果有则点击 "close" 按钮
-        - 点击"Q"
+        - 如果出现 "close" 按钮，则点击 "close" 按钮, 否则跳过
+        - 点击"搜索"
         - 在搜索输入框中输入"任素汐"
         - 等待3秒，直到出现"在腾讯音乐由你榜内相关歌曲"
         - 向上滑动，直到出现"胡广生"

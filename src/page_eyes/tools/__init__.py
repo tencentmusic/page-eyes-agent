@@ -6,5 +6,6 @@
 from .base import AgentDepsType
 from .android import AndroidAgentTool
 from .web import WebAgentTool
+from .harmony import HarmonyAgentTool
 
-__all__ = ["AgentDepsType", "WebAgentTool", "AndroidAgentTool"]
+__all__ = ["AgentDepsType", "WebAgentTool", "AndroidAgentTool", "HarmonyAgentTool"]

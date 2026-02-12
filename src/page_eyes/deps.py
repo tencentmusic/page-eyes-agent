@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, confloat, conlist, ConfigDict
 from .config import Settings
 
 T = TypeVar('T')
+ClientT = TypeVar('ClientT')
 DeviceT = TypeVar('DeviceT')
 ToolT = TypeVar('ToolT')
 
@@ -85,7 +86,7 @@ class AgentDeps(Generic[DeviceT, ToolT]):
 
 class ToolParams(BaseModel):
     instruction: str = Field(description='用户指令，描述该步骤要做什么', exclude=True)
-    action: str = Field(description='要执行的动作，如 click、input、swipe 等, 是调用的工具名称')
+    action: str = Field(description='要执行的动作名称，如 click、input、swipe、open_app 等, 操作调用的工具名称')
 
 
 class OpenUrlToolParams(ToolParams):

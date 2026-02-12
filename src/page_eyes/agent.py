@@ -19,9 +19,9 @@ from pydantic_ai.usage import Usage
 from .config import default_settings, model_settings, Settings
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
-from .device import AndroidDevice, WebDevice
+from .device import AndroidDevice, WebDevice, HarmonyDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
-from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType
+from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType, HarmonyAgentTool
 from .util.platform import Platform
 
 
@@ -230,6 +230,39 @@ class AndroidAgent(UiAgent):
 
         tool = AndroidAgentTool() if tool_cls is None else tool_cls()
         deps: AgentDeps[AndroidDevice, AndroidAgentTool] = AgentDeps(settings, device, tool)
+
+        agent = Agent[AgentDeps](
+            model=settings.model,
+            system_prompt=SYSTEM_PROMPT,
+            model_settings=model_settings,
+            deps_type=AgentDeps,
+            tools=tool.tools,
+            retries=2
+        )
+        return cls(model, deps, agent)
+
+
+class HarmonyAgent(UiAgent):
+    """HarmonyAgent class for mobile device automation."""
+
+    @classmethod
+    async def create(
+            cls, model: Optional[str] = None,
+            *,
+            connect_key: Optional[str] = None,
+            platform: Optional[str | Platform] = None,
+            tool_cls: Optional[type[HarmonyAgentTool]] = None,
+            debug: Optional[bool] = None,
+    ):
+        settings = cls.merge_settings(Settings(
+            model=model,
+            debug=debug
+        ))
+
+        device = await HarmonyDevice.create(connect_key=connect_key, platform=platform)
+
+        tool = HarmonyAgentTool() if tool_cls is None else tool_cls()
+        deps: AgentDeps[HarmonyDevice, HarmonyAgentTool] = AgentDeps(settings, device, tool)
 
         agent = Agent[AgentDeps](
             model=settings.model,

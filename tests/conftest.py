@@ -9,15 +9,16 @@ import pytest
 import pytest_asyncio
 from loguru import logger
 
-from page_eyes.agent import WebAgent, AndroidAgent, PlanningAgent
+from page_eyes.agent import WebAgent, AndroidAgent, PlanningAgent, HarmonyAgent
 from page_eyes.util.platform import Platform
 
 logger.remove()
-logger.add(sys.stdout, level="INFO")
+logger.add(sys.stdout, level="DEBUG")
 
-debug = True
+debug = False
 
 serial = ''  # Android 设备序列号
+connect_key = '127.0.0.1:9002'  # Harmony 设备连接key
 
 
 @pytest.fixture(scope="session")
@@ -39,4 +40,11 @@ async def web_agent_mobile():
 async def android_agent():
     if not serial:
         logger.info("未指定 Android 设备, 将使用默认第一个设备")
-    return await AndroidAgent.create(serial=serial, platform=Platform.KG, debug=debug)
+    return await AndroidAgent.create(serial=serial, platform=Platform.QY, debug=debug)
+
+
+@pytest_asyncio.fixture(scope="session")
+async def harmony_agent():
+    if not connect_key:
+        logger.info("未指定 Harmony 设备, 将使用默认第一个设备")
+    return await HarmonyAgent.create(connect_key=connect_key, platform=Platform.KG, debug=debug)

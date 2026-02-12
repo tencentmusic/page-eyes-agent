@@ -76,7 +76,7 @@ class ToolHandler:
 
         if self.ctx.deps.settings.debug and isinstance(self.step_params, LocationToolParams):
             if isinstance(self.ctx.deps.device, WebDevice):
-                await JSTool.add_highlight_element(self.ctx.deps.device.page, self.step_params.element_bbox)
+                await JSTool.add_highlight_element(self.ctx.deps.device.target, self.step_params.element_bbox)
 
     async def post_handle(self, tool_result: ToolResult):
         """工具的后置处理"""
@@ -324,7 +324,7 @@ class WebAgentTool(AgentTool):
 
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDepsType]) -> io.BytesIO:
-        screenshot = await ctx.deps.device.page.screenshot(full_page=False, style='#option-el-box {display: none;}')
+        screenshot = await ctx.deps.device.target.screenshot(full_page=False, style='#option-el-box {display: none;}')
         image_buffer = io.BytesIO(screenshot)
         image_buffer.name = 'screen.png'
         return image_buffer
@@ -350,12 +350,12 @@ class WebAgentTool(AgentTool):
         """
         任务完成或结束后的清理操作
         """
-        await JSTool.remove_highlight_element(ctx.deps.device.page)
+        await JSTool.remove_highlight_element(ctx.deps.device.target)
         await self.get_screen(ctx, parse_element=False)
 
-        if ctx.deps.device.playwright is not None:
+        if ctx.deps.device.client is not None:
             await ctx.deps.device.context.close()
-            await ctx.deps.device.playwright.stop()
+            await ctx.deps.device.client.stop()
         return ToolResult.success()
 
     @tool(after_delay=2)
@@ -363,7 +363,7 @@ class WebAgentTool(AgentTool):
         """
         使用设备打开URL
         """
-        await ctx.deps.device.page.goto(params.url, wait_until='networkidle')
+        await ctx.deps.device.target.goto(params.url, wait_until='networkidle')
         return ToolResult.success()
 
     @tool(after_delay=2)
@@ -373,23 +373,23 @@ class WebAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size, params.position, params.offset)
         logger.info(f'click coordinate ({x}, {y})')
-        await JSTool.add_highlight_position(ctx.deps.device.page, x, y)
+        await JSTool.add_highlight_position(ctx.deps.device.target, x, y)
         try:
             if params.file_path:
                 logger.info(f'upload file ({params.file_path.absolute()})')
-                async with ctx.deps.device.page.expect_file_chooser(timeout=5000) as fc_info:
-                    await ctx.deps.device.page.mouse.click(x, y)
+                async with ctx.deps.device.target.expect_file_chooser(timeout=5000) as fc_info:
+                    await ctx.deps.device.target.mouse.click(x, y)
                     file_chooser = await fc_info.value
                     await file_chooser.set_files(params.file_path)
             else:
-                async with ctx.deps.device.page.context.expect_page(timeout=1000) as new_page_info:
-                    await ctx.deps.device.page.mouse.click(x, y)
-                old_page = ctx.deps.device.page
-                ctx.deps.device.page = await new_page_info.value
+                async with ctx.deps.device.target.context.expect_page(timeout=1000) as new_page_info:
+                    await ctx.deps.device.target.mouse.click(x, y)
+                old_page = ctx.deps.device.target
+                ctx.deps.device.target = await new_page_info.value
                 await old_page.close()
         except TimeoutError:
             pass
-        await JSTool.remove_highlight_position(ctx.deps.device.page)
+        await JSTool.remove_highlight_position(ctx.deps.device.target)
         return ToolResult.success()
 
     @tool(after_delay=1)
@@ -399,10 +399,10 @@ class WebAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
-        await ctx.deps.device.page.mouse.click(x, y)
-        await ctx.deps.device.page.keyboard.type(params.text)
+        await ctx.deps.device.target.mouse.click(x, y)
+        await ctx.deps.device.target.keyboard.type(params.text)
         if params.send_enter:
-            await ctx.deps.device.page.keyboard.press('Enter')
+            await ctx.deps.device.target.keyboard.press('Enter')
         return ToolResult.success()
 
     @staticmethod
@@ -426,12 +426,12 @@ class WebAgentTool(AgentTool):
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         # TODO: 禁止滑动的时候选中文字，目前先简单实现，后面寻找更优方案
-        el_handle = await ctx.deps.device.page.add_style_tag(content="* {user-select: none !important;}")
+        el_handle = await ctx.deps.device.target.add_style_tag(content="* {user-select: none !important;}")
 
-        await ctx.deps.device.page.mouse.move(x1, y1)
-        await ctx.deps.device.page.mouse.down()
-        await ctx.deps.device.page.mouse.move(x2, y2, steps=steps)
-        await ctx.deps.device.page.mouse.up()
+        await ctx.deps.device.target.mouse.move(x1, y1)
+        await ctx.deps.device.target.mouse.down()
+        await ctx.deps.device.target.mouse.move(x2, y2, steps=steps)
+        await ctx.deps.device.target.mouse.up()
         await JSTool.remove_element(el_handle)
 
     @staticmethod
@@ -453,7 +453,7 @@ class WebAgentTool(AgentTool):
             raise ValueError(f'Invalid Parameter: to={params.to}')
 
         logger.info(f'Scroll delta_x={delta_x}, delta_y={delta_y}')
-        await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
+        await ctx.deps.device.target.mouse.wheel(delta_x, delta_y)
 
     @tool(after_delay=1)
     async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
@@ -461,7 +461,7 @@ class WebAgentTool(AgentTool):
         在设备屏幕中滑动或滚动
         """
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
-        has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.page, params.to)
+        has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.target, params.to)
 
         if params.repeat_times is None:
             if params.expect_keywords:
@@ -492,7 +492,7 @@ class WebAgentTool(AgentTool):
         操作返回到上一个页面
         """
         logger.info(f'go to previous page')
-        await ctx.deps.device.page.go_back()
+        await ctx.deps.device.target.go_back()
         return ToolResult.success()
 
 
@@ -501,7 +501,7 @@ class AndroidAgentTool(AgentTool):
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDepsType]) -> io.BytesIO:
         image_buffer = io.BytesIO()
-        screenshot = ctx.deps.device.adb_device.screenshot()
+        screenshot = ctx.deps.device.target.screenshot()
         screenshot.save(image_buffer, format='png')
         image_buffer.name = 'screen.png'
         image_buffer.seek(0)
@@ -532,7 +532,7 @@ class AndroidAgentTool(AgentTool):
         url_schema = get_client_url_schema(params.url, platform)
         logger.info(f'open schema: {url_schema}')
 
-        ctx.deps.device.adb_device.shell(f'am start -a android.intent.action.VIEW -d "{url_schema}"')
+        ctx.deps.device.target.shell(f'am start -a android.intent.action.VIEW -d "{url_schema}"')
         await asyncio.sleep(2)
         await self.get_screen(ctx, parse_element=False)
         return ToolResult.success()
@@ -544,7 +544,7 @@ class AndroidAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size, params.position, params.offset)
         logger.info(f'Click coordinate ({x}, {y})')
-        ctx.deps.device.adb_device.click(x, y)
+        ctx.deps.device.target.click(x, y)
 
         return ToolResult.success()
 
@@ -555,10 +555,10 @@ class AndroidAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
-        ctx.deps.device.adb_device.click(x, y)
-        AdbDeviceProxy(ctx.deps.device.adb_device).input_text(params.text)
+        ctx.deps.device.target.click(x, y)
+        AdbDeviceProxy(ctx.deps.device.target).input_text(params.text)
         if params.send_enter:
-            ctx.deps.device.adb_device.keyevent('KEYCODE_ENTER')
+            ctx.deps.device.target.keyevent('KEYCODE_ENTER')
         return ToolResult.success()
 
     @tool
@@ -591,7 +591,7 @@ class AndroidAgentTool(AgentTool):
                 params.repeat_times = 1
         for times in range(1, params.repeat_times + 1):
             logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2}), times={times}')
-            ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+            ctx.deps.device.target.swipe(x1, y1, x2, y2, duration=2)
             if params.expect_keywords:
                 await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
                 result = await self.expect_screen_contains(ctx, params.expect_keywords)
@@ -619,7 +619,7 @@ class AndroidAgentTool(AgentTool):
             x1, y1 = start_coordinate
             x2, y2 = end_coordinate
             logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
-            ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+            ctx.deps.device.target.swipe(x1, y1, x2, y2, duration=2)
         return ToolResult.success()
 
     @tool
@@ -631,7 +631,7 @@ class AndroidAgentTool(AgentTool):
         """
         在设备中打开或启动指定的应用(APP)
         """
-        packages: list[str] = ctx.deps.device.adb_device.list_packages(filter_list=['-e'])
+        packages: list[str] = ctx.deps.device.target.list_packages(filter_list=['-e'])
         sub_agent = Agent(
             ctx.model,
             output_type=str,
@@ -644,7 +644,7 @@ class AndroidAgentTool(AgentTool):
         if not package_name:
             return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
         logger.info(f'Find App package name：{package_name}')
-        ctx.deps.device.adb_device.app_start(package_name)
+        ctx.deps.device.target.app_start(package_name)
         await asyncio.sleep(2)
         await self.get_screen(ctx, parse_element=False)
         return ToolResult.success()

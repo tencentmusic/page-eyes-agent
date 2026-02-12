@@ -5,23 +5,27 @@
 # @Time : 2026/2/11 15:50
 import asyncio
 import io
+from typing import TypeAlias
 
 from loguru import logger
 # noinspection PyProtectedMember
 from playwright.async_api import TimeoutError
 from pydantic_ai import RunContext
 
-from .base import AgentTool, tool, AgentDepsType
+from .base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
-    InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput
+    InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
+from ..device import WebDevice
 from ..util.js_tool import JSTool
+
+AgentDepsType: TypeAlias = AgentDeps[WebDevice, AgentTool]
 
 
 class WebAgentTool(AgentTool):
 
     @staticmethod
     async def screenshot(ctx: RunContext[AgentDepsType]) -> io.BytesIO:
-        screenshot = await ctx.deps.device.page.screenshot(full_page=False, style='#option-el-box {display: none;}')
+        screenshot = await ctx.deps.device.target.screenshot(full_page=False, style='#option-el-box {display: none;}')
         image_buffer = io.BytesIO(screenshot)
         image_buffer.name = 'screen.png'
         return image_buffer
@@ -47,12 +51,12 @@ class WebAgentTool(AgentTool):
         """
         任务完成或结束后的清理操作
         """
-        await JSTool.remove_highlight_element(ctx.deps.device.page)
+        await JSTool.remove_highlight_element(ctx.deps.device.target)
         await self.get_screen(ctx, parse_element=False)
 
-        if ctx.deps.device.playwright is not None:
+        if ctx.deps.device.client is not None:
             await ctx.deps.device.context.close()
-            await ctx.deps.device.playwright.stop()
+            await ctx.deps.device.client.stop()
         return ToolResult.success()
 
     @tool(after_delay=2)
@@ -60,7 +64,7 @@ class WebAgentTool(AgentTool):
         """
         使用设备打开URL
         """
-        await ctx.deps.device.page.goto(params.url, wait_until='networkidle')
+        await ctx.deps.device.target.goto(params.url, wait_until='networkidle')
         return ToolResult.success()
 
     @tool(after_delay=2)
@@ -70,23 +74,23 @@ class WebAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size, params.position, params.offset)
         logger.info(f'click coordinate ({x}, {y})')
-        await JSTool.add_highlight_position(ctx.deps.device.page, x, y)
+        await JSTool.add_highlight_position(ctx.deps.device.target, x, y)
         try:
             if params.file_path:
                 logger.info(f'upload file ({params.file_path.absolute()})')
-                async with ctx.deps.device.page.expect_file_chooser(timeout=5000) as fc_info:
-                    await ctx.deps.device.page.mouse.click(x, y)
+                async with ctx.deps.device.target.expect_file_chooser(timeout=5000) as fc_info:
+                    await ctx.deps.device.target.mouse.click(x, y)
                     file_chooser = await fc_info.value
                     await file_chooser.set_files(params.file_path)
             else:
-                async with ctx.deps.device.page.context.expect_page(timeout=1000) as new_page_info:
-                    await ctx.deps.device.page.mouse.click(x, y)
-                old_page = ctx.deps.device.page
-                ctx.deps.device.page = await new_page_info.value
+                async with ctx.deps.device.target.context.expect_page(timeout=1000) as new_page_info:
+                    await ctx.deps.device.target.mouse.click(x, y)
+                old_page = ctx.deps.device.target
+                ctx.deps.device.target = await new_page_info.value
                 await old_page.close()
         except TimeoutError:
             pass
-        await JSTool.remove_highlight_position(ctx.deps.device.page)
+        await JSTool.remove_highlight_position(ctx.deps.device.target)
         return ToolResult.success()
 
     @tool(after_delay=1)
@@ -96,10 +100,10 @@ class WebAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
-        await ctx.deps.device.page.mouse.click(x, y)
-        await ctx.deps.device.page.keyboard.type(params.text)
+        await ctx.deps.device.target.mouse.click(x, y)
+        await ctx.deps.device.target.keyboard.type(params.text)
         if params.send_enter:
-            await ctx.deps.device.page.keyboard.press('Enter')
+            await ctx.deps.device.target.keyboard.press('Enter')
         return ToolResult.success()
 
     @staticmethod
@@ -123,12 +127,12 @@ class WebAgentTool(AgentTool):
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
         # TODO: 禁止滑动的时候选中文字，目前先简单实现，后面寻找更优方案
-        el_handle = await ctx.deps.device.page.add_style_tag(content="* {user-select: none !important;}")
+        el_handle = await ctx.deps.device.target.add_style_tag(content="* {user-select: none !important;}")
 
-        await ctx.deps.device.page.mouse.move(x1, y1)
-        await ctx.deps.device.page.mouse.down()
-        await ctx.deps.device.page.mouse.move(x2, y2, steps=steps)
-        await ctx.deps.device.page.mouse.up()
+        await ctx.deps.device.target.mouse.move(x1, y1)
+        await ctx.deps.device.target.mouse.down()
+        await ctx.deps.device.target.mouse.move(x2, y2, steps=steps)
+        await ctx.deps.device.target.mouse.up()
         await JSTool.remove_element(el_handle)
 
     @staticmethod
@@ -150,7 +154,7 @@ class WebAgentTool(AgentTool):
             raise ValueError(f'Invalid Parameter: to={params.to}')
 
         logger.info(f'Scroll delta_x={delta_x}, delta_y={delta_y}')
-        await ctx.deps.device.page.mouse.wheel(delta_x, delta_y)
+        await ctx.deps.device.target.mouse.wheel(delta_x, delta_y)
 
     @tool(after_delay=1)
     async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
@@ -158,7 +162,7 @@ class WebAgentTool(AgentTool):
         在设备屏幕中滑动或滚动
         """
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
-        has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.page, params.to)
+        has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.target, params.to)
 
         if params.repeat_times is None:
             if params.expect_keywords:
@@ -189,5 +193,5 @@ class WebAgentTool(AgentTool):
         操作返回到上一个页面
         """
         logger.info(f'go to previous page')
-        await ctx.deps.device.page.go_back()
+        await ctx.deps.device.target.go_back()
         return ToolResult.success()

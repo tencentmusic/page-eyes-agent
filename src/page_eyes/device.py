@@ -6,22 +6,30 @@
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Generic
 
 from adbutils import AdbClient, AdbDevice
 from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
 
-from .deps import DeviceSize
+from .deps import DeviceSize, DeviceT, ClientT
 from .util.hdc_tool import HdcClient, HdcDevice
 from .util.platform import Platform
 
 
 @dataclass
-class WebDevice:
-    playwright: Optional[Playwright]
-    context: BrowserContext
-    page: Page
+class Device(Generic[ClientT, DeviceT]):
+    client: ClientT
+    target: DeviceT
     device_size: DeviceSize
+
+    @classmethod
+    def create(cls, *args, **kwargs) -> DeviceT:
+        raise NotImplementedError
+
+
+@dataclass
+class WebDevice(Device[Playwright, Page]):
+    context: BrowserContext
     simulate_device: Optional[str] = None
     is_mobile: Optional[bool] = None
 
@@ -48,7 +56,7 @@ class WebDevice:
         page = context.pages[0]
         device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, context, page, device_size, simulate_device, is_mobile)
+        return cls(playwright, page, device_size, context, simulate_device, is_mobile)
 
     @classmethod
     async def from_page(cls, page: Page, simulate_device: Optional[str] = None) -> "WebDevice":
@@ -58,14 +66,11 @@ class WebDevice:
 
         device_size = DeviceSize(**page.viewport_size)
 
-        return cls(playwright, context, page, device_size, simulate_device)
+        return cls(playwright, page, device_size, context, simulate_device)
 
 
 @dataclass
-class AndroidDevice:
-    client: AdbClient
-    adb_device: AdbDevice
-    device_size: DeviceSize
+class AndroidDevice(Device[AdbClient, AdbDevice]):
     platform: Platform
 
     @classmethod
@@ -90,10 +95,7 @@ class AndroidDevice:
 
 
 @dataclass
-class HarmonyDevice:
-    client: HdcClient
-    hdc_device: HdcDevice
-    device_size: DeviceSize
+class HarmonyDevice(Device[HdcClient, HdcDevice]):
     platform: Platform
 
     @classmethod

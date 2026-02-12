@@ -6,24 +6,32 @@
 import asyncio
 # noinspection PyProtectedMember
 import io
+from typing import TypeAlias
 
 from loguru import logger
 # noinspection PyProtectedMember
 from pydantic_ai import RunContext, Agent
 
-from .base import AgentTool, tool, AgentDepsType
+from .base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
-    InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ToolResultWithOutput
+    InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
+from ..device import AndroidDevice
 from ..util.adb_tool import AdbDeviceProxy
 from ..util.platform import get_client_url_schema
+
+AgentDepsType: TypeAlias = AgentDeps[AndroidDevice, AgentTool]
 
 
 class AndroidAgentTool(AgentTool):
 
     @staticmethod
+    def _start_url(ctx: RunContext[AgentDepsType], url: str):
+        return ctx.deps.device.target.shell(f'am start -a android.intent.action.VIEW -d "{url}"')
+
+    @staticmethod
     async def screenshot(ctx: RunContext[AgentDepsType]) -> io.BytesIO:
         image_buffer = io.BytesIO()
-        screenshot = ctx.deps.device.adb_device.screenshot()
+        screenshot = ctx.deps.device.target.screenshot()
         screenshot.save(image_buffer, format='png')
         image_buffer.name = 'screen.png'
         image_buffer.seek(0)
@@ -53,8 +61,7 @@ class AndroidAgentTool(AgentTool):
         platform = ctx.deps.device.platform
         url_schema = get_client_url_schema(params.url, platform)
         logger.info(f'open schema: {url_schema}')
-
-        ctx.deps.device.adb_device.shell(f'am start -a android.intent.action.VIEW -d "{url_schema}"')
+        self._start_url(ctx, url_schema)
         await asyncio.sleep(2)
         await self.get_screen(ctx, parse_element=False)
         return ToolResult.success()
@@ -66,7 +73,7 @@ class AndroidAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size, params.position, params.offset)
         logger.info(f'Click coordinate ({x}, {y})')
-        ctx.deps.device.adb_device.click(x, y)
+        ctx.deps.device.target.click(x, y)
 
         return ToolResult.success()
 
@@ -77,10 +84,10 @@ class AndroidAgentTool(AgentTool):
         """
         x, y = params.get_coordinate(ctx.deps.device.device_size)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
-        ctx.deps.device.adb_device.click(x, y)
-        AdbDeviceProxy(ctx.deps.device.adb_device).input_text(params.text)
+        ctx.deps.device.target.click(x, y)
+        AdbDeviceProxy(ctx.deps.device.target).input_text(params.text)
         if params.send_enter:
-            ctx.deps.device.adb_device.keyevent('KEYCODE_ENTER')
+            ctx.deps.device.target.keyevent('KEYCODE_ENTER')
         return ToolResult.success()
 
     @tool
@@ -113,7 +120,7 @@ class AndroidAgentTool(AgentTool):
                 params.repeat_times = 1
         for times in range(1, params.repeat_times + 1):
             logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2}), times={times}')
-            ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+            ctx.deps.device.target.swipe(x1, y1, x2, y2, duration=2)
             if params.expect_keywords:
                 await asyncio.sleep(1)  # 避免滑动后截图，元素还未稳定出现
                 result = await self.expect_screen_contains(ctx, params.expect_keywords)
@@ -141,7 +148,7 @@ class AndroidAgentTool(AgentTool):
             x1, y1 = start_coordinate
             x2, y2 = end_coordinate
             logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
-            ctx.deps.device.adb_device.swipe(x1, y1, x2, y2, duration=2)
+            ctx.deps.device.target.swipe(x1, y1, x2, y2, duration=2)
         return ToolResult.success()
 
     @tool
@@ -151,9 +158,9 @@ class AndroidAgentTool(AgentTool):
             params: ToolParams,
     ):
         """
-        在设备中打开或启动指定的应用(APP)
+        在设备中打开APP, 打开应用
         """
-        packages: list[str] = ctx.deps.device.adb_device.list_packages(filter_list=['-e'])
+        packages: list[str] = ctx.deps.device.target.list_packages(filter_list=['-e'])
         sub_agent = Agent(
             ctx.model,
             output_type=str,
@@ -166,7 +173,7 @@ class AndroidAgentTool(AgentTool):
         if not package_name:
             return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
         logger.info(f'Find App package name：{package_name}')
-        ctx.deps.device.adb_device.app_start(package_name)
+        ctx.deps.device.target.app_start(package_name)
         await asyncio.sleep(2)
         await self.get_screen(ctx, parse_element=False)
         return ToolResult.success()
