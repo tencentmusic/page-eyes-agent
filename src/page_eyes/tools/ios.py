@@ -1,18 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author : aidenmo
-# @Email : aidenmo@tencent.com
+# @Author : xinttan
+# @Email : xinttan@tencent.com
 # @Time : 2025/2/11 16:35
 import asyncio
 import io
-from typing import IO, Optional
-from pathlib import Path
-
-from httpx import AsyncClient
 from loguru import logger
-# noinspection PyProtectedMember
-from loguru._logger import context as logger_context
-from pydantic import TypeAdapter
 from pydantic_ai import RunContext, Agent
 
 from ..deps import (
@@ -203,7 +196,6 @@ class IOSAgentTool(AgentTool):
         return ToolResult.success() if not result.is_success else ToolResult.failed()
 
     @tool(after_delay=1)
-    #todo 好像有问题
     async def goback(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: ToolParams) -> ToolResult:
         """
         返回到上一个页面

@@ -28,6 +28,12 @@ PageEyes Agent 支持以下操作系统：
 - **ADB**：Android 调试桥
 - **Android SDK Platform Tools**：包含 ADB 和其他工具
 
+### 针对 iOS 自动化
+
+- **WebDriverAgent (WDA)**：iOS 设备自动化工具
+- **Xcode**：用于编译和部署 WDA (仅 macOS)
+- **iOS 设备**：需要开启开发者模式并信任开发证书
+
 ## 安装步骤
 
 ### 1. 克隆代码库
@@ -133,6 +139,79 @@ export MINIO_BUCKET="your_minio_bucket"
 export MINIO_SECURE="True"
 ```
 
+### 7. 配置 iOS 自动化 (可选)
+
+如果需要进行 iOS 自动化测试，需要配置 WebDriverAgent：
+
+#### 步骤 1：获取 WebDriverAgent
+
+```bash
+# 下载 WebDriverAgent
+git clone https://github.com/appium/WebDriverAgent.git
+cd WebDriverAgent
+
+# 或者使用预编译版本
+# 从项目提供的链接下载 WebDriverAgent.zip 并解压
+```
+
+#### 步骤 2：配置和编译 (仅 macOS)
+
+```bash
+# 安装依赖
+./Scripts/bootstrap.sh
+
+# 使用 Xcode 打开项目
+open WebDriverAgent.xcodeproj
+
+# 在 Xcode 中：
+# 1. 选择 WebDriverAgentRunner target
+# 2. 配置开发团队和签名证书
+# 3. 连接 iOS 设备
+# 4. 选择设备作为运行目标
+```
+
+#### 步骤 3：启动 WDA 服务
+
+```bash
+# 方式 1：使用 Xcode 运行
+# 在 Xcode 中点击 Run 按钮，选择 Test 方案
+
+# 方式 2：使用命令行
+xcodebuild -project WebDriverAgent.xcodeproj \
+  -scheme WebDriverAgentRunner \
+  -destination 'id=YOUR_DEVICE_UDID' \
+  test
+
+# 获取设备 UDID
+idevice_id -l
+# 或
+xcrun xctrace list devices
+```
+
+#### 步骤 4：配置 WDA URL
+
+WDA 服务启动后，配置环境变量：
+
+```bash
+# Linux/macOS
+export IOS_WDA_URL="http://localhost:8100"
+
+# Windows (如果使用远程 Mac 设备)
+set IOS_WDA_URL=http://your.mac.ip:8100
+
+#使用真机需要
+iproxy 8100 8100
+```
+
+#### 步骤 5：验证 WDA 连接
+
+```bash
+# 检查 WDA 服务状态
+curl http://localhost:8100/status
+
+# 应该返回设备信息的 JSON 响应
+```
+
 ## 验证安装
 
 运行以下命令验证开发环境是否正确设置：
@@ -143,6 +222,9 @@ pytest tests/unit
 
 # 运行简单的 Web 自动化示例
 python examples/web_simple.py
+
+# 运行 iOS 自动化示例 (需要先配置 WDA)
+pytest tests/test_ios_agent.py
 ```
 
 ## 开发工具配置
@@ -224,6 +306,36 @@ mkdocs serve
    ```bash
    curl -I http://your.omniparser.service:8000/health
    ```
+
+4. **WDA 连接失败 (iOS)**
+
+   检查 WDA 服务状态和设备连接：
+   ```bash
+   # 检查 WDA 服务
+   curl http://localhost:8100/status
+   
+   # 检查设备连接
+   idevice_id -l
+   
+   # 重启 WDA 服务
+   # 在 Xcode 中停止并重新运行 Test
+   ```
+
+5. **iOS 设备信任问题**
+
+   在 iOS 设备上：
+   - 打开 设置 > 通用 > VPN与设备管理
+   - 信任开发者证书
+   - 打开 设置 > 隐私与安全性 > 开发者模式
+   - 启用开发者模式并重启设备
+
+6. **Xcode 签名问题**
+
+   确保：
+   - 已登录 Apple ID
+   - 选择了正确的开发团队
+   - 设备已添加到开发者账号
+   - Bundle ID 唯一且未被占用
 
 ### 获取帮助
 

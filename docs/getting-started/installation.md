@@ -4,7 +4,7 @@ title: 安装指南
 
 # 安装指南
 
-PageEyes Agent 是一个轻量级 UI 自动化框架，支持通过自然语言指令驱动 Web 和 Android 平台的 UI 自动化任务。本指南将展示如何正确安装和配置 PageEyes Agent 及其依赖项。
+PageEyes Agent 是一个轻量级 UI 自动化框架，支持通过自然语言指令驱动 Web、Android 和 iOS 平台的 UI 自动化任务。本指南将展示如何正确安装和配置 PageEyes Agent 及其依赖项。
 
 
 ## 系统要求
@@ -122,7 +122,100 @@ brew install android-platform-tools
 sudo apt-get install android-tools-adb
 ```
 
-### 4. MinIO（可选，用于报告存储）
+### 4 WebDriverAgent (WDA)（仅 iOS 需要）
+
+如果计划在 iOS 设备上运行自动化任务，需要配置 WebDriverAgent：
+
+!!! tip
+    WDA 的编译和部署需要在 macOS 系统上进行，并需要 Xcode 和 Apple 开发者账号。
+
+#### 步骤 1：获取 WebDriverAgent
+
+```bash
+# 方式 1：从 GitHub 克隆
+git clone https://github.com/appium/WebDriverAgent.git
+cd WebDriverAgent
+
+# 方式 2：使用预编译版本（如果项目提供）
+# 下载 WebDriverAgent.zip 并解压
+unzip WebDriverAgent.zip
+cd WebDriverAgent
+```
+
+#### 步骤 2：安装依赖并配置
+
+```bash
+# 安装依赖
+./Scripts/bootstrap.sh
+
+# 使用 Xcode 打开项目
+open WebDriverAgent.xcodeproj
+```
+
+在 Xcode 中进行以下配置：
+
+1. 选择 **WebDriverAgentRunner** target
+2. 在 **Signing & Capabilities** 中：
+   - 勾选 "Automatically manage signing"
+   - 选择你的开发团队（Team）
+   - 确保 Bundle Identifier 唯一（例如：com.yourcompany.WebDriverAgentRunner）
+3. 连接 iOS 设备到 Mac
+4. 在设备上信任开发者证书：
+   - 打开 **设置 > 通用 > VPN与设备管理**
+   - 信任你的开发者证书
+5. 启用开发者模式（iOS 16+）：
+   - 打开 **设置 > 隐私与安全性 > 开发者模式**
+   - 启用并重启设备
+
+#### 步骤 3：启动 WDA 服务
+
+```bash
+# 获取设备 UDID
+idevice_id -l
+# 或
+xcrun xctrace list devices
+
+# 使用 xcodebuild 启动 WDA
+xcodebuild -project WebDriverAgent.xcodeproj \
+  -scheme WebDriverAgentRunner \
+  -destination 'id=YOUR_DEVICE_UDID' \
+  test
+
+# 或者在 Xcode 中直接运行 Test（推荐）
+# Product > Test 或按 Cmd+U
+```
+
+成功启动后，你会看到类似以下输出：
+
+```
+ServerURLHere->http://[YOUR_DEVICE_IP]:8100<-ServerURLHere
+
+执行端口转发：
+iproxy 8100 8100
+```
+
+#### 步骤 4：验证 WDA 连接
+
+```bash
+# 检查 WDA 服务状态
+curl http://localhost:8100/status
+
+# 应该返回包含设备信息的 JSON 响应
+```
+
+#### 步骤 5：配置环境变量
+
+在你的项目中设置 WDA URL：
+
+```bash
+# 本地设备
+export IOS_WDA_URL="http://localhost:8100"
+
+# 或远程设备
+export IOS_WDA_URL="http://YOUR_DEVICE_IP:8100"
+```
+
+### 5. MinIO（可选，用于报告存储）
 
 如果您需要存储和共享测试报告，可以配置 MinIO：
 
@@ -186,6 +279,7 @@ PageEyes Agent 采用灵活的配置管理系统，支持通过环境变量、`.
 | AGENT_LOG_GRAPH_NODE | False     | 是否记录图节点日志                                                   |
 | OPENAI_BASE_URL   | https://api.deepseek.com/v1          | DeepSeek API的服务端点                                               |
 | OPENAI_API_KEY    | a22a37d7-xxx | 调用DeepSeek API所需的认证密钥                                       |
+| IOS_WDA_URL       | -         | iOS WebDriverAgent 服务地址（仅 iOS 自动化需要）                      |
 
 
 使用腾讯云COS服务（与MinIO二选一）
@@ -242,6 +336,11 @@ OPENAI_BASE_URL="https://your.llm.provider.com/v1/"
 
 # 大模型服务 API Key
 OPENAI_API_KEY="your_llm_api_key_here"
+
+# --- iOS 自动化配置 ---
+# WebDriverAgent 服务地址 (仅 iOS 自动化需要)
+# 本地设备使用 localhost，远程设备使用设备 IP
+IOS_WDA_URL="http://localhost:8100"
 ```
 
 ### 3. 存储与调试配置
@@ -307,6 +406,29 @@ AGENT_LOG_GRAPH_NODE=True
    adb kill-server
    adb start-server
    ```
+
+4. **WDA 连接失败（iOS）**
+   ```bash
+   # 检查 WDA 服务状态
+   curl http://localhost:8100/status
+   
+   # 检查设备连接
+   idevice_id -l
+   
+   # 如果服务未运行，在 Xcode 中重新运行 Test
+   ```
+
+5. **iOS 设备信任问题**
+   - 在设备上打开 **设置 > 通用 > VPN与设备管理**
+   - 信任开发者证书
+   - 在 **设置 > 隐私与安全性 > 开发者模式** 中启用开发者模式
+   - 重启设备
+
+6. **Xcode 签名错误**
+   - 确保已登录 Apple ID（Xcode > Preferences > Accounts）
+   - 选择正确的开发团队
+   - 修改 Bundle Identifier 确保唯一性
+   - 清理项目并重新构建（Product > Clean Build Folder）
 
 ### 获取帮助
 

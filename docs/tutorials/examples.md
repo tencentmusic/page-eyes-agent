@@ -116,6 +116,9 @@ iOS 端的交互效果与 Android 端类似，通过 WebDriverAgent 实现对 iO
 #### 步骤报告
 
 报告内容为每个步骤对应页面的元素信息详情（包括元素位置、大小、识别内容、周围元素等），方便调试与回顾。报告格式与 Android 端保持一致。
+<a href="https://cdn-y.tencentmusic.com/uni/commonPic/cos_a11ada74ed44812322bed7fd9bd68bba70dcbda0.html" target="_blank" title="点击查看完整报告">
+    <img src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_81580d06dbdc357ee702e74577e2462a7d4b693c.png" alt="步骤报告示例" style="width: 800px; border: 1px solid #ccc; cursor: pointer; vertical-align: middle; margin-top: 10px; margin-bottom: 10px;">
+</a>
 
 
 

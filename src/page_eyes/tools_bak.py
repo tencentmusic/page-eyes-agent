@@ -20,7 +20,7 @@ from playwright.async_api import TimeoutError
 from pydantic import TypeAdapter
 from pydantic_ai import ModelRetry, RunContext, Agent
 
-from .config import default_settings
+from .config import global_settings
 from .deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
     WaitToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput
