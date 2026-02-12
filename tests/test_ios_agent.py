@@ -50,7 +50,8 @@ async def test_ios_04(ios_agent):
     await ios_agent.run(
         """
         - 打开"baidu.com"
-        - 搜索 "2026blast春决"
+        - 打开搜索框
+        - 输入"2026blast春决"
         """
     )
 

@@ -41,12 +41,6 @@ class WdaClient(wda.Client):
         self.tap_hold(x, y, duration)
         logger.info(f'Long press at ({x}, {y}) for {duration}s')
 
-    def double_tap(self, x: float, y: float):
-        """双击指定坐标
-        """
-        self.double_tap(x, y)
-        logger.info(f'Double tap at ({x}, {y})')
-
     def input_text_with_clear(self, text: str, clear: bool = True):
         """输入文本，支持先清空
         """
@@ -58,27 +52,6 @@ class WdaClient(wda.Client):
 
         self.send_keys(text)
         logger.info(f'Input text: {text}')
-
-    def swipe_with_direction(self, direction: str, distance: float = 0.5):
-        """按方向滑动
-        """
-        size = self.window_size()
-        width, height = size.width, size.height
-        center_x, center_y = width / 2, height / 2
-
-        swipe_map = {
-            'up': (center_x, height * (0.5 + distance / 2), center_x, height * (0.5 - distance / 2)),
-            'down': (center_x, height * (0.5 - distance / 2), center_x, height * (0.5 + distance / 2)),
-            'left': (width * (0.5 + distance / 2), center_y, width * (0.5 - distance / 2), center_y),
-            'right': (width * (0.5 - distance / 2), center_y, width * (0.5 + distance / 2), center_y),
-        }
-
-        if direction not in swipe_map:
-            raise ValueError(f"Invalid direction: {direction}. Must be one of: up/down/left/right")
-
-        x1, y1, x2, y2 = swipe_map[direction]
-        self.swipe(x1, y1, x2, y2)
-        logger.info(f'Swipe {direction} with distance {distance}')
 
     def get_app_list(self) -> List[AppInfo]:
         """获取设备上所有应用的Bundle ID和显示名称
@@ -119,8 +92,37 @@ class WdaClient(wda.Client):
         except Exception as e:
             logger.warning(f'Failed to get app list with pymobiledevice3: {e}, falling back to WDA')
 
-
         return app_list
+
+    def tap_and_input(self, x: float, y: float, text: str, send_enter: bool = False, tap_delay: float = 0.5):
+        """点击坐标并输入文本(因为WDA的Session=Client，所以都用Client)
+
+        Args:
+            x: 点击的x坐标
+            y: 点击的y坐标
+            text: 要输入的文本
+            send_enter: 是否发送回车键
+            tap_delay: 点击后等待时间（秒）
+        """
+        import time
+
+        # 先点击输入框获取焦点
+        self.tap(x, y)
+        logger.info(f'Tap at ({x}, {y}) to focus input field')
+
+        # 等待输入框获取焦点
+        time.sleep(tap_delay)
+
+        # 输入文本
+        self.send_keys(text)
+        logger.info(f'Input text: {text}')
+
+        # 发送回车键
+        if send_enter:
+            self.send_keys('\n')
+            logger.info('Send enter key')
+
+
 
 
 

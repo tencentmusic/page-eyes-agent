@@ -14,7 +14,7 @@ from ._mobile import MobileAgentTool
 from ..deps import (
     AgentDeps, ToolParams, ToolResult, ToolResultWithOutput,
     ClickToolParams, InputToolParams, SwipeToolParams,
-    OpenUrlToolParams
+    SwipeFromCoordinateToolParams, OpenUrlToolParams
 )
 from ..device import IOSDevice
 from ._base import tool
@@ -58,7 +58,7 @@ class IOSAgentTool(MobileAgentTool):
         x, y = params.get_coordinate(device.device_size, params.position, params.offset)
 
         # 执行点击
-        device.target.tap(x,y)
+        device.target.session().tap(x,y)
 
         return ToolResult.success()
 
@@ -71,19 +71,12 @@ class IOSAgentTool(MobileAgentTool):
         logger.info(f'input text: {params.text} to element: {params.element_content}')
 
         device = ctx.deps.device
-        session = device.target.session()
 
-        # 先点击输入框获取焦点
+        # 计算点击坐标
         x, y = params.get_coordinate(device.device_size)
-        session.tap(x, y)
-        await asyncio.sleep(0.5)
 
-        # 输入文本
-        session.send_keys(params.text)
-
-        # 发送回车键
-        if params.send_enter:
-            session.send_keys('\n')
+        # 将 session 转换为 WdaSession 并使用扩展方法
+        device.client.tap_and_input(x, y, params.text, params.send_enter)
 
         return ToolResult.success()
 
@@ -123,6 +116,42 @@ class IOSAgentTool(MobileAgentTool):
                 if times == params.repeat_times:
                     return ToolResult.failed()
 
+        return ToolResult.success()
+
+    @tool(after_delay=1)
+    async def swipe_from_coordinate(
+            self,
+            ctx: RunContext[AgentDepsType],
+            params: SwipeFromCoordinateToolParams,
+    ) -> ToolResult:
+        """
+        在设备屏幕中根据给定的坐标进行滑动操作，支持传递多个坐标进行连续滑动
+        coordinates 是滑动坐标值的集合，如[(x1, y1), (x2, y2), ...]
+        工具依次从坐标集中取出2组值作为开始坐标(x1, y1)和结束坐标(x2, y2)，直到完成所有坐标的滑动操作
+        """
+        logger.info(f'swipe from coordinates: {params.coordinates}')
+
+        device = ctx.deps.device
+        session = device.target.session()
+        width, height = device.device_size.width, device.device_size.height
+
+        # 验证坐标是否在屏幕范围内
+        for x, y in params.coordinates:
+            if not (0 <= x <= width and 0 <= y <= height):
+                logger.warning(f'Coordinate ({x}, {y}) is out of screen bounds ({width}x{height})')
+                return ToolResult.failed(f'坐标 ({x}, {y}) 超出屏幕范围 ({width}x{height})')
+
+        # 依次从坐标集中取出2组值进行滑动
+        coordinate_iter = iter(params.coordinates)
+        swipe_count = 0
+        for start_coordinate, end_coordinate in zip(coordinate_iter, coordinate_iter):
+            x1, y1 = start_coordinate
+            x2, y2 = end_coordinate
+            logger.info(f'Swipe from ({x1}, {y1}) to ({x2}, {y2})')
+            session.swipe(x1, y1, x2, y2)
+            swipe_count += 1
+
+        logger.info(f'Completed {swipe_count} swipe(s)')
         return ToolResult.success()
 
     @tool(after_delay=1)
@@ -231,7 +260,7 @@ class IOSAgentTool(MobileAgentTool):
         sub_agent = Agent(
             ctx.model,
             output_type=str,
-            system_prompt='你是一个移动端应用助手，负责根据用户输入的指令从提供的应用列表中找出用户指令对应的Bundle ID，并仅返回Bundle ID（不要返回其他内容），如果都不匹配则自己推算出来'
+            system_prompt='你是一个移动端应用助手，负责根据用户输入的指令从提供的应用列表中找出用户指令对应的Bundle ID，并仅返回Bundle ID（不要返回其他内容），如果都不匹配则请你推理返回对应的Bundle ID'
         )
         prompt = (f'用户指令：{params.instruction}\n'
                   f'应用列表（Bundle ID | 显示名称）：\n' +
