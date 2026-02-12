@@ -184,3 +184,14 @@ async def test_ios_20(ios_agent):
         - 在"搜索历史"上方的元素中输入"任素汐"
         """
     )
+
+async def test_ios_21(ios_agent):
+    """测试长按复制歌名"""
+    await ios_agent.run(
+        """
+        - 打开qq音乐app
+        - 搜索"蔡徐坤"
+        - 向下滑动直到出现"What a Day"
+        - 长按"What a Day",在弹出的菜单中点击"复制"
+        """
+    )

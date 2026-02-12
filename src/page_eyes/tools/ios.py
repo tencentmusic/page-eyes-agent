@@ -10,25 +10,24 @@ from typing import TypeAlias
 from loguru import logger
 from pydantic_ai import RunContext, Agent
 
+from ._mobile import MobileAgentTool
 from ..deps import (
     AgentDeps, ToolParams, ToolResult, ToolResultWithOutput,
-    ClickToolParams, InputToolParams, SwipeToolParams, WaitToolParams,
-    AssertContainsParams, AssertNotContainsParams, ScreenInfo, OpenUrlToolParams
+    ClickToolParams, InputToolParams, SwipeToolParams,
+    OpenUrlToolParams
 )
 from ..device import IOSDevice
-from ..config import default_settings
-from ._base import AgentTool, tool
+from ._base import tool
 
-storage_client = default_settings.storage_client
-
-AgentDepsType: TypeAlias = AgentDeps[IOSDevice, AgentTool]
+AgentDepsType: TypeAlias = AgentDeps[IOSDevice, 'IOSAgentTool']
 
 
-class IOSAgentTool(AgentTool):
-    """iOS设备自动化工具类"""
+class IOSAgentTool(MobileAgentTool):
+    """iOS设备自动化工具类
+    """
 
     @staticmethod
-    async def screenshot(ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']]) -> io.BytesIO:
+    async def screenshot(ctx: RunContext[AgentDepsType]) -> io.BytesIO:
         """截图并返回字节流"""
         image_buffer = io.BytesIO()
         screenshot = ctx.deps.device.target.screenshot()
@@ -45,51 +44,29 @@ class IOSAgentTool(AgentTool):
         image_buffer.seek(0)
         return image_buffer
 
-    @tool
-    async def get_screen_info(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']]) -> ToolResultWithOutput[
-        dict]:
-        """
-        获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
-        该工具禁止作为一个单独步骤
-        """
-        screen_info = await self.get_screen(ctx)
-        return ToolResultWithOutput.success(screen_info.model_dump(include={'screen_elements'}))
-
-    async def tear_down(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: ToolParams) -> ToolResult:
-        """清理操作，在失败时调用"""
-        logger.warning(f'ios tear down: {params}')
-        return ToolResult.success()
-
     @tool(after_delay=1)
-    async def click(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: ClickToolParams) -> ToolResult:
+    async def click(self, ctx: RunContext[AgentDepsType], params: ClickToolParams) -> ToolResult:
         """
         点击指定元素
-
-        示例:
-        - 点击"确定"按钮 -> position=None, offset=None
-        - 点击"确定"按钮左侧 -> position='left', offset=None
+        iOS使用WDA的tap方法
         """
         logger.info(f'click element: {params.element_content}')
 
         device = ctx.deps.device
-        session = device.target.session()
 
         # 计算点击坐标
         x, y = params.get_coordinate(device.device_size, params.position, params.offset)
 
         # 执行点击
-        session.tap(x, y)
+        device.target.tap(x,y)
 
         return ToolResult.success()
 
     @tool(after_delay=1)
-    async def input(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: InputToolParams) -> ToolResult:
+    async def input(self, ctx: RunContext[AgentDepsType], params: InputToolParams) -> ToolResult:
         """
         在指定元素中输入文本
-
-        示例:
-        - 输入"123456" -> text="123456", send_enter=True
-        - 输入"123456"，不发送回车键 -> text="123456", send_enter=False
+        iOS使用WDA的send_keys方法
         """
         logger.info(f'input text: {params.text} to element: {params.element_content}')
 
@@ -111,13 +88,10 @@ class IOSAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool(after_delay=1)
-    async def swipe(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: SwipeToolParams) -> ToolResult:
+    async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
         """
         滑动屏幕
-
-        示例:
-        - 向上滑动 2 次 -> to='top', repeat_times=2
-        - 向上滑动最多 5 次，直到页面中出现 "确定" 元素 -> to='top', repeat_times=5, expect_keywords=['确定']
+        iOS使用WDA的swipe方法
         """
         logger.info(f'swipe {params.to}, repeat_times: {params.repeat_times}')
 
@@ -152,55 +126,7 @@ class IOSAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool(after_delay=1)
-    async def wait(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: WaitToolParams) -> ToolResult:
-        """
-        等待指定时间或直到出现期望的元素
-
-        示例:
-        - 等待2秒 -> timeout=2, expect_keywords=None
-        - 等待5秒，直到出现"确定"按钮 -> timeout=5, expect_keywords=['确定']
-        """
-        logger.info(f'wait {params.timeout}s, expect_keywords: {params.expect_keywords}')
-
-        if params.expect_keywords:
-            for _ in range(params.timeout):
-                await asyncio.sleep(1)
-                result = await self.expect_screen_contains(ctx, params.expect_keywords)
-                if result.is_success:
-                    return result
-            return ToolResult.failed()
-        else:
-            await asyncio.sleep(params.timeout)
-            return ToolResult.success()
-
-    @tool
-    async def assert_contains(
-            self,
-            ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']],
-            params: AssertContainsParams
-    ) -> ToolResult:
-        """
-        断言当前屏幕包含指定关键字
-        """
-        logger.info(f'assert contains: {params.expect_keywords}')
-        return await self.expect_screen_contains(ctx, params.expect_keywords)
-
-    @tool
-    async def assert_not_contains(
-            self,
-            ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']],
-            params: AssertNotContainsParams
-    ) -> ToolResult:
-        """
-        断言当前屏幕不包含指定关键字
-        """
-        logger.info(f'assert not contains: {params.unexpect_keywords}')
-        result = await self.expect_screen_contains(ctx, params.unexpect_keywords)
-
-        return ToolResult.success() if not result.is_success else ToolResult.failed()
-
-    @tool(after_delay=1)
-    async def goback(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: ToolParams) -> ToolResult:
+    async def goback(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
         """
         返回到上一个页面
         这里优先尝试查找并点击导航栏的返回按钮，如果没有则使用边缘滑动手势
@@ -242,7 +168,7 @@ class IOSAgentTool(AgentTool):
         return ToolResult.success()
 
     @tool(after_delay=1)
-    async def home(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']], params: ToolParams) -> ToolResult:
+    async def home(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
         """
         返回主屏幕
         """
@@ -253,33 +179,11 @@ class IOSAgentTool(AgentTool):
 
         return ToolResult.success()
 
-    @tool(after_delay=2)
-    async def launch_app(
-            self,
-            ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']],
-            params: ToolParams
-    ) -> ToolResult:
-        """
-        启动指定的应用
-        需要在params中传入bundle_id参数
-        """
-        bundle_id = params.params.get('bundle_id')
-        if not bundle_id:
-            logger.error('launch_app requires bundle_id parameter')
-            return ToolResult.failed()
-
-        logger.info(f'launch app: {bundle_id}')
-
-        session = ctx.deps.device.target.session()
-        session.app_launch(bundle_id)
-
-        return ToolResult.success()
-
     @tool
-    async def open_url(self, ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']],
-                       params: OpenUrlToolParams) -> ToolResult:
+    async def open_url(self, ctx: RunContext[AgentDepsType], params: OpenUrlToolParams) -> ToolResult:
         """
         使用iOS设备打开URL
+        iOS通过Safari浏览器打开URL
         """
         logger.info(f'Open URL: {params.url}')
 
@@ -310,90 +214,95 @@ class IOSAgentTool(AgentTool):
     @tool
     async def open_app(
             self,
-            ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']],
+            ctx: RunContext[AgentDepsType],
             params: ToolParams,
     ):
         """
         在设备中打开或启动指定的应用(APP)
+        iOS使用Bundle ID启动应用
         """
         logger.info(f'打开应用指令: {params.instruction}')
 
-        # iOS应用包名映射表
-        app_mapping = {
-            '设置': 'com.apple.Preferences',
-            'safari': 'com.apple.mobilesafari',
-            '浏览器': 'com.apple.mobilesafari',
-            '日历': 'com.apple.mobilecal',
-            '相机': 'com.apple.camera',
-            '照片': 'com.apple.mobileslideshow',
-            '信息': 'com.apple.MobileSMS',
-            '电话': 'com.apple.mobilephone',
-            '邮件': 'com.apple.mobilemail',
-            '地图': 'com.apple.Maps',
-            '时钟': 'com.apple.mobiletimer',
-            '计算器': 'com.apple.calculator',
-            '备忘录': 'com.apple.mobilenotes',
-            '提醒事项': 'com.apple.reminders',
-            '通讯录': 'com.apple.MobileAddressBook',
-            '音乐': 'com.apple.Music',
-            '视频': 'com.apple.videos',
-            '播客': 'com.apple.podcasts',
-            '图书': 'com.apple.iBooks',
-            '健康': 'com.apple.Health',
-            '钱包': 'com.apple.Passbook',
-            '天气': 'com.apple.weather',
-            '股票': 'com.apple.stocks',
-            '查找': 'com.apple.mobileme.fmip1',
-            '语音备忘录': 'com.apple.VoiceMemos',
-            '提示': 'com.apple.tips',
-            '文件': 'com.apple.DocumentsApp',
-            '快捷指令': 'com.apple.shortcuts',
-            '测距仪': 'com.apple.measure',
-            '翻译': 'com.apple.translation',
-        }
-        instruction_lower = params.instruction.lower()
-        app_name = None
-        for name, bundle_id in app_mapping.items():
-            if name.lower() in instruction_lower:
-                app_name = name
-                bundle_id = app_mapping[name]
-                break
-        if not app_name:
-            return ToolResultWithOutput.failed(output=f'未找到匹配的应用: {params.instruction}')
-        logger.info(f'打开应用: {app_name} (Bundle ID: {bundle_id})')
+        # 获取设备上所有应用的Bundle ID和显示名称
+        # 使用 pymobiledevice3 获取所有已安装应用的详细信息
+        app_list = []
         try:
-            session = ctx.deps.device.target.session()
-            session.home()
-            await asyncio.sleep(1)
-            session.app_launch(bundle_id)
-            await asyncio.sleep(3)
-            await self.get_screen(ctx, parse_element=False)
-            return ToolResult.success()
+            from pymobiledevice3.lockdown import create_using_usbmux
+            from pymobiledevice3.services.installation_proxy import InstallationProxyService
 
+            # 通过 USB 连接到设备
+            lockdown = create_using_usbmux()
+            installation_proxy = InstallationProxyService(lockdown=lockdown)
+
+            # 获取所有应用（用户应用和系统应用）
+            apps_info = installation_proxy.get_apps(application_type='Any')
+
+            # 提取 bundle ID 和显示名称
+            if apps_info:
+                for bundle_id, app_info in apps_info.items():
+                    display_name = app_info.get('CFBundleDisplayName') or app_info.get('CFBundleName', '')
+                    app_list.append({
+                        'bundle_id': bundle_id,
+                        'display_name': display_name
+                    })
+            logger.info(f'Found {len(app_list)} apps on device using pymobiledevice3')
+
+        except ImportError:
+            logger.warning('pymobiledevice3 not installed, falling back to WDA app_list')
+            # 如果 pymobiledevice3 未安装，回退到 WDA 方法
+            try:
+                user_apps = ctx.deps.device.target.app_list('user') or []
+                system_apps = ctx.deps.device.target.app_list('system') or []
+                apps = user_apps + system_apps
+                for app in apps:
+                    if app.get('bundleId'):
+                        app_list.append({
+                            'bundle_id': app.get('bundleId', ''),
+                            'display_name': app.get('label', '') or app.get('name', '')
+                        })
+                logger.info(f'Found {len(app_list)} apps on device using WDA')
+            except Exception as e:
+                logger.warning(f'Failed to get app list: {e}')
+                app_list = []
         except Exception as e:
-            # 获取设备上所有应用的Bundle ID列表
-            apps = ctx.deps.device.target.app_list()
-            bundle_ids = [app.get('bundleId', '') for app in apps if app.get('bundleId')]
+            logger.warning(f'Failed to get app list with pymobiledevice3: {e}, falling back to WDA')
+            # 如果 pymobiledevice3 失败，回退到 WDA 方法
+            try:
+                user_apps = ctx.deps.device.target.app_list('user') or []
+                system_apps = ctx.deps.device.target.app_list('system') or []
+                apps = user_apps + system_apps
+                for app in apps:
+                    if app.get('bundleId'):
+                        app_list.append({
+                            'bundle_id': app.get('bundleId', ''),
+                            'display_name': app.get('label', '') or app.get('name', '')
+                        })
+                logger.info(f'Found {len(app_list)} apps on device using WDA fallback')
+            except:
+                app_list = []
 
-            # 使用LLM从应用列表中智能匹配
-            sub_agent = Agent(
-                ctx.model,
-                output_type=str,
-                system_prompt='你是一个移动端应用助手，负责根据用户输入的指令从提供的应用Bundle ID列表找出用户指令对应的Bundle ID，并仅返回Bundle ID，如果都不匹配则返回空字符串'
-            )
-            prompt = (f'用户指令：{params.instruction}\n'
-                      f'应用Bundle ID列表：{bundle_ids}')
-            result = await sub_agent.run(prompt, output_type=str)
-            bundle_id = result.output
+        logger.info(f'Found {len(app_list)} apps on device')
 
-            if not bundle_id:
-                return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
+        # 使用LLM从应用列表中智能匹配
+        sub_agent = Agent(
+            ctx.model,
+            output_type=str,
+            system_prompt='你是一个移动端应用助手，负责根据用户输入的指令从提供的应用列表中找出用户指令对应的Bundle ID，并仅返回Bundle ID（不要返回其他内容），如果都不匹配则自己推算出来'
+        )
+        prompt = (f'用户指令：{params.instruction}\n'
+                  f'应用列表（Bundle ID | 显示名称）：\n' +
+                  '\n'.join([f"{app['bundle_id']} | {app['display_name']}" for app in app_list]))
+        result = await sub_agent.run(prompt, output_type=str)
+        bundle_id = result.output
 
-            logger.info(f'Find App Bundle ID：{bundle_id}')
+        if not bundle_id:
+            return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
 
-            # 启动应用
-            session = ctx.deps.device.target.session()
-            session.app_launch(bundle_id)
-            await asyncio.sleep(2)
-            await self.get_screen(ctx, parse_element=False)
-            return ToolResult.success()
+        logger.info(f'Find App Bundle ID：{bundle_id}')
+
+        # 启动应用
+        session = ctx.deps.device.target.session()
+        session.app_launch(bundle_id)
+        await asyncio.sleep(2)
+        await self.get_screen(ctx, parse_element=False)
+        return ToolResult.success()
