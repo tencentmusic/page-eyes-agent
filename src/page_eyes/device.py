@@ -4,6 +4,8 @@
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/6 14:58
 import asyncio
+import os
+import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -148,7 +150,8 @@ class IOSDevice(Device[wda.Client, wda.Session]):
                 raise Exception(f"Failed to get device status from WebDriverAgent at {wda_url}")
 
             logger.info("✅ 成功连接到WebDriverAgent")
-            return cls(wda_client, device_size, platform)
+            session = wda_client.session()
+            return cls(wda_client, session, device_size, platform)
 
         except Exception as first_error:
             logger.warning(f"首次连接失败: {first_error}")
@@ -171,7 +174,8 @@ class IOSDevice(Device[wda.Client, wda.Session]):
                             status = wda_client.status()
                             if status:
                                 logger.info("✅ 成功连接到WebDriverAgent")
-                                return cls(wda_client, device_size, platform)
+                                session = wda_client.session()
+                                return cls(wda_client, session, device_size, platform)
                         except Exception as retry_error:
                             if i == max_retries - 1:
                                 raise Exception(f"启动WDA后仍无法连接: {retry_error}")

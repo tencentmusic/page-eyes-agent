@@ -19,6 +19,7 @@ debug = True
 
 serial = ''  # Android 设备序列号
 connect_key = '127.0.0.1:9002'  # Harmony 设备连接key
+wda_url = 'http://10.91.215.64:8100'  # iOS 设备wda url
 
 
 @pytest.fixture(scope="session")
@@ -52,6 +53,6 @@ async def harmony_agent():
 
 @pytest_asyncio.fixture(scope="session")
 async def ios_agent():
-    return await IOSAgent.create(wda_url="http://10.91.215.64:8100",debug=debug)
+    return await IOSAgent.create(wda_url=wda_url,debug=debug)
 
 
