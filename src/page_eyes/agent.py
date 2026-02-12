@@ -6,8 +6,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Union
 from random import randint
+from typing import Optional, Union
 
 from loguru import logger
 from pydantic import TypeAdapter
@@ -17,13 +17,11 @@ from pydantic_ai.messages import ToolReturnPart, ToolCallPart
 from pydantic_ai.usage import Usage
 
 from .config import default_settings, model_settings, Settings
-from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, StepOutputType, PlanningStep, ToolParams, StepInfo, \
+from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, PlanningStep, ToolParams, StepInfo, \
     MarkFailedParams
-from .device import AndroidDevice, WebDevice, HarmonyDevice, IOSDevice
+from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
-from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType, HarmonyAgentTool
-from .tools import AndroidAgentTool, WebAgentTool, AgentDepsType
-from .tools import IOSAgentTool
+from .tools import AgentDepsType, WebAgentTool, AndroidAgentTool, HarmonyAgentTool, IOSAgentTool
 from .util.platform import Platform
 
 
