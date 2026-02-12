@@ -19,6 +19,7 @@ from playwright.async_api import async_playwright, Playwright, Page, BrowserCont
 from .deps import DeviceSize, DeviceT, ClientT
 from .util.hdc_tool import HdcClient, HdcDevice
 from .util.platform import Platform
+from .util.wda_tool import WdaClient
 
 
 @dataclass
@@ -125,7 +126,7 @@ class HarmonyDevice(Device[HdcClient, HdcDevice]):
 
 
 @dataclass
-class IOSDevice(Device[wda.Client, wda.Session]):
+class IOSDevice(Device[WdaClient, wda.Session]):
     """iOS 设备连接类，通过 WebDriverAgent 连接"""
     platform: Platform
 
@@ -142,7 +143,7 @@ class IOSDevice(Device[wda.Client, wda.Session]):
         """
         try:
             logger.info(f"尝试连接WebDriverAgent: {wda_url}")
-            wda_client = wda.Client(wda_url)
+            wda_client = WdaClient(wda_url)
             window_size = wda_client.window_size()
             device_size = DeviceSize(width=window_size.width, height=window_size.height)
             status = wda_client.status()
@@ -168,7 +169,7 @@ class IOSDevice(Device[wda.Client, wda.Session]):
                         try:
                             await asyncio.sleep(retry_delay)
                             logger.info(f"第 {i + 1}/{max_retries} 次尝试连接...")
-                            wda_client = wda.Client(wda_url)
+                            wda_client = WdaClient(wda_url)
                             window_size = wda_client.window_size()
                             device_size = DeviceSize(width=window_size.width, height=window_size.height)
                             status = wda_client.status()
