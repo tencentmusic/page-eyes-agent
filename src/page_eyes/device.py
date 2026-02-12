@@ -3,15 +3,16 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/6 14:58
+import asyncio
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Generic
 
-from adbutils import AdbClient, AdbDevice
-from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
 import wda
+from adbutils import AdbClient, AdbDevice
 from loguru import logger
+from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
 
 from .deps import DeviceSize, DeviceT, ClientT
 from .util.hdc_tool import HdcClient, HdcDevice
@@ -19,11 +20,19 @@ from .util.platform import Platform
 
 
 @dataclass
-class WebDevice:
-    playwright: Optional[Playwright]
-    context: BrowserContext
-    page: Page
+class Device(Generic[ClientT, DeviceT]):
+    client: ClientT
+    target: DeviceT
     device_size: DeviceSize
+
+    @classmethod
+    def create(cls, *args, **kwargs) -> DeviceT:
+        raise NotImplementedError
+
+
+@dataclass
+class WebDevice(Device[Playwright, Page]):
+    context: BrowserContext
     simulate_device: Optional[str] = None
     is_mobile: Optional[bool] = None
 
@@ -112,11 +121,10 @@ class HarmonyDevice(Device[HdcClient, HdcDevice]):
         device_size = DeviceSize(width=window_size.width, height=window_size.height)
         return cls(client, hdc_device, device_size, platform)
 
+
 @dataclass
-class IOSDevice:
+class IOSDevice(Device[wda.Client, wda.Session]):
     """iOS 设备连接类，通过 WebDriverAgent 连接"""
-    wda_client: wda.Client
-    device_size: DeviceSize
     platform: Platform
 
     @classmethod
@@ -156,7 +164,7 @@ class IOSDevice:
                     for i in range(max_retries):
                         try:
                             await asyncio.sleep(retry_delay)
-                            logger.info(f"第 {i+1}/{max_retries} 次尝试连接...")
+                            logger.info(f"第 {i + 1}/{max_retries} 次尝试连接...")
                             wda_client = wda.Client(wda_url)
                             window_size = wda_client.window_size()
                             device_size = DeviceSize(width=window_size.width, height=window_size.height)
@@ -234,71 +242,3 @@ async def start_wda_if_needed(udid: str = None, wda_project_path: str = None, ti
     except Exception as e:
         logger.error(f"启动WebDriverAgent失败: {e}")
         return False
-
-
-@dataclass
-class IOSDevice:
-    """iOS 设备连接类，通过 WebDriverAgent 连接"""
-    wda_client: wda.Client
-    device_size: DeviceSize
-    platform: Platform
-
-    @classmethod
-    async def create(cls, wda_url: str, platform: Optional[Platform] = Platform.QY, auto_start_wda: bool = True):
-        """
-        创建iOS设备连接
-        Args:
-            wda_url: WebDriverAgent URL（必填）
-            platform: 平台类型
-            auto_start_wda: 是否自动启动WDA（默认True）
-        Returns:
-            IOSDevice实例
-        """
-        try:
-            logger.info(f"尝试连接WebDriverAgent: {wda_url}")
-
-            wda_client = wda.Client(wda_url)
-
-            window_size = wda_client.window_size()
-            device_size = DeviceSize(width=window_size.width, height=window_size.height)
-
-            status = wda_client.status()
-            if not status:
-                raise Exception(f"Failed to get device status from WebDriverAgent at {wda_url}")
-
-            logger.info("✅ 成功连接到WebDriverAgent")
-
-            return cls(wda_client, device_size, platform)
-
-        except Exception as first_error:
-            logger.warning(f"首次连接失败: {first_error}")
-            # 如果连接失败且允许自动启动，尝试启动WDA
-            if auto_start_wda:
-                logger.info("尝试自动启动WebDriverAgent...")
-                # 启动WDA【只在MACOS环境下且安装了Xcode的条件下才有效，推荐自己启动】
-                started = await start_wda_if_needed()
-                if started:
-                    logger.info("等待WebDriverAgent完全启动...")
-                    max_retries = 10
-                    retry_delay = 3
-                    for i in range(max_retries):
-                        try:
-                            await asyncio.sleep(retry_delay)
-                            logger.info(f"第 {i+1}/{max_retries} 次尝试连接...")
-                            wda_client = wda.Client(wda_url)
-                            window_size = wda_client.window_size()
-                            device_size = DeviceSize(width=window_size.width, height=window_size.height)
-                            status = wda_client.status()
-                            if status:
-                                logger.info("✅ 成功连接到WebDriverAgent")
-                                return cls(wda_client, device_size, platform)
-                        except Exception as retry_error:
-                            if i == max_retries - 1:
-                                raise Exception(f"启动WDA后仍无法连接: {retry_error}")
-                            logger.debug(f"连接失败，继续重试... {retry_error}")
-
-            raise Exception(f"Failed to connect to WebDriverAgent at {wda_url}: {first_error}")
-
-        except Exception as e:
-            raise Exception(f"Failed to connect to WebDriverAgent at {wda_url}: {str(e)}")
-

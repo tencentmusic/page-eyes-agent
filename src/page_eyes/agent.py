@@ -249,16 +249,15 @@ class IOSAgent(UiAgent):
     async def create(
             cls, model: Optional[str] = None,
             *,
-            wda_url: str = None,
+            wda_url: str,
             platform: Optional[str | Platform] = None,
             tool_cls: Optional[type[IOSAgentTool]] = None,
             debug: Optional[bool] = None,
     ):
-        # 如果没有传入wda_url，从环境变量读取
-        if wda_url is None:
-            wda_url = os.getenv("IOS_WDA_URL", "http://localhost:8100")
-
-        settings = global_settings.copy_and_update(model=model, debug=debug)
+        settings = cls.merge_settings(Settings(
+            model=model,
+            debug=debug
+        ))
 
         device = await IOSDevice.create(wda_url=wda_url, platform=platform)
 

@@ -5,6 +5,8 @@
 # @Time : 2025/2/11 16:35
 import asyncio
 import io
+from typing import TypeAlias
+
 from loguru import logger
 from pydantic_ai import RunContext, Agent
 
@@ -14,10 +16,12 @@ from ..deps import (
     AssertContainsParams, AssertNotContainsParams, ScreenInfo, OpenUrlToolParams
 )
 from ..device import IOSDevice
-from ..config import global_settings
+from ..config import default_settings
 from .base import AgentTool, tool
 
-storage_client = global_settings.storage_client
+storage_client = default_settings.storage_client
+
+AgentDepsType: TypeAlias = AgentDeps[IOSDevice, AgentTool]
 
 
 class IOSAgentTool(AgentTool):
@@ -27,7 +31,7 @@ class IOSAgentTool(AgentTool):
     async def screenshot(ctx: RunContext[AgentDeps[IOSDevice, 'IOSAgentTool']]) -> io.BytesIO:
         """截图并返回字节流"""
         image_buffer = io.BytesIO()
-        screenshot = ctx.deps.device.wda_client.screenshot()
+        screenshot = ctx.deps.device.target.screenshot()
 
         # 兼容不同版本的返回值
         if hasattr(screenshot, 'save'):
@@ -68,7 +72,7 @@ class IOSAgentTool(AgentTool):
         logger.info(f'click element: {params.element_content}')
 
         device = ctx.deps.device
-        session = device.wda_client.session()
+        session = device.target.session()
 
         # 计算点击坐标
         x, y = params.get_coordinate(device.device_size, params.position, params.offset)
@@ -90,7 +94,7 @@ class IOSAgentTool(AgentTool):
         logger.info(f'input text: {params.text} to element: {params.element_content}')
 
         device = ctx.deps.device
-        session = device.wda_client.session()
+        session = device.target.session()
 
         # 先点击输入框获取焦点
         x, y = params.get_coordinate(device.device_size)
@@ -118,7 +122,7 @@ class IOSAgentTool(AgentTool):
         logger.info(f'swipe {params.to}, repeat_times: {params.repeat_times}')
 
         device = ctx.deps.device
-        session = device.wda_client.session()
+        session = device.target.session()
         width, height = device.device_size.width, device.device_size.height
 
         # 定义滑动起点和终点
@@ -204,7 +208,7 @@ class IOSAgentTool(AgentTool):
         logger.info('go to previous page')
 
         device = ctx.deps.device
-        session = device.wda_client.session()
+        session = device.target.session()
         try:
             # 方法1：尝试查找并点击导航栏的返回按钮
             back_button = None
@@ -244,7 +248,7 @@ class IOSAgentTool(AgentTool):
         """
         logger.info('go to home')
 
-        session = ctx.deps.device.wda_client.session()
+        session = ctx.deps.device.target.session()
         session.home()
 
         return ToolResult.success()
@@ -266,7 +270,7 @@ class IOSAgentTool(AgentTool):
 
         logger.info(f'launch app: {bundle_id}')
 
-        session = ctx.deps.device.wda_client.session()
+        session = ctx.deps.device.target.session()
         session.app_launch(bundle_id)
 
         return ToolResult.success()
@@ -290,7 +294,7 @@ class IOSAgentTool(AgentTool):
 
         logger.info(f'格式化后的URL: {url}')
 
-        session = ctx.deps.device.wda_client.session()
+        session = ctx.deps.device.target.session()
 
         # 先启动Safari浏览器
         session.app_launch('com.apple.mobilesafari')
@@ -358,7 +362,7 @@ class IOSAgentTool(AgentTool):
             return ToolResultWithOutput.failed(output=f'未找到匹配的应用: {params.instruction}')
         logger.info(f'打开应用: {app_name} (Bundle ID: {bundle_id})')
         try:
-            session = ctx.deps.device.wda_client.session()
+            session = ctx.deps.device.target.session()
             session.home()
             await asyncio.sleep(1)
             session.app_launch(bundle_id)
@@ -368,7 +372,7 @@ class IOSAgentTool(AgentTool):
 
         except Exception as e:
             # 获取设备上所有应用的Bundle ID列表
-            apps = ctx.deps.device.wda_client.app_list()
+            apps = ctx.deps.device.target.app_list()
             bundle_ids = [app.get('bundleId', '') for app in apps if app.get('bundleId')]
 
             # 使用LLM从应用列表中智能匹配
@@ -388,7 +392,7 @@ class IOSAgentTool(AgentTool):
             logger.info(f'Find App Bundle ID：{bundle_id}')
 
             # 启动应用
-            session = ctx.deps.device.wda_client.session()
+            session = ctx.deps.device.target.session()
             session.app_launch(bundle_id)
             await asyncio.sleep(2)
             await self.get_screen(ctx, parse_element=False)

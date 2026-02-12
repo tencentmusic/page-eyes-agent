@@ -22,7 +22,6 @@ dependencies = [
     "esprima2>=5.0.0",
     "facebook-wda>=1.4.6",
     "hdcutils>=0.1.4",
-    "facebook-wda>=1.4.6",
     "loguru>=0.7.3",
     "minio>=7.2.16",
     "playwright>=1.52.0",

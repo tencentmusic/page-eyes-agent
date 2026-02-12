@@ -19,8 +19,8 @@
 
 3. **验证配置加载**
    ```python
-   from page_eyes.config import global_settings
-   print(global_settings.model_dump())
+   from page_eyes.config import default_settings
+   print(default_settings.model_dump())
    ```
   
 ### 问题：依赖包安装失败或者冲突

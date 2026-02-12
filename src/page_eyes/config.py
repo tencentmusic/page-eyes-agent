@@ -66,6 +66,6 @@ class Settings(BaseSettings):
         return self.model_copy(update=update_dict, deep=False)
 
 
-global_settings = Settings()
+default_settings = Settings()
 
 model_settings = ModelSettings(max_tokens=20000, temperature=0.2)
