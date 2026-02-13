@@ -29,6 +29,7 @@ async def test_ios_02(ios_agent):
         - 进入通用设置
         - 进入关于本机
         - 查看iOS版本信息
+        -再返回上一页，再回到桌面，再打开短信应用
         """
     )
 
@@ -194,5 +195,13 @@ async def test_ios_21(ios_agent):
         - 搜索"蔡徐坤"
         - 向下滑动直到出现"What a Day"
         - 长按"What a Day",在弹出的菜单中点击"复制"
+        """
+    )
+
+async def test_ios_22(ios_agent):
+    """测试连续打开应用"""
+    await ios_agent.run(
+        """
+        - 打开设置，再打开地图，再打开日历，再打开照片
         """
     )
