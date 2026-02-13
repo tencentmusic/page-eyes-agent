@@ -252,6 +252,19 @@ class IOSAgentTool(MobileAgentTool):
         """
         logger.info(f'打开应用指令: {params.instruction}')
 
+        # 从 app_name_map 中查找匹配的 Bundle ID，优先级高于默认，因为如displayName=信息的app有两个bundle id（com.apple.MobileSMS和com.apple.mobilesms.compose）
+        app_name_map = ctx.deps.app_name_map
+        if app_name_map:
+            instruction_lower = params.instruction.lower()
+            for name, bid in app_name_map.items():
+                if name.lower() in instruction_lower:
+                    logger.info(f'从 app_name_map 中匹配到应用: {name} -> {bid}')
+                    session = ctx.deps.device.target.session()
+                    session.app_launch(bid)
+                    await asyncio.sleep(2)
+                    await self.get_screen(ctx, parse_element=False)
+                    return ToolResult.success()
+
         # 获取设备上所有应用的Bundle ID和显示名称
         app_list = ctx.deps.device.client.get_app_list()
         logger.info(f'Found {len(app_list)} apps on device')

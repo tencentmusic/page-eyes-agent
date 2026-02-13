@@ -282,6 +282,7 @@ class IOSAgent(UiAgent):
             wda_url: str,
             platform: Optional[str | Platform] = None,
             tool_cls: Optional[type[IOSAgentTool]] = None,
+            app_name_map: Optional[dict[str, str]] = None,
             debug: Optional[bool] = None,
     ):
         settings = cls.merge_settings(Settings(
@@ -292,7 +293,10 @@ class IOSAgent(UiAgent):
         device = await IOSDevice.create(wda_url=wda_url, platform=platform)
 
         tool = IOSAgentTool() if tool_cls is None else tool_cls()
-        deps: AgentDeps[IOSDevice, IOSAgentTool] = AgentDeps(settings, device, tool)
+        deps: AgentDeps[IOSDevice, IOSAgentTool] = AgentDeps(
+            settings, device, tool,
+            app_name_map=app_name_map or {}
+        )
 
         agent = Agent[AgentDeps](
             model=settings.model,

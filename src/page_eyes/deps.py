@@ -82,6 +82,8 @@ class AgentDeps(Generic[DeviceT, ToolT]):
     device: DeviceT
     tool: ToolT
     context: AgentContext = field(default_factory=AgentContext)
+    app_name_map: dict[str, str] = field(default_factory=dict)
+    """友好的应用名称到 Bundle ID 的映射"""
 
 
 class ToolParams(BaseModel):
