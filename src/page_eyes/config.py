@@ -62,6 +62,7 @@ class Settings(BaseSettings):
 
     storage_client: StorageClient = StorageClient.create_from_config(CosConfig(), MinioConfig())
 
+    enable_cos: Optional[bool] = True
     debug: Optional[bool] = False
 
 

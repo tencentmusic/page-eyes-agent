@@ -8,6 +8,10 @@
 <a href="https://pypi.org/project/page-eyes/">
 <img alt="Version" src="https://img.shields.io/pypi/v/page-eyes.svg?labelColor=d4eaf7&label=version&color=blue">
 </a>
+![](https://img.shields.io/badge/Web-supported-brightgreen?logo=googlechrome&logoColor=white)
+![](https://img.shields.io/badge/Android-supported-brightgreen?logo=android&logoColor=white)
+![](https://img.shields.io/badge/iOS-supported-brightgreen?logo=apple&logoColor=white)
+![](https://img.shields.io/badge/HarmonyOS_Next-supported-brightgreen?logo=harmonyos&logoColor=white)
 
 ---
 
@@ -41,21 +45,6 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 pip install page-eyes
 ```
 
-根据需要操作的设备类型导入对应的 Agent 类
-
-```python
-from page_eyes.agent import WebAgent, AndroidAgent, HarmonyAgent, IOSAgent
-
-...
-```
-
-| Agent Class  | 支持类型                               |
-|--------------|------------------------------------|
-| WebAgent     | Web/H5浏览器操作，依赖 Playwright 和 Chrome |
-| AndroidAgent | Android 移动端操作，依赖 adb               |
-| HarmonyAgent | 鸿蒙 Next 移动端操作，依赖 hdc               |
-| IOSAgent     | iOS 移动端操作，依赖 wda                   |
-
 或者克隆项目源码安装
 
 ```shell
@@ -68,14 +57,14 @@ uv sync  # 安装依赖
 
 配置环境变量
 
-| 环境变量                 | 默认值                         | 说明                          |
-|:---------------------|-----------------------------|-----------------------------|
-| AGENT_MODEL          | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat |
-| AGENT_DEBUG          | False                       | 是否启用调试模式                    |
-| AGENT_HEADLESS       | False                       | 是否使用无头模式                    |
-| AGENT_LOG_GRAPH_NODE | False                       | 是否记录图节点日志                   |
-| OPENAI_BASE_URL      | https://api.deepseek.com/v1 | DeepSeek API的服务端点           |
-| OPENAI_API_KEY       | a22a37d7-xxx                | 调用DeepSeek API所需的认证密钥       |
+| 环境变量             | 默认值                         | 说明                          |
+|:-----------------|-----------------------------|-----------------------------|
+| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat |
+| AGENT_DEBUG      | False                       | 是否启用调试模式                    |
+| BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式     |
+| OMNI_BASE_URL    | http://127.0.0.1:8000       | OmniParser API的服务端点         |
+| OPENAI_BASE_URL  | https://api.deepseek.com/v1 | DeepSeek API的服务端点           |
+| OPENAI_API_KEY   | xxx-xxx-xxx                 | 调用DeepSeek API所需的认证密钥       |
 
 使用腾讯云COS服务（与MinIO二选一）
 
@@ -97,7 +86,22 @@ uv sync  # 安装依赖
 
 [详细部署参考](docs/getting-started/installation.md)
 
-使用示例
+**使用示例**
+
+根据需要操作的设备类型可以导入对应的 Agent 类
+
+```python
+from page_eyes.agent import WebAgent, AndroidAgent, HarmonyAgent, IOSAgent
+
+...
+```
+
+| Agent Class  | 支持类型                               |
+|--------------|------------------------------------|
+| WebAgent     | Web/H5浏览器操作，依赖 Playwright 和 Chrome |
+| AndroidAgent | Android 移动端操作，依赖 adb               |
+| HarmonyAgent | 鸿蒙 Next 移动端操作，依赖 hdc               |
+| IOSAgent     | iOS 移动端操作，依赖 facebook-wda          |
 
 ```python
 import asyncio
