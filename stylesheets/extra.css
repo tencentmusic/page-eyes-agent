@@ -1,0 +1,247 @@
+/* --- 全局颜色变量 --- */
+:root {
+    /* 夜间模式 */
+    --dark-bg: #0d1117; /* 深色背景 */
+    --dark-surface: #161b22; /* 表面颜色 */
+    --dark-text: #f0f6fc; /* 文字颜色 */
+    --dark-accent: #D7FF64; /* 浅绿色 */
+
+    /* 日间模式 */
+    --light-bg: #ffffff; /* 白色背景 */
+    --light-surface: #f6f8fa; /* 浅灰表面 */
+    --light-text: #24292f; /* 深色文字 */
+    --light-accent: #1673FA; /* 浅蓝色 */
+}
+
+/* 夜间模式配色 */
+[data-md-color-scheme="slate"] {
+    --md-default-fg-color: var(--dark-text);
+    --md-default-bg-color: var(--dark-bg);
+    --md-primary-fg-color: var(--dark-accent);
+    --md-accent-fg-color: var(--dark-accent);
+}
+
+/* 日间模式配色 */
+[data-md-color-scheme="default"] {
+    --md-default-fg-color: var(--light-text);
+    --md-default-bg-color: var(--light-bg);
+    --md-primary-fg-color: var(--light-accent);
+    --md-accent-fg-color: var(--light-accent);
+}
+
+
+/* 侧边栏背景 */
+[data-md-color-scheme="slate"] .md-sidebar--primary {
+    background-color: var(--dark-surface);
+}
+
+[data-md-color-scheme="default"] .md-sidebar--primary {
+    background-color: var(--light-surface);
+}
+
+
+/* 导航容器 */
+.md-nav {
+    font-size: 0.7rem;
+    line-height: 1.3;
+}
+
+/* 导航标题 */
+.md-nav__title {
+    font-size: 0.6rem;
+    font-weight: 500;
+    padding: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+[data-md-color-scheme="slate"] .md-nav__title {
+    color: var(--dark-accent);
+}
+
+[data-md-color-scheme="default"] .md-nav__title {
+    color: var(--light-accent);
+}
+
+/* 一级导航链接 */
+.md-nav__item > .md-nav__link {
+    padding: 0.5rem 0.75rem;
+    margin: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+[data-md-color-scheme="slate"] .md-nav__item > .md-nav__link {
+    color: var(--dark-text);
+}
+
+[data-md-color-scheme="default"] .md-nav__item > .md-nav__link {
+    color: var(--light-text);
+}
+
+/* 一级导航悬停 */
+[data-md-color-scheme="slate"] .md-nav__item > .md-nav__link:hover {
+    background-color: var(--dark-bg);
+    color: var(--dark-accent);
+}
+
+[data-md-color-scheme="default"] .md-nav__item > .md-nav__link:hover {
+    background-color: var(--light-bg);
+    color: var(--light-accent);
+}
+
+/* 一级导航激活状态 */
+[data-md-color-scheme="slate"] .md-nav__item > .md-nav__link--active {
+    background-color: var(--dark-bg);
+    color: var(--dark-accent);
+    font-weight: 600;
+}
+
+[data-md-color-scheme="default"] .md-nav__item > .md-nav__link--active {
+    background-color: var(--light-bg);
+    color: var(--light-accent);
+    font-weight: 600;
+}
+
+/* 自定义箭头 */
+.md-nav__icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: transform 0.2s ease;
+}
+
+.md-nav__icon::after {
+    content: "›";
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .md-nav__icon {
+    color: var(--dark-accent);
+}
+
+[data-md-color-scheme="default"] .md-nav__icon {
+    color: var(--light-accent);
+}
+
+/* 展开状态的箭头 */
+.md-nav__toggle:checked ~ .md-nav__link .md-nav__icon {
+    transform: translateY(-50%) rotate(90deg);
+}
+
+/* 隐藏默认SVG图标 */
+.md-nav__icon svg {
+    display: none;
+}
+
+/* 二级导航容器 */
+.md-nav__item .md-nav__list {
+    margin: 0.25rem 0.5rem;
+    padding: 0.25rem 0;
+    border-radius: 0.375rem;
+}
+
+[data-md-color-scheme="slate"] .md-nav__item .md-nav__list {
+    background-color: var(--dark-bg);
+}
+
+[data-md-color-scheme="default"] .md-nav__item .md-nav__list {
+    background-color: var(--light-bg);
+}
+
+/* 二级导航链接 */
+.md-nav__item .md-nav__item .md-nav__link {
+    padding: 0.375rem 0.75rem 0.375rem 1rem;
+    margin: 0.125rem 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 400;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+[data-md-color-scheme="slate"] .md-nav__item .md-nav__item .md-nav__link {
+    color: var(--dark-text);
+}
+
+[data-md-color-scheme="default"] .md-nav__item .md-nav__item .md-nav__link {
+    color: var(--light-text);
+}
+
+/* 二级导航悬停 */
+[data-md-color-scheme="slate"] .md-nav__item .md-nav__item .md-nav__link:hover {
+    background-color: var(--dark-surface);
+    color: var(--dark-accent);
+}
+
+[data-md-color-scheme="default"] .md-nav__item .md-nav__item .md-nav__link:hover {
+    background-color: var(--light-surface);
+    color: var(--light-accent);
+}
+
+/* 二级导航激活状态 */
+[data-md-color-scheme="slate"] .md-nav__item .md-nav__item .md-nav__link--active {
+    background-color: var(--dark-surface);
+    color: var(--dark-accent);
+    font-weight: 500;
+    border-left: 2px solid var(--dark-accent);
+    padding-left: 0.875rem;
+}
+
+[data-md-color-scheme="default"] .md-nav__item .md-nav__item .md-nav__link--active {
+    background-color: var(--light-surface);
+    color: var(--light-accent);
+    font-weight: 500;
+    border-left: 2px solid var(--light-accent);
+    padding-left: 0.875rem;
+}
+
+/* 移除默认激活指示器 */
+.md-nav__link--active::before {
+    display: none;
+}
+
+/* 滚动条样式 */
+.md-sidebar__scrollwrap::-webkit-scrollbar {
+    width: 4px;
+}
+
+.md-sidebar__scrollwrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+[data-md-color-scheme="slate"] .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
+    background: var(--dark-accent);
+    border-radius: 2px;
+}
+
+[data-md-color-scheme="default"] .md-sidebar__scrollwrap::-webkit-scrollbar-thumb {
+    background: var(--light-accent);
+    border-radius: 2px;
+}
+
+/* 响应式调整 */
+@media screen and (max-width: 76.1875em) {
+    .md-nav__item > .md-nav__link {
+        padding: 0.4rem 0.6rem;
+        margin: 0.1rem 0.3rem;
+        font-size: 0.75rem;
+    }
+
+    .md-nav__item .md-nav__item .md-nav__link {
+        padding: 0.3rem 0.6rem 0.3rem 0.9rem;
+        margin: 0.1rem 0.3rem;
+        font-size: 0.7rem;
+    }
+}
+
+.md-footer-meta__inner {
+    justify-content: center;
+}
+
+.md-header__button.md-logo img {
+    height: 1.8rem;
+}

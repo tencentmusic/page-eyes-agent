@@ -1,0 +1,2033 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="一个轻量级 UI Agent，通过自然语言指令驱动，无需编写脚本既可实现Web、Android平台的UI自动化任务">
+      
+      
+      
+        <link rel="canonical" href="https://tencentmusic.github.io/page-eyes-agent/article/%E8%A7%86%E8%A7%89%E5%A4%A7%E6%A8%A1%E5%9E%8B%E9%A9%B1%E5%8A%A8%E7%9A%84%E9%A1%B5%E9%9D%A2%E5%BC%82%E5%B8%B8%E6%A3%80%E6%B5%8B%EF%BC%9A%E7%AA%81%E7%A0%B4%E4%BC%A0%E7%BB%9F%E8%A7%86%E8%A7%89%E6%96%B9%E6%B3%95%E7%93%B6%E9%A2%88/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../img/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>视觉大模型驱动的页面异常检测：突破传统视觉方法瓶颈 - PageEyes Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-gray">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="PageEyes Agent" class="md-header__button md-logo" aria-label="PageEyes Agent" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PageEyes Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              视觉大模型驱动的页面异常检测：突破传统视觉方法瓶颈
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-gray"  aria-label="切换为夜间模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换为夜间模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="切换为日间模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换为日间模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tencentmusic/page-eyes-agent" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    page-eyes-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PageEyes Agent" class="md-nav__button md-logo" aria-label="PageEyes Agent" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    PageEyes Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tencentmusic/page-eyes-agent" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    page-eyes-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    主页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../getting-started/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速开始
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    快速开始
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第一个Demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/core-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    核心概念
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    使用场景
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    最佳实践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API参考
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API参考
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/module-a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块A
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/module-b/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块B
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    高级接口
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    教程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速上手
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实战案例
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    关联项目
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    关联项目
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../related/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    相关工具
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../related/integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    集成方案
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    常见问题
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    常见问题
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    故障排查
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献指南
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    贡献指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/code-style/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    代码规范
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/dev-env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发环境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    版本信息
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    版本信息
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    更新日志
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安全策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    规划
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    关于
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    关于
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/team/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    团队
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    许可证
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/acknowledgements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    致谢
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一、背景
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        二、方案选型
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="二、方案选型">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 模型选型
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 提示词优化
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#23" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.3 参数调优
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三、检测效果
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        四、总结
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="四、总结">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 AI异常检测方案的优点
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-ai" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 AI异常检测方案目前的不足
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 后续优化方向
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        最后
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="最后">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关于讨论
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        彩蛋
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="_1">视觉大模型驱动的页面异常检测：突破传统视觉方法瓶颈</h1>
+<p>导语：在页面异常检测领域，传统视觉方法长期面临难以突破的瓶颈：无论是基于规则的模板匹配，还是依赖人工设计特征的传统 CV 模型，都难以应对复杂场景下的多样挑战 —— 比如不同服务的报错提示样式和文案的千差万别，不同平台的控件错位、字体错乱等异常表现的差异显著。这些场景往往需要大量的人工调参和特征工程，不仅泛化能力有限，还难以覆盖边缘 case。​
+而视觉大模型的兴起，为解决这一困境提供了新的技术路径。其强大的视觉理解能力与思考能力，能够直接识别页面的元素和位置，无需依赖人工预设规则，便可对报错信息、文字重叠、内容缺失等异常进行准确检测。​
+本文将聚焦视觉大模型在页面异常检测中的实践，拆解如何利用大模型突破传统视觉方法的局限，以及在方案设计中需要关注的技术细节与探索方向。</p>
+<h3 id="_2">一、背景</h3>
+<p>页面巡检作为自动化测试中的关键环节，其核心愿景始终围绕：通过快速识别页面异常，避免问题传导至用户端影响体验，从而最大限度降低异常带来的业务损失。</p>
+<p>在没有页面巡检的情况下，页面问题的发现往往依赖用户反馈与监控工具对日志的分析 —— 这种模式不仅存在明显滞后性（问题已影响用户），还难以覆盖无明确性能指标的视觉异常（如布局错位、元素缺失）。</p>
+<p>相比之下，服务端异常检测已经有了一套成熟的监控方案。通过分析系统日志、追踪数据传输链路，就能快速发现问题并准确定位故障点。但在页面异常检测场景，不同终端屏幕尺寸不一，界面操作流程、UI组件库的使用各不相同，传统的图像识别方法很难适应这些复杂场景，经常会出现检测不准确的情况。</p>
+<p>具体来看，页面异常存在多种典型场景，而传统方法在应对时往往力不从心：</p>
+<ol>
+<li>元素显示不完整
+   如下图所示，弹窗内元素仅显示左半部分，信息缺失严重且影响用户操作，传统基于规则匹配的方法难以精准识别此类异常。</li>
+</ol>
+<p><img title="" src="https://cdn-y.tencentmusic.com/8e47e36baa90dd842f0ef5941b4dd97e.png" alt="图1.元素显示不完整" width="309" style="display: block; margin: 0 auto;"></p>
+<ol>
+<li>图片加载异常
+   下图中歌曲封面未能完整加载，仅以占位符呈现，传统方法如果对所有可能的占位符进行模板匹配，所需成本非常高，而基于采样的空白检测又需要根据不同的页面、设备专门设置不同的阈值等参数。</li>
+</ol>
+<p><img title="" src="https://cdn-y.tencentmusic.com/986e8a75e2dfcea3289fc257e5e61df9.png" alt="图2.图片加载异常" width="318" style="display: block; margin: 0 auto;"></p>
+<ol>
+<li>“错误提示”还是“异常信息”？
+   面对复杂系统时，传统的视觉识别方法的局限性体现得愈发明显。如下图展示的界面，虽出现 “系统异常请联系管理员或稍后重新发起导入任务” 提示文本，但实际为业务逻辑的错误提示而非页面异常。如果用 OCR 技术检测出来了“异常文本”，是否应判定为页面异常并上报，都是传统方法面对的难题。</li>
+</ol>
+<p><img title="" src="https://cdn-y.tencentmusic.com/f45dc7c9d6e3a8d130d6e7ad222482ef.png" alt="图3.正常页面" width="657" style="display: block; margin: 0 auto;"></p>
+<h3 id="_3">二、方案选型</h3>
+<p>使用视觉大模型进行页面异常检测，核心在于3个关键环节</p>
+<h4 id="21">2.1 模型选型</h4>
+<p>页面异常识别对大模型可以说是非常 “挑剔”了—— 既需具备强大的图像理解能力，能准确识别页面元素；又要有精准的判断能力，将误漏报率控制在极低水平；同时需平衡资源成本与识别效率等工程指标。</p>
+<p>为了方便测试模型和提示词，用AI快速做了一个web小工具:</p>
+<p><img title="" src="https://cdn-y.tencentmusic.com/cceccbf395ac37cef368a1debe23a530.png" alt="图4.工具界面" width="599" style="display: block; margin: 0 auto;"></p>
+<p>在初步了解后，选择了Claude-Sonnet-4、Qwen2.5-VL-32B、Qwen3-235B-A22B、Gemini2.5 Pro和GLM-4.1V-Thinking作为调研对象。测试结果中，Claude-Sonnet-4，Qwen2.5-VL-32B和GLM-4.1V-Thinking的表现都符合我们的预期。</p>
+<p>【识别效果以Qwen2.5-VL-32B为100%，测试了74张图片】</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"></th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;"></th>
+<th style="text-align: center;"></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>ClaudeSonnet4</strong></td>
+<td style="text-align: center;"><strong>Gemini2.5Pro</strong></td>
+<td style="text-align: center;"><strong>Qwen3</strong></td>
+</tr>
+<tr>
+<td style="text-align: center;">识别速度(avg)</td>
+<td style="text-align: center;">8.4s</td>
+<td style="text-align: center;">27.1s</td>
+<td style="text-align: center;">54.7s</td>
+</tr>
+<tr>
+<td style="text-align: center;">识别效果</td>
+<td style="text-align: center;">95%</td>
+<td style="text-align: center;">90%</td>
+<td style="text-align: center;">40%</td>
+</tr>
+</tbody>
+</table>
+<p>但是Claude-Sonnet-4首先是成本较高，其次是作为外部闭源模型可能有信息安全隐患，而Qwen2.5-VL-32B我们也没有足够的GPU资源进行本地部署。</p>
+<p>在测试结果中，<a href="https://huggingface.co/THUDM/GLM-4.1V-9B-Thinking">GLM-4.1V-Thinking</a> 作为一个9B参数量的开源视觉大模型，在识别速度和效果方面都算优秀，而且成本较低（智谱官方提供低并发量的免费API，且模型参数量不大，可以本地部署）。</p>
+<p>放几张检测结果图:
+<img title="" src="https://cdn-y.tencentmusic.com/0cac5e6c1efffce28c30d908a4ae9a7d.png" alt="检测结果1" width="673" style="display: block; margin: 0 auto;">
+<img title="" src="https://cdn-y.tencentmusic.com/06caa665effd438e354db6ed0be7a560.png" alt="检测结果2" width="692" style="display: block; margin: 0 auto;"></p>
+<h4 id="22">2.2 提示词优化</h4>
+<p>提示词也是影响检测效果非常重要的一部分，甚至只改变几句话都会让检测效果大打折扣甚至误报乱报。</p>
+<p>刚开始尝试让大模型直接给出异常的具体坐标，但是不同模型对于分辨率的识别能力大不相同，于是在Prompt中要求它输出归一化的坐标，随后自己再根据图像的分辨率还原真实坐标进行画框。</p>
+<p>对于输出格式的约束也是一个难点，由于GLM-4.1V-Thinking不支持Tool Calling和结果检查，最后选择了在Prompt中规范大模型的输出 + 高容忍性的结果提取解析的方案。</p>
+<p>测试过程中，发现GLM-4.1V-Thinking经常检测不出来文字重叠的异常情况，因此还对要求了大模型对文本重叠进行了重点检测，给出一个示例Prompt:</p>
+<div class="highlight"><pre><span></span><code>你是一个专业的页面异常检测系统，负责分析各类页面截图（包括Web页面、移动端界面等），发现所有可能的页面异常。请严格按照以下步骤和要求执行：
+
+<span class="gu">## 检测步骤</span>
+
+<span class="gu">### 第一步：文字区域详细检查（必须执行）</span>
+<span class="k">-</span><span class="w"> </span>依次检查页面的主要文字区域。
+<span class="k">-</span><span class="w"> </span>对每个文字区域，判断：
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>能否清晰读出文字内容？
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>文字行与行之间是否有正常间距？
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>是否存在多行文字叠加、密度异常高、无法区分的情况？（水印不属于异常）
+<span class="k">-</span><span class="w"> </span>对于无法清晰阅读、文字重叠、密度异常高的区域，**必须标记为 rendering_issue**，严重程度为 high。
+
+<span class="gu">### 第二步：全局异常检测</span>
+<span class="k">-</span><span class="w"> </span>检查所有常见页面异常，包括但不限于：
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="gs">**incomplete_element**</span>: 元素显示不完整（如文字、图片、按钮等被截断）
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="gs">**error_message**</span>: 错误提示信息（如“加载失败”、“404”等）
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="gs">**layout_anomaly**</span>: 布局错位、不对称、容器溢出
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="gs">**loading_issue**</span>: loading 卡住、图片加载失败
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="gs">**empty_content**</span>: 应有内容但显示空白，&quot;暂无数据&quot;不一定属于异常
+<span class="w">  </span><span class="k">-</span><span class="w"> </span><span class="gs">**rendering_issue**</span>: 渲染问题（如元素重叠、样式丢失等视觉问题）
+
+<span class="gu">## 输出要求</span>
+<span class="k">-</span><span class="w"> </span><span class="gs">**必须输出纯JSON，合并所有检测到的异常，严格按如下格式：**</span>
+
+{
+  &quot;anomaly_detected&quot;: true,
+  &quot;anomalies&quot;: [
+    {
+      &quot;type&quot;: &quot;rendering_issue&quot;,
+      &quot;bbox&quot;: [0.0, 0.0, 0.5, 0.4],
+      &quot;confidence&quot;: 0.95,
+      &quot;severity&quot;: &quot;high&quot;,
+      &quot;description&quot;: &quot;左上角区域文字重叠，无法清晰阅读&quot;
+    },
+    {
+      &quot;type&quot;: &quot;incomplete_element&quot;,
+      &quot;bbox&quot;: [0.5, 0.2, 0.7, 0.3],
+      &quot;confidence&quot;: 0.9,
+      &quot;severity&quot;: &quot;high&quot;,
+      &quot;description&quot;: &quot;按钮显示不完整，右侧被截断&quot;
+    }
+  ]
+}
+
+
+<span class="k">-</span><span class="w"> </span><span class="gs">**无异常时输出：**</span>
+
+  {
+  &quot;anomaly_detected&quot;: false,
+  &quot;anomalies&quot;: []
+  }
+
+
+<span class="k">-</span><span class="w"> </span><span class="gs">**bbox**</span>格式：[x1, y1, x2, y2]，归一化坐标（0-1范围），必须准确标记异常区域实际位置，不得使用示例坐标。
+
+<span class="gu">## 严重程度</span>
+
+<span class="k">-</span><span class="w"> </span><span class="gs">**high**</span>: 严重影响使用（如内容截断、明显错误、文字重叠无法阅读）
+<span class="k">-</span><span class="w"> </span><span class="gs">**medium**</span>: 部分影响体验（如轻微错位）
+<span class="k">-</span><span class="w"> </span><span class="gs">**low**</span>: 轻微问题（如颜色略异常）
+
+<span class="gu">## 检测重点提醒</span>
+
+<span class="k">-</span><span class="w"> </span>先检查所有文字区域的可读性，再检查其他异常。
+<span class="k">-</span><span class="w"> </span>任何无法清晰阅读的文字区域都必须标记为 rendering_issue。
+<span class="k">-</span><span class="w"> </span>不要遗漏元素不完整、加载异常、布局错位等其他问题。
+<span class="k">-</span><span class="w"> </span>输出时合并所有异常，确保每个异常都单独标注 bbox、类型、置信度、严重程度和描述。
+
+请仔细观察页面截图，确保不遗漏任何显示异常，尤其注意文字区域的可读性和页面元素的完整性。
+</code></pre></div>
+<h4 id="23">2.3 参数调优</h4>
+<p>这里指的是设置的 <code>temperature</code>、<code>top_p</code>等参数。</p>
+<p>【概念引用自<a href="https://www.promptingguide.ai/zh/introduction/settings">PromptEngineeringGuide</a> 】</p>
+<blockquote>
+<p><strong>Temperature</strong>：简单来说，<code>temperature</code> 的参数值越小，模型就会返回越确定的一个结果。如果调高该参数值，大语言模型可能会返回更随机的结果，也就是说这可能会带来更多样化或更具创造性的产出。（调小<code>temperature</code>）实质上，你是在增加其他可能的 token 的权重。在实际应用方面，对于质量保障（QA）等任务，我们可以设置更低的 <code>temperature</code> 值，以促使模型基于事实返回更真实和简洁的结果。 对于诗歌生成或其他创造性任务，适度地调高 <code>temperature</code> 参数值可能会更好。
+<strong>Top_p</strong>：同样，使用 <code>top_p</code>（与 <code>temperature</code> 一起称为核采样（nucleus sampling）的技术），可以用来控制模型返回结果的确定性。如果你需要准确和事实的答案，就把参数值调低。如果你在寻找更多样化的响应，可以将其值调高点。
+使用Top P意味着只有词元集合（tokens）中包含<code>top_p</code>概率质量的才会被考虑用于响应，因此较低的<code>top_p</code>值会选择最有信心的响应。这意味着较高的<code>top_p</code>值将使模型考虑更多可能的词语，包括不太可能的词语，从而导致更多样化的输出。
+一般建议是改变 Temperature 和 Top P 其中一个参数就行，不用两个都调整。</p>
+</blockquote>
+<p>由于我们需要确定、稳定的异常检测，最终设定了较低的 <code>temperature</code> 值来保证尽可能低的误报率。</p>
+<h3 id="_4">三、检测效果</h3>
+<p>目前该异常检测方案作为一个辅助检测能力已经在我们页面巡检服务的灰度环境上线试运行一段时间了，对于一些常见异常的检测效果还是很不错的。</p>
+<p>展示一些异常检测效果：</p>
+<ol>
+<li>
+<p>文本重叠
+   <img title="" src="https://cdn-y.tencentmusic.com/f4735d8cac0f4de1f6437f2a146b285c.png" alt="文本重叠" style="display: block; margin: 0 auto;"></p>
+</li>
+<li>
+<p>卡加载
+   <img title="" src="https://cdn-y.tencentmusic.com/dee592533220f8c99c9722bdd44d022d.png" alt="卡加载" style="display: block; margin: 0 auto;"></p>
+</li>
+<li>
+<p>报错提示
+   <img title="" src="https://cdn-y.tencentmusic.com/8ad0a976c336ea394d797418fc6b89bd.png" alt="报错提示" style="display: block; margin: 0 auto;"></p>
+</li>
+<li>
+<p>异常加载&amp;&amp;区域白屏
+   <img title="" src="https://cdn-y.tencentmusic.com/432446439e251e7e4d829d9863ba1580.png" alt="异常加载和区域白屏" style="display: block; margin: 0 auto;"></p>
+</li>
+<li>
+<p>报错提示</p>
+</li>
+</ol>
+<p><img title="" src="https://cdn-y.tencentmusic.com/f97f6f1f2a8a28631fe07c139c1ae658.png" alt="报错提示" style="display: block; margin: 0 auto;"></p>
+<p>目前在保持原有页面巡检方案的同时，异步进行AI页面异常检测，发现异常后就通过BOT机器人企微通知。</p>
+<p><img title="" src="https://cdn-y.tencentmusic.com/b972706dd3821dd6ab271f70a25c1e57.png" alt="图5.BOT通知" width="505" style="display: block; margin: 0 auto;"></p>
+<h3 id="_5">四、总结</h3>
+<h4 id="41-ai">4.1 AI异常检测方案的优点</h4>
+<p>基于视觉大模型进行页面异常检测，首先省去了人工进行特征工程的步骤，不仅更加灵活通用，而且检测效果也更好。在根据业务、需求微调好了Prompt和参数后便可以长期稳定地进行多样化检测，突破了传统CV方法的瓶颈，能轻松胜任很多以前难以完成的异常检测任务。</p>
+<p>其次，视觉大模型的发展日新月异，GLM-4.1V-Thinking就是最近发布的具有优秀图像理解能力的小参数模型。相信随着相关技术的不断发展和完善，该方案的性能和成本都会令人愈发满意。</p>
+<h4 id="42-ai">4.2 AI异常检测方案目前的不足</h4>
+<p>根据之前的调研和试运行的结果来看，目前使用AI进行页面异常检测遇到的问题主要是:</p>
+<ol>
+<li>机器资源需求大
+   即便是使用9B小参数的大模型，对显存的占用也是较高的。【如果使用智谱官方提供的免费API，请务必做好<strong>信息安全防护</strong>】</li>
+<li>仍存在误报漏报
+   目前的视觉大模型对于“<strong>页面异常</strong>”的识别能力也还是没有达到人工判断的水平，因此还是存在着误报漏报的情况，但是通过调整Prompt和参数可以控制误漏报率在一个符合需求的范围内。</li>
+</ol>
+<h4 id="43">4.3 后续优化方向</h4>
+<p>目前基于视觉大模型进行页面异常检测已经到了可以投入使用的阶段，需要优化的指标主要有3个:</p>
+<ol>
+<li>
+<p>识别时间
+   在之前的调研结果中，使用智谱API <code>GLM-4.1V-Thinking</code> 的平均识别时间是5s左右一张，但是不同机器的性能差异、不同服务提供方的请求限制均会导致这个识别时间上升，优化的方向主要有：提示机器性能、尝试图片压缩等。</p>
+</li>
+<li>
+<p>误漏报率
+   目前我们对于误漏报率的控制达到了这样的成果:
+   误报率&lt;1%，漏报率&lt;3%，符合预期。
+   但是对于页面巡检的终极目标来说肯定是希望2项数据均为0的，优化的方向主要有：调整Prompt、寻找更好的模型、调整参数等。</p>
+</li>
+<li>
+<p>识别准确率
+   目前在能识别出异常的场景下，大模型给出的异常信息都是准确的，但是返回的异常区域坐标有时会有一些偏差，如下图所示:</p>
+</li>
+</ol>
+<p><img title="" src="https://cdn-y.tencentmusic.com/d22ae01064f1ce42da133e4ae4e54d7b.png" alt="图6.识别准确率" width="543" style="display: block; margin: 0 auto;"></p>
+<p>对于这一点，之前提到的让大模型输出归一化坐标的方法已经优化了很多了，但是后续还是希望能够给出更精准的坐标</p>
+<h3 id="_6">最后</h3>
+<h4 id="_7">关于讨论</h4>
+<p>基于视觉大模型进行页面异常检测未来将会是异常监控的主流方案。大家如果有相似的idea，或者想讨论相关技术细节、实现方案等都非常欢迎～</p>
+<h4 id="_8">彩蛋</h4>
+<p>一开始给出的3个场景，AI检测的效果怎么样呢？
+<img title="" src="https://cdn-y.tencentmusic.com/5cbe08f15505fc61614f6c966aff9fd4.png" alt="图7.开头检测1" width="326" style="display: block; margin: 0 auto;">
+<img title="" src="https://cdn-y.tencentmusic.com/69e94689a1692146e1c4cd4a47d933bb.png" alt="图8.开头检测2" width="332" style="display: block; margin: 0 auto;">
+<img title="" src="https://cdn-y.tencentmusic.com/a3a796f390c9149fc9e18725cb1b1864.png" alt="图9.开头检测3" style="display: block; margin: 0 auto;"></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright (c) 2025 Tencent Music Entertainment Group
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.expand", "navigation.sections", "navigation.instant", "navigation.tracking", "navigation.indexes", "content.code.copy", "content.tabs.link", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

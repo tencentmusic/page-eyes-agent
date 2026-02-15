@@ -1,0 +1,2390 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="一个轻量级 UI Agent，通过自然语言指令驱动，无需编写脚本既可实现Web、Android平台的UI自动化任务">
+      
+      
+      
+        <link rel="canonical" href="https://tencentmusic.github.io/page-eyes-agent/article/LLM%20%E4%B8%8B%E5%8D%8A%E5%9C%BA%E6%98%AF%E2%80%9C%E8%A1%8C%E5%8A%A8%E2%80%9D%EF%BC%9A%E5%9F%BA%E4%BA%8E%20Pydantic%20AI%20%2B%20OmniParser%20%E4%BB%8E%E9%9B%B6%E6%89%93%E9%80%A0%20GUI%20Agent/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../img/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>LLM 下半场是“行动”：基于 Pydantic AI + OmniParser 从零打造 GUI Agent - PageEyes Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-gray">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#llm-pydantic-ai-omniparser-gui-agent" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="PageEyes Agent" class="md-header__button md-logo" aria-label="PageEyes Agent" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PageEyes Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              LLM 下半场是“行动”：基于 Pydantic AI + OmniParser 从零打造 GUI Agent
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-gray"  aria-label="切换为夜间模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换为夜间模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="切换为日间模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换为日间模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tencentmusic/page-eyes-agent" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    page-eyes-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PageEyes Agent" class="md-nav__button md-logo" aria-label="PageEyes Agent" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    PageEyes Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tencentmusic/page-eyes-agent" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    page-eyes-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    主页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../getting-started/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速开始
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    快速开始
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第一个Demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/core-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    核心概念
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    使用场景
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    最佳实践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API参考
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API参考
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/module-a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块A
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/module-b/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块B
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    高级接口
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    教程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速上手
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实战案例
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    关联项目
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    关联项目
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../related/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    相关工具
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../related/integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    集成方案
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    常见问题
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    常见问题
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    故障排查
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献指南
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    贡献指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/code-style/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    代码规范
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/dev-env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发环境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    版本信息
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    版本信息
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    更新日志
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安全策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    规划
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    关于
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    关于
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/team/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    团队
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    许可证
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/acknowledgements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    致谢
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#01" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        01. 概念重塑：从“对话者”到“行动派”
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="01. 概念重塑：从“对话者”到“行动派”">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gui-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GUI Agent 是什么？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#02-gui-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        02. 价值落地：GUI Agent 能做什么？
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#03-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        03. 技术解构：Agent 的“五官”与“大脑”
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="03. 技术解构：Agent 的“五官”与“大脑”">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 眼睛：UI 感知与解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 大脑：推理与规划
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 手：执行层
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 骨架：Agent 编排框架
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#04-pydantic-ai-omniparser" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        04. 实战演练：Pydantic AI + OmniParser 落地指南
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="04. 实战演练：Pydantic AI + OmniParser 落地指南">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        核心选型思考
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        架构设计与实现
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        关键代码解析
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#05" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        05. 避坑指南：生产环境下的挑战与对策
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="05. 避坑指南：生产环境下的挑战与对策">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 操作延迟
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. 动态内容与弹窗
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. 坐标幻觉与精度
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. 上下文记忆限制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. 规划和执行稳定性
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#06-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        06. 结语：UI 交互的未来
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="llm-pydantic-ai-omniparser-gui-agent">LLM 下半场是“行动”：基于 Pydantic AI + OmniParser 从零打造 GUI Agent</h1>
+<blockquote>
+<p>导语：在 LLM（大语言模型） 引爆了 "Chat"（对话）能力的今天，工程师们的目光早已转向了下一个圣杯——"Act"（行动）。
+我们不再满足于让 AI 告诉我们怎么做，而是希望它<strong>直接帮我们做</strong>。
+这就是 <strong>GUI Agent</strong> 的核心使命：像人类一样，通过视觉感知屏幕，操作鼠标键盘（或触摸屏），完成跨软件的复杂任务。本文将避开枯燥的原理堆砌，而是以 Python 为核心，结合 <strong>Pydantic AI</strong> 框架和微软开源的 <strong>OmniParser</strong>，带你从零构建一个能够像人类一样操作 Android 手机的 GUI Agent。</p>
+</blockquote>
+<h2 id="01">01. 概念重塑：从“对话者”到“行动派”</h2>
+<h4 id="gui-agent">GUI Agent 是什么？</h4>
+<p>简单来说，GUI Agent 是一个<strong>具备视觉感知能力和操作执行能力的智能体</strong>。</p>
+<p>传统的自动化脚本（如 Selenium、Appium 脚本）是“盲目”且“死板”的。它们依赖于固定的 DOM 结构或坐标，一旦 UI 改版，脚本即刻失效。</p>
+<p>而 GUI Agent 模拟的是人类的操作逻辑：</p>
+<ol>
+<li>
+<p><strong>看 (Vision)</strong>：截取屏幕画面，识别按钮、输入框、图标。</p>
+</li>
+<li>
+<p><strong>想 (Reason)</strong>：结合用户指令（如“帮我点一杯拿铁”）和当前画面，规划下一步动作。</p>
+</li>
+<li>
+<p><strong>做 (Act)</strong>：发送点击、滑动、输入指令。</p>
+</li>
+<li>
+<p><strong>反馈 (Feedback)</strong>：观察操作后的屏幕变化，修正计划。</p>
+</li>
+</ol>
+<p>这种 <strong>多模态</strong> 的闭环，使得 GUI Agent 能够适应未见过的界面，具备极强的泛化能力。</p>
+<p><img alt="01.png" src="https://cdn-y.tencentmusic.com/b97f9d869c01f0d29f89c317e62e19a9.png" /></p>
+<h2 id="02-gui-agent">02. 价值落地：GUI Agent 能做什么？</h2>
+<p>GUI Agent 的出现，打破了 API 集成的限制。<strong>只要人能操作的软件，Agent 就能操作</strong>。</p>
+<ol>
+<li>
+<p><strong>UI自动化测试</strong>：<br />
+   不再需要编写脆弱的 XPath 选择器。Agent 可以像真实用户一样测试 App 的核心流程（如登录、搜索歌曲、播放歌曲），并自动报告 UI 异常。</p>
+</li>
+<li>
+<p><strong>个人效率助手</strong>：<br />
+   处理跨应用的数据搬运。例如：从微信聊天记录中提取发票 PDF，打开报销 App，填入金额并上传附件。这种跨 App 的操作，传统 API 很难打通，但 GUI Agent 畅通无阻。</p>
+</li>
+<li>
+<p><strong>无障碍辅助</strong>：<br />
+   为老年人或视障人士服务。用户语音指令：“帮我在购物App上选一部价格合适的手机”，Agent 自动打开多个购物App、价格对比、加入购物车、请求是否下单确认。</p>
+</li>
+</ol>
+<p><img alt="" src="https://cdn-y.tencentmusic.com/ddaa06c3f2cd6057a752c8329727ba9d.png" /></p>
+<h2 id="03-agent">03. 技术解构：Agent 的“五官”与“大脑”</h2>
+<p>要“手搓”一个 Agent，我们需要组装三个核心模块：<strong>眼睛、大脑、手</strong>，以及连接它们的<strong>骨架</strong>。</p>
+<h4 id="1-ui">1. 眼睛：UI 感知与解析</h4>
+<p>这是最关键的一步。虽然很多视觉语言大模型（VLM）具备视觉能力，但它对<strong>精确坐标</strong>的判断往往不够准确（幻觉）。我们需要专业的模型来检测 UI 元素。</p>
+<ul>
+<li><strong>技术选型</strong>：<img alt="" src="https://cdn-y.tencentmusic.com/23c863392dc4fd2a38fa4d6902c1672d.svg" /> OmniParser (Yolo + Florence-2 + OCR) 。</li>
+</ul>
+<h4 id="2">2. 大脑：推理与规划</h4>
+<p>负责理解用户意图，并将屏幕信息转化为行动指令。</p>
+<ul>
+<li><strong>技术选型</strong>：DeepSeek、Qwen、GPT、Claude</li>
+</ul>
+<h4 id="3">3. 手：执行层</h4>
+<p>负责将指令转化为底层系统调用。</p>
+<ul>
+<li>
+<p><strong>技术选型</strong>：</p>
+</li>
+<li>
+<p><strong>PC端</strong>：PyAutoGUI</p>
+</li>
+<li>
+<p><strong>Web端</strong>：Playwright, Selenium</p>
+</li>
+<li>
+<p><strong>移动端</strong>：<strong>ADB , Appium, XCTest</strong></p>
+</li>
+</ul>
+<h4 id="4-agent">4. 骨架：Agent 编排框架</h4>
+<p>负责串联上述模块，管理上下文记忆。</p>
+<ul>
+<li><strong>技术选型</strong>： <strong>Pydantic AI</strong>，LangChain。</li>
+</ul>
+<h2 id="04-pydantic-ai-omniparser">04. 实战演练：Pydantic AI + OmniParser 落地指南</h2>
+<h4 id="_1">核心选型思考</h4>
+<p><strong>为什么选择Pydantic AI？</strong></p>
+<p>在 Python Agent 开发领域，LangChain 曾是霸主，但其过度封装和复杂的抽象让开发者头疼。<strong>Pydantic AI</strong> 是近期异军突起的新秀（由 Pydantic 官方团队推出），它的优势在于：</p>
+<ol>
+<li>
+<p><strong>Type Safety (类型安全)</strong>：基于 Pydantic 强大的验证机制，确保 LLM 输出的 JSON 结构绝对符合代码要求，极大减少了 <code>JSONDecodeError</code>。</p>
+</li>
+<li>
+<p><strong>Dependency Injection (依赖注入)</strong>：在 Agent 运行时优雅地注入上下文（如 ADB 连接对象），便于测试和解耦。</p>
+</li>
+<li>
+<p><strong>Lightweight (轻量)</strong>：没有复杂的 Chain/Graph 概念，回归 Python 原生控制流，这也是作者极力推荐最主要的原因。</p>
+</li>
+</ol>
+<p>我们来看一个最简单的例子：</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic_ai</span><span class="w"> </span><span class="kn">import</span> <span class="n">Agent</span>
+
+<span class="c1"># 1. 定义 Agent</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">Agent</span><span class="p">(</span>
+    <span class="s1">&#39;openai:deepseek-v3.1-terminus&#39;</span><span class="p">,</span>
+    <span class="n">system_prompt</span><span class="o">=</span><span class="s1">&#39;你是一个有用的助手，用富有情绪价值的语气回答。&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># 2. 定义工具</span>
+<span class="nd">@agent</span><span class="o">.</span><span class="n">tool</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">roll_dice</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">sides</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;掷一个有指定面数的骰子。&quot;&quot;&quot;</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">random</span>
+    <span class="k">return</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">sides</span><span class="p">)</span>
+
+<span class="c1"># 3. 运行 Agent</span>
+<span class="c1"># 用户问了一个问题，AI 会自动判断需要调用 roll_dice 工具</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">agent</span><span class="o">.</span><span class="n">run_sync</span><span class="p">(</span><span class="s2">&quot;帮我掷一个 20 面的骰子，并告诉我结果。&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="p">)</span>
+<span class="c1"># 🎲 太棒了！我为您掷了一个20面的骰子，结果是 **12**！</span>
+<span class="c1"># 这个数字相当不错呢～既不是特别高也不是特别低，正好在中间偏上的位置。不知道您觉得这个结果怎么样？如果您想要重新掷一次或者尝试其他面数的骰子，随时告诉我哦！✨</span>
+</code></pre></div>
+<p>提供模型和指令既可完整运行 Agent。</p>
+<blockquote>
+<p>疑问环节：你可能在想这跟我在 chat 中使用有什么区别？</p>
+<p>Agent 通常是基于 Chat (LLM) 构建的，但它多出了两个关键模块：</p>
+<ol>
+<li><strong>大脑（规划能力）：</strong> Chat 只是根据概率预测下一个字。而 Agent 会利用 LLM 进行<strong>任务拆解</strong>。</li>
+<li><strong>双手（工具调用）：</strong> Agent 被赋予了调用外部世界的能力（Function Calling）。它可以执行 Python 代码或调用其他API。</li>
+</ol>
+</blockquote>
+<p><strong>为什么选择 OmniParser？</strong></p>
+<p>微软开源的 <strong>OmniParser</strong> 是目前 GUI 识别领域小模型中的 SOTA。</p>
+<p>OmniParser 的优势在于：</p>
+<ul>
+<li>
+<p><strong>专精 UI 元素</strong>：它经过大量 UI 截图训练，能精准识别极小的图标、汉堡菜单、返回键。</p>
+</li>
+<li>
+<p><strong>结构化输出</strong>：它不仅返回截图，还返回带有 ID 和 坐标 (Bounding Box) 的结构化数据。这让 LLM 只需要说“点击 ID=5 的元素”，而不需要猜测坐标。</p>
+</li>
+<li>
+<p><strong>低资源需求</strong>：10G 左右的显存既可部署</p>
+</li>
+</ul>
+<p><img alt="" src="https://cdn-y.tencentmusic.com/f31035fa16adf3cc5bd21e1ac05a65ad.png" /></p>
+<h4 id="_2">架构设计与实现</h4>
+<p>我们的 Mobile Agent 运行流程如下图所示：</p>
+<div class="highlight"><pre><span></span><code>graph TD
+
+A[用户指令] --&gt; B(Pydantic AI Agent)
+
+B --&gt; C{获取当前状态}
+
+C --&gt; D[ADB 截图]
+
+D --&gt; E[OmniParser 解析]
+
+E --&gt; F[带标注的图片 + UI 元素列表]
+
+F --&gt; B
+
+B --&gt; G{LLM 决策}
+
+G --&gt;|需要更多信息| B
+
+G --&gt;|执行动作| H[ADB 执行点击/输入/滑动/断言...]
+
+H --&gt; C
+
+G --&gt;|任务完成| I[返回结果]
+</code></pre></div>
+<p>项目结构组织如下：</p>
+<div class="highlight"><pre><span></span><code>page-eyes-agent/
+├── src/page_eyes/          # Main package
+│   ├── agent.py            # PlanningAgent, WebAgent, AndroidAgent
+│   ├── tools.py            # Tool framework and implementations
+│   ├── prompt.py           # System prompts (PLANNING_SYSTEM_PROMPT, SYSTEM_PROMPT)
+│   ├── config.py           # default_settings and configuration
+│   └── util/
+│       ├── adb_tool.py     # YADB and ADB utilities
+│       └── ...
+├── tests/                   # Test suite
+│   ├── test_web_agent.py   # Web automation tests
+│   ├── test_android_agent.py # Android automation tests
+│   └── main.py             # Example usage
+├── docs/                    # Documentation
+├── pyproject.toml          # Project metadata and dependencies
+└── uv.lock                 # Dependency lock file
+</code></pre></div>
+<p>完整的处理链路如下</p>
+<p><img alt="" src="https://cdn-y.tencentmusic.com/90144a1a3e2e2f070790412bb5941de0.png" /></p>
+<h4 id="_3">关键代码解析</h4>
+<p><strong>1. 系统提示词（System Prompt）的设计</strong></p>
+<p>我们将 Agent 分为“规划专家”和“执行专家”。以下是Prompt 示例:</p>
+<div class="highlight"><pre><span></span><code>PLANNING_SYSTEM_PROMPT = &quot;&quot;&quot;
+<span class="gu">## 角色定位</span>
+「高精度UI操作规划专家」：专注准确解析用户意图，将用户指令转化为可执行的原子化操作步骤
+
+<span class="gu">## 目标</span>
+指令分解：将复杂指令拆解为多个原子化操作步骤，每个步骤必须满足：  
+<span class="k">-</span><span class="w"> </span>直接关联用户意图  
+<span class="k">-</span><span class="w"> </span>单个步骤进行一个操作
+<span class="k">-</span><span class="w"> </span>保留原始指令中的所有信息
+
+<span class="gu">## 约束</span>
+❗强制要求：  
+<span class="k">-</span><span class="w"> </span>所有操作必须按照指令的顺序进行规划 
+
+<span class="gu">## 示例</span>
+<span class="k">-</span><span class="w"> </span>点击&quot;close&quot;关闭弹窗，若弹窗不存在则跳过 -&gt; {&#39;instruction&#39;: &#39;点击&quot;close&quot;关闭弹窗，若&quot;close&quot;元素不存在则跳过&#39;}
+<span class="k">-</span><span class="w"> </span>向上滑动3次 -&gt; {&#39;instruction&#39;: &#39;向上滑动 3 次&#39;}
+<span class="k">-</span><span class="w"> </span>向上滑动，直到出现&quot;登录&quot;按钮 -&gt; {&#39;instruction&#39;: &#39;向上滑动，直到出现&quot;登录&quot;按钮&#39;}
+<span class="k">-</span><span class="w"> </span>打开QQ音乐APP -&gt; {&#39;instruction&#39;: &#39;打开 &quot;QQ音乐&quot; APP&#39;}
+<span class="k">-</span><span class="w"> </span>点击&quot;上传&quot;按钮，上传文件&quot;/Users/pic.png&quot; -&gt; {&#39;instruction&#39;: &#39;点击&quot;上传&quot;按钮，上传文件: &quot;/Users/pic.png&quot;&#39;}
+&quot;&quot;&quot;
+
+SYSTEM_PROMPT = &quot;&quot;&quot;
+<span class="gu">## 角色定位</span>
+「高精度UI操作执行专家」：基于实时屏幕状态，精准解析用户意图并执行可靠的原子化操作
+
+<span class="gu">## 核心目标</span>
+<span class="k">1.</span> <span class="gs">**意图理解**</span>：准确解析用户指令，将复杂任务拆解为可执行的原子化操作序列
+<span class="k">2.</span> <span class="gs">**精准执行**</span>：严格基于当前屏幕实际状态，调用相应工具完成操作
+<span class="k">3.</span> <span class="gs">**异常处理**</span>：识别并妥善处理执行过程中的异常情况
+
+<span class="gu">## 工作流程</span>
+<span class="k">1.</span> 如果需要获取屏幕元素信息，则调用 <span class="sb">`get_screen_info`</span> 工具获取当前屏幕元素信息
+<span class="k">2.</span> 根据用户指令和当前屏幕的元素信息查找目标元素，如果未找到，则调用 <span class="sb">`mark_failed`</span> 工具标记失败
+<span class="k">3.</span> 调用相应的工具执行操作
+<span class="k">4.</span> 如果用户指令未完成，则重复以上1-3操作步骤
+<span class="k">5.</span> 工具返回结果包含 <span class="sb">`is_success`</span> 字段，True表示当前操作成功，False表示当前操作失败
+
+<span class="gu">## 补充说明</span>
+<span class="k">-</span><span class="w"> </span>&quot;打开url&quot;、&quot;打开app&quot;、&quot;打开应用&quot;、&quot;等待&quot;、&quot;滑动&quot;、&quot;滚动&quot;操作不需要获取界面元素信息，其它操作必须先获取界面元素信息  
+<span class="k">-</span><span class="w"> </span>过程中如果出现位置、权限、用户协议、广告等弹窗等，则调用 <span class="sb">`click`</span> 工具点击&quot;同意&quot;、&quot;确定&quot;、&quot;允许&quot;、&quot;跳过&quot;、&quot;关闭&quot;、&quot;取消&quot;、&quot;我知道了&quot;、&quot;Dismiss&quot;、&quot;X&quot;等按钮
+<span class="k">-</span><span class="w"> </span><span class="sb">`input`</span> 工具内部会自动调用 <span class="sb">`click`</span> 工具进行输入框激活操作，因此可跳过输入前的激活操作
+
+<span class="gu">## 元素定位规范</span>
+<span class="gu">### 定位策略</span>
+<span class="k">1.</span> 文本内容精确匹配（优先级最高）
+<span class="k">2.</span> 如果文本内容不能精确匹配，则根据用户的指令进行模糊匹配（见&quot;模糊匹配策略&quot;）
+<span class="k">3.</span> 相邻元素关系推断（见&quot;空间关系定位&quot;）
+
+<span class="gs">**失败处理**</span>：若目标元素未找到，立即调用 <span class="sb">`mark_failed`</span> 工具标记失败并终止任务
+
+<span class="gu">### 模糊匹配策略</span>
+<span class="k">-</span><span class="w"> </span>当文本内容不完整时，结合元素类型（button、input等）和上下文语义进行匹配
+<span class="k">-</span><span class="w"> </span>优先选择语义相关性最高的元素
+<span class="k">-</span><span class="w"> </span>若存在多个候选元素，选择屏幕中首次出现的元素（从上到下、从左到右）
+
+<span class="gu">### 空间关系定位</span>
+元素上下文包含四个方向的相邻元素ID列表，可用于相对位置定位：
+<span class="k">-</span><span class="w"> </span><span class="sb">`left_elem_ids`</span>：左侧相邻元素ID列表（从近到远排序）
+<span class="k">-</span><span class="w"> </span><span class="sb">`right_elem_ids`</span>：右侧相邻元素ID列表（从近到远排序）
+<span class="k">-</span><span class="w"> </span><span class="sb">`top_elem_ids`</span>：上方相邻元素ID列表（从近到远排序）
+<span class="k">-</span><span class="w"> </span><span class="sb">`bottom_elem_ids`</span>：下方相邻元素ID列表（从近到远排序）
+
+<span class="gs">**示例**</span>：
+<span class="k">1.</span> 指令&quot;点击搜索框右侧的第1个按钮&quot;  
+<span class="k">-</span><span class="w"> </span>若搜索框的 <span class="sb">`right_elem_ids: [5, 8, 12]`</span>
+<span class="k">-</span><span class="w"> </span>则目标元素为right_elem_ids对应索引0，即 id=5 的元素
+
+<span class="k">2.</span> 指令&quot;点击搜索框右侧的第2个按钮&quot;  
+<span class="k">-</span><span class="w"> </span>若搜索框的 <span class="sb">`right_elem_ids: [5, 8, 12]`</span>
+<span class="k">-</span><span class="w"> </span>则目标元素为right_elem_ids索引1，即 id=8 的元素
+
+<span class="k">3.</span> 指令&quot;点击搜索框左侧的按钮&quot;  
+<span class="k">-</span><span class="w"> </span>若搜索框的 <span class="sb">`left_elem_ids: [3, 2, 1]`</span>
+<span class="k">-</span><span class="w"> </span>因无明确左侧第几个元素，则默认取目标元素left_elem_ids索引0， 即 id=3 的元素
+
+<span class="gu">## 弹窗自动处理</span>
+在执行主任务过程中，若遇到以下元素，应自动处理：
+<span class="k">-</span><span class="w"> </span><span class="gs">**权限请求**</span>：点击&quot;允许&quot;、&quot;同意&quot;、&quot;确定&quot;
+<span class="k">-</span><span class="w"> </span><span class="gs">**用户协议**</span>：点击&quot;同意&quot;、&quot;接受&quot;
+<span class="k">-</span><span class="w"> </span><span class="gs">**广告弹窗**</span>：点击&quot;跳过&quot;、&quot;关闭&quot;、&quot;X&quot;、&quot;Dismiss&quot;
+<span class="k">-</span><span class="w"> </span><span class="gs">**通知提示**</span>：点击&quot;我知道了&quot;、&quot;确定&quot;、&quot;取消&quot;
+
+<span class="gu">## 工具参数规范</span>
+<span class="gu">### 通用参数</span>
+<span class="k">-</span><span class="w"> </span><span class="sb">`action`</span>：操作类型标识符，对应工具名称（如：click、input、scroll）
+<span class="k">-</span><span class="w"> </span><span class="sb">`element_bbox`</span>：元素边界框坐标，格式为 <span class="sb">`[x1, y1, x2, y2]`</span>
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>坐标系统：归一化坐标（相对屏幕分辨率）
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>取值范围：[0.0, 1.0]
+<span class="w">  </span><span class="k">-</span><span class="w"> </span>示例：`[0.1, 0.2, 0.3, 0.4]` 表示元素左上角在屏幕 (10%, 20%) 位置，右下角在 (30%, 40%) 位置
+
+<span class="gu">## 执行约束</span>
+<span class="gu">### 强制要求 ❗</span>
+<span class="k">1.</span> <span class="gs">**意图忠实性**</span>：所有操作必须严格遵循用户指令意图，不得擅自添加或修改
+<span class="k">2.</span> <span class="gs">**状态依赖性**</span>：所有操作必须基于当前屏幕实际状态，禁止假设屏幕外或历史状态的元素
+<span class="k">3.</span> <span class="gs">**顺序执行性**</span>：严格按照指令顺序执行，每次仅调用一个工具
+<span class="k">4.</span> <span class="gs">**元素唯一性**</span>：当屏幕存在多个相同元素且用户未明确指定时，选择首个匹配元素
+<span class="k">5.</span> <span class="gs">**失败即停原则**</span>：元素未找到或操作无法执行时，必须调用 <span class="sb">`mark_failed`</span> 标记失败并立即终止
+
+<span class="gu">### 绝对禁止 ❌</span>
+<span class="k">1.</span> 假设或推测屏幕外、历史状态或未来状态的元素
+<span class="k">2.</span> 添加用户指令中未明确要求的操作步骤
+<span class="k">3.</span> 同时调用多个工具（必须等待当前工具执行完成）
+<span class="k">4.</span> 忽略元素定位失败，强行执行后续操作
+<span class="k">5.</span> 修改用户指令的原始意图或执行顺序
+&quot;&quot;&quot;
+</code></pre></div>
+<p><strong>2. Agent 主循环逻辑</strong></p>
+<p>GUI Agent 不是一次性的，它是一个循环过程。</p>
+<div class="highlight"><pre><span></span><code>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">system_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">report_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./report&quot;</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🤖Agent start planning...&quot;</span><span class="p">)</span>
+
+        <span class="n">planning_agent</span> <span class="o">=</span> <span class="n">PlanningAgent</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">deps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="p">)</span>
+        <span class="n">planning_result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">planning_agent</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">prompt</span><span class="p">)</span>
+        <span class="n">planning_steps</span> <span class="o">=</span> <span class="n">planning_result</span><span class="o">.</span><span class="n">output</span><span class="o">.</span><span class="n">steps</span>
+
+        <span class="n">planning_steps</span> <span class="o">=</span> <span class="p">[</span><span class="o">*</span><span class="n">planning_steps</span><span class="p">,</span> <span class="n">PlanningStep</span><span class="p">(</span><span class="n">instruction</span><span class="o">=</span><span class="s1">&#39;结束任务&#39;</span><span class="p">)]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🤖Agent planning finished.&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">planning_steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;◽️step</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">. </span><span class="si">{</span><span class="n">step</span><span class="o">.</span><span class="n">instruction</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">system_prompt</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">system_prompt</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">system_prompt</span><span class="p">)</span>
+
+        <span class="n">usage</span> <span class="o">=</span> <span class="n">planning_result</span><span class="o">.</span><span class="n">usage</span><span class="p">()</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="n">RunContext</span><span class="p">(</span><span class="n">deps</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">agent</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">usage</span><span class="o">=</span><span class="n">Usage</span><span class="p">(),</span> <span class="n">prompt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;🤖Agent start executing steps...&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">planning</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">planning_steps</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">add_step_info</span><span class="p">(</span><span class="n">StepInfo</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="n">step</span><span class="p">,</span> <span class="n">planning</span><span class="o">=</span><span class="n">planning</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">planning</span><span class="o">.</span><span class="n">instruction</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;▶️ step=</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">planning</span><span class="o">.</span><span class="n">instruction</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">planning</span><span class="o">.</span><span class="n">instruction</span> <span class="o">!=</span> <span class="s1">&#39;结束任务&#39;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sub_agent_run</span><span class="p">(</span><span class="n">planning</span><span class="p">,</span> <span class="n">usage</span><span class="p">)</span>
+                    <span class="n">usage</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">usage</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;💬 </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">UnexpectedModelBehavior</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">mark_failed</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">MarkFailedParams</span><span class="p">(</span>
+                        <span class="n">reason</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                    <span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;step=</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">planning</span><span class="o">.</span><span class="n">instruction</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot;✅&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">current_step</span><span class="o">.</span><span class="n">is_success</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s2">&quot;❌&quot;</span><span class="si">}</span><span class="s1"> &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;step=</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">planning</span><span class="o">.</span><span class="n">instruction</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">tear_down</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">ToolParams</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s1">&#39;tear_down&#39;</span><span class="p">,</span> <span class="n">instruction</span><span class="o">=</span><span class="s1">&#39;任务完成&#39;</span><span class="p">))</span>
+
+            <span class="c1"># 步骤执行后如果没有截图则自动补上，比如滑动、等待</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">current_step</span><span class="o">.</span><span class="n">image_url</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">tool</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">parse_element</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">current_step</span><span class="o">.</span><span class="n">is_success</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;steps: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s1">&#39;DETAIL&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;usage: </span><span class="si">{</span><span class="n">usage</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">is_success_output</span> <span class="o">=</span> <span class="nb">all</span><span class="p">([</span><span class="n">step</span><span class="o">.</span><span class="n">is_success</span> <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+        <span class="n">report_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;is_success&#39;</span><span class="p">:</span> <span class="n">is_success_output</span><span class="p">,</span>
+                       <span class="s1">&#39;device_size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">device_size</span><span class="p">,</span>
+                       <span class="s1">&#39;steps&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">steps</span><span class="p">}</span>
+        <span class="n">report_json</span> <span class="o">=</span> <span class="n">TypeAdapter</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span><span class="o">.</span><span class="n">dump_json</span><span class="p">(</span><span class="n">report_data</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">report_path</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_report</span><span class="p">(</span><span class="n">report_json</span><span class="p">,</span> <span class="n">report_dir</span><span class="p">)</span>
+
+        <span class="n">steps_output</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">step</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">,</span> <span class="s1">&#39;is_success&#39;</span><span class="p">})</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">steps</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;is_success&#39;</span><span class="p">:</span> <span class="n">is_success_output</span><span class="p">,</span>
+            <span class="s1">&#39;steps&#39;</span><span class="p">:</span> <span class="n">steps_output</span><span class="p">,</span>
+            <span class="s1">&#39;report_path&#39;</span><span class="p">:</span> <span class="n">report_path</span>
+        <span class="p">}</span>
+</code></pre></div>
+<p><strong>3. 工具封装与参数定义</strong></p>
+<p>工具执行后不管是成功还是失败都需要反馈给模型，以便模型能根据结果重新规划和决策</p>
+<div class="highlight"><pre><span></span><code>    <span class="nd">@tool</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">click</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">[</span><span class="n">AgentDepsType</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="n">ClickToolParams</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    点击设备屏幕指定的元素</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get_coordinate</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">device_size</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">position</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">offset</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Click coordinate (</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ToolResult</span><span class="o">.</span><span class="n">success</span><span class="p">()</span>
+
+
+<span class="nd">@tool</span><span class="p">(</span><span class="n">after_delay</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">[</span><span class="n">AgentDepsType</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="n">InputToolParams</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    在设备指定的元素中输入文本</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get_coordinate</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">device_size</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Input text: (</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">y</span><span class="si">}</span><span class="s1">) -&gt; </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">click</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">AdbDeviceProxy</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">input_text</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">send_enter</span><span class="p">:</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">deps</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">keyevent</span><span class="p">(</span><span class="s1">&#39;KEYCODE_ENTER&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ToolResult</span><span class="o">.</span><span class="n">success</span><span class="p">()</span>
+
+
+<span class="nd">@tool</span><span class="p">(</span><span class="n">before_delay</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">assert_screen_contains</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ctx</span><span class="p">:</span> <span class="n">RunContext</span><span class="p">[</span><span class="n">AgentDepsType</span><span class="p">],</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">AssertContainsParams</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResult</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    检查屏幕中是否出现或包含指定的多个关键字内容，如果是则 is_success=True, 否则 is_success=False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">expect_screen_contains</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">params</span><span class="o">.</span><span class="n">expect_keywords</span><span class="p">)</span>
+
+
+<span class="o">...</span>
+</code></pre></div>
+<p>工具失败要抛出异常，必要时可以让模型重试</p>
+<div class="highlight"><pre><span></span><code><span class="k">raise</span> <span class="n">ModelRetry</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error occurred, try call &#39;</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; again&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>为了能让LLM更精准的调用工具和传递正确的参数，我们需要给参数字段增加一些描述以及使用的示例（Few-Shot）</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ClickToolParams</span><span class="p">(</span><span class="n">LocationToolParams</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;示例：</span>
+<span class="sd">    - 点击&quot;确定&quot;按钮 -&gt; position=None, offset=None</span>
+<span class="sd">    - 点击&quot;确定&quot;按钮左侧 -&gt; position=&#39;left&#39;, offset=None</span>
+<span class="sd">    - 点击&quot;确定&quot;按钮左侧1/2处 -&gt; position=&#39;left&#39;, offset=0.5</span>
+<span class="sd">    - 点击&quot;上传&quot;按钮，上传文件:&quot;/Users/Desktop/1.png&quot; -&gt; position=None, offset=None, file_path=&#39;/Users/Desktop/1.png&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">position</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">PositionType</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;点击元素的相对位置&#39;</span><span class="p">)</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;相对位置的偏移量&#39;</span><span class="p">)</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;要上传的文件路径&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">InputToolParams</span><span class="p">(</span><span class="n">LocationToolParams</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    示例：</span>
+<span class="sd">    - 输入&quot;123456&quot; -&gt; text=&quot;123456&quot;，send_enter=True</span>
+<span class="sd">    - 输入&quot;123456&quot;，不发送回车键 -&gt; text=&quot;123456&quot;，send_enter=False</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s1">&#39;要输入的文本&#39;</span><span class="p">)</span>
+    <span class="n">send_enter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;是否发送回车键&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="05">05. 避坑指南：生产环境下的挑战与对策</h2>
+<p>手搓一个 Demo 容易，但要做到生产可用，你会遇到以下“深坑”：</p>
+<h4 id="1">1. 操作延迟</h4>
+<p>这是目前最大的痛点。</p>
+<ul>
+<li>
+<p>截图 + 上传 + OmniParser 解析 + LLM 推理 + 网络传输，这一套流程下来，每一步可能需要 2~6 秒。</p>
+</li>
+<li>
+<p><strong>解决方案</strong>：</p>
+</li>
+<li>
+<p>使用更快的模型（如 deepseek-v3、deepseek-v3.1-terminus，实测速度和推理能力不错）；</p>
+</li>
+<li>
+<p>优化截图压缩算法，降低网络传输耗时；</p>
+</li>
+<li>
+<p>根据业务情况由ocr+icon推理降级为仅ocr模式，元素解析最耗时的步骤在icon含义的推理上，而大部分要操作的元素都有文案供 ocr识别；</p>
+</li>
+<li>
+<p>利用图像记忆，已解析过的相似图片直接从数据库中读取解析结果；</p>
+</li>
+</ul>
+<h4 id="2_1">2. 动态内容与弹窗</h4>
+<p>屏幕是动态的。当你准备点击“确定”时，突然弹出一个“系统更新”的弹窗，或者广告遮挡了按钮。</p>
+<ul>
+<li><strong>解决方案</strong>：</li>
+<li>Agent 需要具备<strong>异常检测机制</strong>。如果点击后屏幕没有预期变化，或者出现了未知图层，需要触发“回退”或“关闭弹窗”的策略，而不是死循环；</li>
+<li>每一步操作前动态等到目标元素出现后再执行，这一步可以在工具内部实现，直接操作或让模型决策循环很可能因找不到元素而失败</li>
+</ul>
+<h4 id="3_1">3. 坐标幻觉与精度</h4>
+<p>虽然模型推理能力很强，但在实际坐标算术计算中，很可能会出现偏差或完全不对的情况，这也是我们熟知的模型幻觉问题</p>
+<ul>
+<li><strong>解决方案</strong>：只让模型返回目标元素的基本信息（bbox或id），然后通过工具来计算最终操作定位</li>
+</ul>
+<h4 id="4">4. 上下文记忆限制</h4>
+<p>长流程任务（如：在淘宝买东西，涉及搜索、比价、选规格、填地址、付款）会产生极长的 上下文，一旦上下文过多，模型操作的步骤准确性会骤降。</p>
+<ul>
+<li><strong>解决方案</strong>：<strong>显式状态管理</strong>。不要把所有历史步骤和截图信息都塞给 LLM。只保留最近 2 步的操作信息，之前的步骤总结为文本摘要。</li>
+</ul>
+<h4 id="5">5. 规划和执行稳定性</h4>
+<p>模型接收到屏幕信息和指令后是可以一次完成规划+工具调用的，我们在初期探索时为了简便也是这样用，但实际发现让模型一次性完成并通过的稳定性很差，复杂一点的场景就会出现步骤跳过、步骤重复的情况。</p>
+<p><strong>解决方案</strong>：规划和操作分2步，先让模型对用户指令进行拆解成多个单一的操作指令，然后再根据每个指令去再规划再执行，将单个复杂的任务变成多个简单的任务，即使路径很长也不会太影响。</p>
+<p>如：
+<code>用户指令</code></p>
+<div class="highlight"><pre><span></span><code>打开QQ音乐APP，点击<span class="s2">&quot;close&quot;</span>关闭弹窗，如果点击的元素不存在则跳过，向上滑动最多10次，直到页面中出现<span class="s2">&quot;搜索2025年上榜歌手&quot;</span>元素，点击<span class="s2">&quot;搜索&quot;</span>
+等待2s，然后输入<span class="s2">&quot;周杰伦&quot;</span>，最后向上滑动3次<span class="err">&#39;</span>
+</code></pre></div>
+<p><code>路径规划</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;打开 &quot;QQ音乐&quot; APP&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;点击&quot;close&quot;关闭弹窗，若&quot;close&quot;元素不存在则跳过&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;向上滑动最多 10 次，直到页面中出现&quot;搜索2025年上榜歌手&quot;元素&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;点击&quot;搜索&quot;&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;等待 2 秒&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;输入&quot;周杰伦&quot;&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;instruction&#39;</span><span class="p">:</span> <span class="s1">&#39;向上滑动 3 次&#39;</span><span class="p">}</span>
+<span class="p">]</span>
+</code></pre></div>
+<p><code>路径执行</code></p>
+<p><img alt="" src="https://cdn-y.tencentmusic.com/e79e29174a0a4a8758dd00ba7e19c938.png" /></p>
+<h2 id="06-ui">06. 结语：UI 交互的未来</h2>
+<p>构建一个 GUI Agent，本质上是在构建一个<strong>数字世界的机器人</strong>。</p>
+<p>通过 <strong>Pydantic AI</strong>，我们获得了工程上的严谨性和类型安全，让 Agent 的输出可控；通过 <strong>OmniParser</strong>，我们赋予了 Agent 像素级的感知能力，解决了“看不准”的难题。</p>
+<p>目前的 GUI Agent 仍处于“辅助驾驶”阶段（L2/L3），速度较慢，偶尔需要人工干预优化指令。但随着多模态模型（LMM）推理速度的提升和端侧小模型的普及，未来的软件交互模式将被重塑：<strong>UI 将不再是给人看的，而是给 AI 看的。</strong></p>
+<p>作为效能开发者，现在正是入局的最佳时机。不要只停留在调用 API，动手搓一个 Agent，去感受 AI 如何接管屏幕的魔力吧。</p>
+<hr />
+<p><strong>🔗 文章所提到的完整代码已开源至GitHub</strong>: <a href="https://github.com/tencentmusic/page-eyes-agent">https://github.com/tencentmusic/page-eyes-agent</a></p>
+<p><strong>📚 了解更多Agent项目细节</strong>：<a href="https://deepwiki.com/tencentmusic/page-eyes-agent">deepwiki</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright (c) 2025 Tencent Music Entertainment Group
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.expand", "navigation.sections", "navigation.instant", "navigation.tracking", "navigation.indexes", "content.code.copy", "content.tabs.link", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
