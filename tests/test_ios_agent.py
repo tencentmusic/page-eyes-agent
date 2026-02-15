@@ -90,7 +90,6 @@ async def test_ios_07(ios_agent):
     )
 
 
-
 async def test_ios_09(ios_agent):
     """测试输入交互，输入后默认会自动回车"""
     await ios_agent.run(
@@ -111,6 +110,7 @@ async def test_ios_10(ios_agent):
         """
     )
 
+
 async def test_ios_13(ios_agent):
     """测试条件判断和操作"""
     await ios_agent.run(
@@ -120,6 +120,7 @@ async def test_ios_13(ios_agent):
         - 点击"搜索"按钮
         """
     )
+
 
 async def test_ios_15(ios_agent):
     """测试操作不存在的元素"""
@@ -187,6 +188,7 @@ async def test_ios_20(ios_agent):
         """
     )
 
+
 async def test_ios_21(ios_agent):
     """测试长按复制歌名"""
     await ios_agent.run(
@@ -197,6 +199,7 @@ async def test_ios_21(ios_agent):
         - 长按"What a Day",在弹出的菜单中点击"复制"
         """
     )
+
 
 async def test_ios_22(ios_agent):
     """测试连续打开应用"""

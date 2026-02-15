@@ -55,11 +55,5 @@ async def harmony_agent():
 async def ios_agent():
     return await IOSAgent.create(wda_url=wda_url,debug=debug)
 
-#带有自定义Bundle Identifier的ios_agent
-# @pytest_asyncio.fixture(scope="session")
-# async def ios_agent():
-#     return await IOSAgent.create(wda_url=wda_url,debug=debug,app_name_map={
-#         "信息": "com.apple.MobileSMS",
-#     })
 
 
