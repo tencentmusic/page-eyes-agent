@@ -29,7 +29,7 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android、HarmonyOS、iOS），目前主要包含以下功能：
 
 1. 完全由自然语言指令驱动，无需编写脚本，既可实现自动化测试，UI巡检等任务
-2. 跨平台、跨端支持，在 Python 环境中安装 page-eyes 库和配置 OmniParser 服务后即可开始 Web、Android 平台的自动化任务，未来还将继续支持iOS平台
+2. 跨平台、跨端支持，在 Python 环境中安装 page-eyes 库和配置 OmniParser 服务后即可开始多个平台的自动化任务
 3. 支持多种大模型接入，包括DeepSeek、OpenAI、千问等，默认使用 DeepSeek V3 模型，后续会支持更多大模型接入
 4. 可通过自然语言进行断言，并生成详细的执行日志和报告，方便测试人员查看执行过程和结果
 

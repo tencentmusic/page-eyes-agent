@@ -2,6 +2,14 @@
 
 本文档记录 PageEyes Agent 项目的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## 2026-02-13
+### 新增
+  - 支持 HarmonyOS NEXT UI自动化
+  
+## 2026-02-11
+### 新增
+  - 支持 iOS 设备连接，通过 WebDriverAgent (WDA) 实现 iOS 自动化
+
 ##  2025-09-03
 
 ### 新增

@@ -1,7 +1,9 @@
 ## 更新日志
+- 2026-02-13
+  - 支持 HarmonyOS NEXT UI自动化
+  
 - 2026-02-11
   - 支持 iOS 设备连接，通过 WebDriverAgent (WDA) 实现 iOS 自动化
-  - IOSAgent 支持通过 WDA URL（必填） 连接 iOS 设备
 
 - 2025-11-12
   - 单Agent改为多Agent模式，规划、执行、反思各司其职，指令格式也可以更随意

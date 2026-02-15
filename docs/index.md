@@ -11,16 +11,17 @@ hide:
 ### 轻量级 UI 自动化 Agent  
 *基于自然语言指令驱动的跨平台 UI 自动化解决方案*
 
-![](https://img.shields.io/badge/build-passing-brightgreen)
 ![](https://img.shields.io/badge/python-12-blue?logo=python)
 <a href="https://github.com/tencentmusic/page-eyes-agent/blob/master/LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-blue?labelColor=d4eaf7" alt="License">
+<img src="https://img.shields.io/badge/License-MIT-blue?labelColor=d4eaf7" alt="License">
 </a>
 <a href="https://pypi.org/project/page-eyes/">
-    <img alt="Version" src="https://img.shields.io/pypi/v/page-eyes.svg?labelColor=d4eaf7&label=version&color=blue">
+<img alt="Version" src="https://img.shields.io/pypi/v/page-eyes.svg?labelColor=d4eaf7&label=version&color=blue">
 </a>
-![](https://img.shields.io/github/stars/tencentmusic/page-eyes-agent)
-![](https://img.shields.io/github/forks/tencentmusic/page-eyes-agent)
+![](https://img.shields.io/badge/Web-supported-brightgreen?logo=googlechrome&logoColor=white)
+![](https://img.shields.io/badge/Android-supported-brightgreen?logo=android&logoColor=white)
+![](https://img.shields.io/badge/iOS-supported-brightgreen?logo=apple&logoColor=white)
+![](https://img.shields.io/badge/HarmonyOS_Next-supported-brightgreen?logo=harmonyos&logoColor=white)
 </div>
 
 ---
@@ -30,7 +31,7 @@ PageEyes Agent 是一个 **Python UI 自动化 Agent 框架**，帮助你用自�
 
 PageEyes Agent 以 *自然语言指令* 颠覆传统 UI 自动化：无需编写脚本，也能实现复杂的跨平台测试与巡检。基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydanticai) 框架开发，
 其中元素信息感知能力依靠 [OmniParserV2](https://huggingface.co/microsoft/OmniParser-v2.0) 模型，不依赖视觉语言大模型，
-即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android、iOS）
+即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android、HarmonyOS、iOS）
 
 ---
 

@@ -64,6 +64,23 @@ if __name__ == "__main__":
   <img title="元素信息示例" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_2f75e92b9643a8d9cd4a60706a5947ca038e5f6c.png" style="max-width: 100%; border: 1px solid #eee; margin-top: 10px;">
 </details>
 
+Harmony OS 类似
+> - 打开 "QQ音乐" APP
+> - 点击 "乐馆"
+> - 点击 "歌手"
+> - 上滑直到出现 "周深"
+> - 点击 "周深"
+> - 点击 "全部播放"
+ 
+
+<video
+  controls
+  preload="metadata"
+  style="width: 60%; max-width: 640px; border: 1px solid #ccc; display: block; margin-top: 10px;">
+  <source src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_fe101665ff1eada954cb1c4bfb5420ecf01c8876.mp4" type="video/mp4">
+  抱歉，您的浏览器不支持播放此视频。
+</video>
+
 
 
 ## 由你榜iOS端自动化
