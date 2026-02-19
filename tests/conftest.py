@@ -13,7 +13,7 @@ from page_eyes.agent import WebAgent, AndroidAgent, PlanningAgent, HarmonyAgent,
 from page_eyes.util.platform import Platform
 
 logger.remove()
-logger.add(sys.stdout, level="INFO")
+logger.add(sys.stdout, level="DEBUG")
 
 debug = True
 

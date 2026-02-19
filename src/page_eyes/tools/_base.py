@@ -73,7 +73,8 @@ class ToolHandler:
 
         if self.ctx.deps.settings.debug and isinstance(self.step_params, LocationToolParams):
             if isinstance(self.ctx.deps.device, WebDevice):
-                await JSTool.add_highlight_element(self.ctx.deps.device.target, self.step_params.element_bbox)
+                bbox = self.ctx.deps.context.current_step.screen_elements[self.step_params.element_id].get('bbox')
+                await JSTool.add_highlight_element(self.ctx.deps.device.target, bbox)
 
     async def post_handle(self, tool_result: ToolResult):
         """工具的后置处理"""
@@ -178,11 +179,23 @@ class AgentTool(ABC):
     @tool
     async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
         """
-        获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
-        该工具禁止作为一个单独步骤
+        获取当前屏幕信息，每个元素都有唯一的 ID，单个元素包含以下字段：
+        id: 元素ID
+        content: 元素描述信息
+        left_elem_ids: 该元素左侧的元素列表
+        right_elem_ids: 该元素右侧的元素列表
+        top_elem_ids: 该元素上方的元素列表
+        bottom_elem_ids: 该元素下方的元素列表
+
+        注意：该工具禁止作为一个单独步骤执行
         """
         screen_info = await self.get_screen(ctx)
-        return ToolResultWithOutput.success(screen_info.model_dump(include={'screen_elements'}))
+        # 仅保留必要的字段给 LLM
+        parsed_elements = TypeAdapter(list[dict]).dump_python(
+            screen_info.screen_elements,
+            include={'__all__': {'id', 'content', 'left_elem_ids', 'top_elem_ids', 'right_elem_ids', 'bottom_elem_ids'}}
+        )
+        return ToolResultWithOutput.success(parsed_elements)
 
     @tool(after_delay=0)
     async def wait(self, ctx: RunContext[AgentDepsType], params: WaitToolParams) -> ToolResult:

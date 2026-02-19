@@ -6,11 +6,13 @@
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, TypeVar, Literal, Generic, TypeAlias
+from typing import Optional, TypeVar, Literal, Generic, TypeAlias, Union, Any
 
-from pydantic import BaseModel, Field, confloat, conlist, ConfigDict
+from pydantic import BaseModel, Field, conlist, ConfigDict
+from pydantic_ai import RunContext
 
 from .config import Settings
+from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
 
 T = TypeVar('T')
 ClientT = TypeVar('ClientT')
@@ -18,12 +20,6 @@ DeviceT = TypeVar('DeviceT')
 ToolT = TypeVar('ToolT')
 
 SimulateDeviceType: TypeAlias = Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str
-
-
-class DeviceSize(BaseModel):
-    """当前设备尺寸"""
-    width: int
-    height: int
 
 
 class ScreenInfo(BaseModel):
@@ -97,17 +93,25 @@ class OpenUrlToolParams(ToolParams):
 
 PositionType: TypeAlias = Literal['left', 'right', 'top', 'bottom']
 
+AgentDepsType: TypeAlias = AgentDeps[
+    Union[WebDevice, AndroidDevice, HarmonyDevice, IOSDevice],
+    Any,
+]
+
 
 class LocationToolParams(ToolParams):
-    element_bbox: conlist(confloat(ge=0.0, le=1.0), min_length=4, max_length=4) = Field(description='要操作的元素 bbox')
+    element_id: int = Field(description='要操作的元素ID')
     element_content: str = Field(description='要操作的元素内容')
 
     def get_coordinate(self,
-                       device_size: DeviceSize,
+                       ctx: RunContext[AgentDepsType],
                        position: Optional[PositionType] = None,
                        offset: Optional[float] = None) -> tuple[int, int]:
         """计算坐标, 返回 (x, y)"""
-        x1, y1, x2, y2 = self.element_bbox
+        device_size = ctx.deps.device.device_size
+        bbox = ctx.deps.context.current_step.screen_elements[self.element_id].get('bbox')
+
+        x1, y1, x2, y2 = bbox
         width, height = device_size.width, device_size.height
         x, y = (x1 + x2) / 2, (y1 + y2) / 2
         offset = 0.25 if offset is None else offset
