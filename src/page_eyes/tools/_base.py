@@ -164,7 +164,7 @@ class AgentTool(ABC):
         else:
             image_url = await self._upload_cos(image_buffer, suffix=Path(image_buffer.name).suffix)
             parsed_content_list = []
-            logger.info(f'👁‍🗨 Get screen url：{image_url}')
+            logger.info(f'👁‍🗨 Get screen url：{image_url[:200] + (image_url[200:] and "...")}')
 
         # 将当前屏幕信息记录到上下文
         ctx.deps.context.current_step.image_url = image_url
