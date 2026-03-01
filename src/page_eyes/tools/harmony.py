@@ -28,7 +28,7 @@ class HarmonyAgentTool(MobileAgentTool):
         """
         在设备指定的元素中输入文本
         """
-        x, y = params.get_coordinate(ctx.deps.device.device_size)
+        x, y = params.get_coordinate(ctx)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
         ctx.deps.device.target.uitest.input_text(params.text, x=x, y=y)
         if params.send_enter:

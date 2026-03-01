@@ -31,22 +31,6 @@ class WebAgentTool(AgentTool):
         return image_buffer
 
     @tool
-    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
-        """
-        获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，列表顺序即为屏幕元素的排列顺序，从左到右，从上到下
-        每个元素包含以下字段：
-        id: 元素的id
-        bbox: 元素的相对坐标，格式为 (x1, y1, x2, y2)
-        content: 元素描述信息
-        left_elem_ids: 该元素左侧的元素列表
-        right_elem_ids: 该元素右侧的元素列表
-        top_elem_ids: 该元素上方的元素列表
-        bottom_elem_ids: 该元素下方的元素列表
-        """
-        screen_info = await self.get_screen(ctx)
-        return ToolResultWithOutput.success(screen_info.model_dump(include={'screen_elements'}))
-
-    @tool
     async def tear_down(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
         """
         任务完成或结束后的清理操作
@@ -72,7 +56,7 @@ class WebAgentTool(AgentTool):
         """
         点击设备屏幕指定的元素, element_bbox 不能为空
         """
-        x, y = params.get_coordinate(ctx.deps.device.device_size, params.position, params.offset)
+        x, y = params.get_coordinate(ctx, params.position, params.offset)
         logger.info(f'click coordinate ({x}, {y})')
         await JSTool.add_highlight_position(ctx.deps.device.target, x, y)
         try:
@@ -98,7 +82,7 @@ class WebAgentTool(AgentTool):
         """
         在设备指定的元素中输入文本
         """
-        x, y = params.get_coordinate(ctx.deps.device.device_size)
+        x, y = params.get_coordinate(ctx)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
         await ctx.deps.device.target.mouse.click(x, y)
         await ctx.deps.device.target.keyboard.type(params.text)
@@ -192,6 +176,7 @@ class WebAgentTool(AgentTool):
         """
         操作返回到上一个页面
         """
+        logger.debug(params)
         logger.info(f'go to previous page')
         await ctx.deps.device.target.go_back()
         return ToolResult.success()

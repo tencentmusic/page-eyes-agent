@@ -38,15 +38,6 @@ class MobileAgentTool(AgentTool):
         image_buffer.seek(0)
         return image_buffer
 
-    @tool
-    async def get_screen_info(self, ctx: RunContext[AgentDepsType]) -> ToolResultWithOutput[dict]:
-        """
-        获取当前屏幕信息，screen_elements 包含所有解析到的元素信息，bbox 是相对值，格式为 (x1, y1, x2, y2)
-        该工具禁止作为一个单独步骤
-        """
-        screen_info = await self.get_screen(ctx)
-        return ToolResultWithOutput.success(screen_info.model_dump(include={'screen_elements'}))
-
     async def tear_down(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
         """
         任务完成或结束后的清理操作
@@ -72,7 +63,7 @@ class MobileAgentTool(AgentTool):
         """
         点击设备屏幕指定的元素
         """
-        x, y = params.get_coordinate(ctx.deps.device.device_size, params.position, params.offset)
+        x, y = params.get_coordinate(ctx, params.position, params.offset)
         logger.info(f'Click coordinate ({x}, {y})')
         ctx.deps.device.target.click(x, y)
 
@@ -83,7 +74,7 @@ class MobileAgentTool(AgentTool):
         """
         在设备指定的元素中输入文本
         """
-        x, y = params.get_coordinate(ctx.deps.device.device_size)
+        x, y = params.get_coordinate(ctx)
         logger.info(f'Input text: ({x}, {y}) -> {params.text}')
         ctx.deps.device.target.click(x, y)
         AdbDeviceProxy(ctx.deps.device.target).input_text(params.text)

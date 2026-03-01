@@ -9,17 +9,26 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Generic
+from typing import Optional, Generic, TypeVar
 
 import wda
 from adbutils import AdbClient, AdbDevice
 from loguru import logger
 from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
+from pydantic import BaseModel
 
-from .deps import DeviceSize, DeviceT, ClientT
 from .util.hdc_tool import HdcClient, HdcDevice
 from .util.platform import Platform
 from .util.wda_tool import WdaClient
+
+ClientT = TypeVar('ClientT')
+DeviceT = TypeVar('DeviceT')
+
+
+class DeviceSize(BaseModel):
+    """当前设备尺寸"""
+    width: int
+    height: int
 
 
 @dataclass

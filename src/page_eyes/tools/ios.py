@@ -55,7 +55,7 @@ class IOSAgentTool(MobileAgentTool):
         device = ctx.deps.device
 
         # 计算点击坐标
-        x, y = params.get_coordinate(device.device_size, params.position, params.offset)
+        x, y = params.get_coordinate(ctx, params.position, params.offset)
 
         # 执行点击
         device.target.session().tap(x,y)
@@ -73,7 +73,7 @@ class IOSAgentTool(MobileAgentTool):
         device = ctx.deps.device
 
         # 计算点击坐标
-        x, y = params.get_coordinate(device.device_size)
+        x, y = params.get_coordinate(ctx)
 
         # 将 session 转换为 WdaSession 并使用扩展方法
         device.client.tap_and_input(x, y, params.text, params.send_enter)
@@ -139,7 +139,7 @@ class IOSAgentTool(MobileAgentTool):
         for x, y in params.coordinates:
             if not (0 <= x <= width and 0 <= y <= height):
                 logger.warning(f'Coordinate ({x}, {y}) is out of screen bounds ({width}x{height})')
-                return ToolResult.failed(f'坐标 ({x}, {y}) 超出屏幕范围 ({width}x{height})')
+                return ToolResultWithOutput.failed(f'坐标 ({x}, {y}) 超出屏幕范围 ({width}x{height})')
 
         # 依次从坐标集中取出2组值进行滑动
         coordinate_iter = iter(params.coordinates)

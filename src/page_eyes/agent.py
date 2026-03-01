@@ -94,7 +94,7 @@ class UiAgent:
             self.deps.context.current_step.parallel_tool_calls = False
             self.deps.context.current_step.parallel_tool_calls = len(tool_parts) > 1
             for part in tool_parts:
-                logger.debug(f"🤖Agent tool call: {part.tool_name}, args: {part.args}")
+                logger.info(f"🤖Agent tool call: {part.tool_name}, args: {part.args.replace('{}', '-')}")
 
     async def _sub_agent_run(self, planning, usage) -> AgentRunResult:
         async with self.agent.iter(user_prompt=planning.instruction, deps=self.deps, usage=usage) as agent_run:

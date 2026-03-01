@@ -4,9 +4,11 @@
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/19 11:46
 import asyncio
+import base64
 import hashlib
 import imghdr
 import io
+import mimetypes
 import os
 import time
 from abc import ABC, abstractmethod
@@ -63,11 +65,7 @@ class TinyImg:
 class StorageStrategy(ABC):
     @abstractmethod
     def upload_file(self, file, prefix='', suffix='.png'):
-        pass
-
-    @abstractmethod
-    async def async_upload_file(self, file, prefix='', suffix='.png'):
-        pass
+        raise NotImplementedError
 
     @staticmethod
     def get_file_md5(file):
@@ -76,6 +74,9 @@ class StorageStrategy(ABC):
         m.update(file.read())
         file.seek(0)
         return m.hexdigest()
+
+    async def async_upload_file(self, file, prefix='', suffix='.png'):
+        return await asyncio.to_thread(self.upload_file, file, prefix=prefix, suffix=suffix)
 
 
 # COS策略实现
@@ -98,9 +99,6 @@ class CosStrategy(StorageStrategy):
         except Exception as e:
             logger.error(f'上传文件失败：{e}')
             raise e
-
-    async def async_upload_file(self, file, prefix='', suffix='.png'):
-        return await asyncio.to_thread(self.upload_file, file, prefix=prefix, suffix=suffix)
 
 
 # MinIO策略实现
@@ -140,8 +138,16 @@ class MinioStrategy(StorageStrategy):
             logger.error(f"上传文件失败: {e}")
             raise e
 
-    async def async_upload_file(self, file, prefix='', suffix='.png'):
-        return await asyncio.to_thread(self.upload_file, file, prefix=prefix, suffix=suffix)
+
+# Base64 策略实现
+class Base64Strategy(StorageStrategy):
+
+    def upload_file(self, file: IO[bytes], prefix='', suffix='.png'):
+        file = TinyImg(file).to_webp() if suffix == '.png' else file
+        base64_data = base64.b64encode(file.read()).decode('utf-8')
+        file.seek(0)
+        mimetype, _ = mimetypes.guess_type(f'file{suffix}')
+        return f"data:{mimetype};base64,{base64_data}"
 
 
 # 主要的存储客户端类
@@ -175,7 +181,7 @@ class StorageClient:
                 secure=minio_config.secure
             )
         else:
-            raise ValueError("未找到有效的存储配置，请检查COS或MinIO环境变量配置")
+            strategy = Base64Strategy()
 
         return cls(strategy)
 
