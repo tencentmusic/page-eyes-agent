@@ -8,10 +8,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, TypeVar, Literal, Generic, TypeAlias, Union, Any
 
-from pydantic import BaseModel, Field, conlist, ConfigDict
+from pydantic import BaseModel, Field, conlist, ConfigDict, computed_field
 from pydantic_ai import RunContext
 
-from .config import Settings
+from .config import Settings, default_settings
 from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
 
 T = TypeVar('T')
@@ -99,7 +99,7 @@ AgentDepsType: TypeAlias = AgentDeps[
 ]
 
 
-class LocationToolParams(ToolParams):
+class LLMLocationToolParams(ToolParams):
     element_id: int = Field(description='要操作的元素ID')
     element_content: str = Field(description='要操作的元素内容')
 
@@ -125,6 +125,40 @@ class LocationToolParams(ToolParams):
             y = y2 - (y2 - y1) * offset
 
         return int(x * width), int(y * height)
+
+
+class VLMLocationToolParams(ToolParams):
+    coordinate: tuple[int, int, int, int] = Field(description='要操作的元素坐标，格式为(x1, y1, x2, y2)')
+    element_content: str = Field(description='要操作的元素内容')
+
+    @computed_field
+    def bbox(self) -> tuple[float, float, float, float]:
+        x1, y1, x2, y2 = self.coordinate
+        return x1 / 1000, y1 / 1000, x2 / 1000, y2 / 1000
+
+    def get_coordinate(self,
+                       ctx: RunContext[AgentDepsType],
+                       position: Optional[PositionType] = None,
+                       offset: Optional[float] = None) -> tuple[int, int]:
+        device_size = ctx.deps.device.device_size
+        x1, y1, x2, y2 = self.coordinate
+        width, height = device_size.width, device_size.height
+
+        x, y = ((x1 + x2) / 2) / 1000 * width, ((y1 + y2) / 2) / 1000 * height
+        offset = 0.25 if offset is None else offset
+        if position == 'left':
+            x = x1 + (x2 - x1) * offset
+        elif position == 'right':
+            x = x2 - (x2 - x1) * offset
+        elif position == 'top':
+            y = y1 + (y2 - y1) * offset
+        elif position == 'bottom':
+            y = y2 - (y2 - y1) * offset
+
+        return int(x), int(y)
+
+
+LocationToolParams = VLMLocationToolParams if default_settings.model_type == 'vlm' else LLMLocationToolParams
 
 
 class ClickToolParams(LocationToolParams):
@@ -168,6 +202,14 @@ class SwipeFromCoordinateToolParams(ToolParams):
 class WaitToolParams(ToolParams):
     """
     示例：
+    等待2秒 -> timeout=2
+    """
+    timeout: int = Field(description='等待时间，单位为秒')
+
+
+class WaitForKeywordsToolParams(ToolParams):
+    """
+    示例：
     等待2秒 -> timeout=2，expect_keywords=None
     等待5秒，直到出现"确定"按钮 -> timeout=5，expect_keywords=['确定']
     """
@@ -184,7 +226,7 @@ class AssertNotContainsParams(ToolParams):
 
 
 class MarkFailedParams(BaseModel):
-    reason: str = Field(description='失败原因')
+    reason: str = Field(description='操作失败原因')
 
 
 class ToolResult(BaseModel, Generic[T]):

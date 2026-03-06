@@ -161,7 +161,7 @@ class MobileAgentTool(AgentTool):
         prompt = (f'用户指令：{params.instruction}\n'
                   f'应用包名列表：{packages}')
         result = await sub_agent.run(prompt, output_type=str)
-        package_name = result.output
+        package_name = result.output.strip()
         if not package_name:
             return ToolResultWithOutput.failed(output='在该设备中未找到对应的应用')
         logger.info(f'Find App package name：{package_name}')

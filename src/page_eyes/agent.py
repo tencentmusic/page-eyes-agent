@@ -11,14 +11,15 @@ from typing import Optional, Union
 
 from loguru import logger
 from pydantic import TypeAdapter
-from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior
+from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior, \
+    ModelMessage
 from pydantic_ai.agent import AgentRunResult
-from pydantic_ai.messages import ToolReturnPart, ToolCallPart
+from pydantic_ai.messages import ToolReturnPart, ToolCallPart, ModelRequest, UserPromptPart, ImageUrl
 from pydantic_ai.usage import Usage
 
 from .config import default_settings, Settings, BrowserConfig
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, PlanningStep, ToolParams, StepInfo, \
-    MarkFailedParams
+    MarkFailedParams, ScreenInfo
 from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AgentDepsType, WebAgentTool, AndroidAgentTool, HarmonyAgentTool, IOSAgentTool
@@ -43,6 +44,10 @@ class PlanningAgent:
         return await agent.run(prompt.strip(), deps=self.deps)
 
 
+class ImageUserPromptPart(UserPromptPart):
+    pass
+
+
 @dataclass
 class UiAgent:
     model: str
@@ -56,6 +61,28 @@ class UiAgent:
         )
         logger.info(f'settings: {settings}')
         return settings
+
+    @classmethod
+    async def history_processor(cls, ctx: RunContext, messages: list[ModelMessage]) -> list[ModelMessage]:
+        """上下文处理器"""
+        if default_settings.model_type == 'vlm' and isinstance(messages[-1], ModelRequest):
+            # 清理之前的截图
+            for message in messages:
+                if isinstance(message, ModelRequest):
+                    message.parts = [
+                        part for part in message.parts if not isinstance(part, ImageUserPromptPart)
+                    ]
+
+            # 每一步请求主动携带当前截图
+            screen: ScreenInfo = await ctx.deps.tool.get_screen(ctx=ctx)
+            messages[-1].parts.append(
+                ImageUserPromptPart(content=[
+                    '当前屏幕截图：',
+                    ImageUrl(url=screen.image_url)
+                ])
+            )
+
+        return messages
 
     @classmethod
     async def create(cls, *args, **kwargs):
@@ -89,6 +116,8 @@ class UiAgent:
                     logger.debug(f"🤖Agent tool result: {part.tool_name} -> {part.content}")
 
         elif isinstance(node, CallToolsNode):
+            if node.model_response.thinking:
+                logger.info(f"💬thinking: {node.model_response.thinking}")
             parts = node.model_response.parts
             tool_parts = [part for part in parts if isinstance(part, ToolCallPart)]
             self.deps.context.current_step.parallel_tool_calls = False
@@ -131,7 +160,7 @@ class UiAgent:
                 try:
                     result = await self._sub_agent_run(planning, usage)
                     usage = result.usage()
-                    logger.info(f"💬 {result.output}")
+                    logger.info(f"💬 {str(result.output).strip()}")
                 except UnexpectedModelBehavior as e:
                     await self.deps.tool.mark_failed(ctx, MarkFailedParams(
                         reason=str(e),
@@ -236,6 +265,7 @@ class AndroidAgent(UiAgent):
             model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
+            # history_processors=[cls.history_processor],
             retries=2
         )
         return cls(model, deps, agent)

@@ -26,7 +26,7 @@ dependencies = [
     "loguru>=0.7.3",
     "minio>=7.2.16",
     "playwright>=1.52.0",
-    "pydantic-ai==0.3.4",
+    "pydantic-ai==1.65.0",
     "pymobiledevice3>=7.6.0",
 ]
 

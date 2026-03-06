@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='agent_', extra='ignore')
 
     model: Optional[str] = 'openai:deepseek-chat'
+    model_type: Optional[Literal['vlm', 'llm']] = 'llm'
+
     model_settings: ModelSettings = ModelSettings(max_tokens=20000, temperature=0.2)
 
     browser: BrowserConfig = BrowserConfig()
