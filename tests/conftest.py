@@ -11,6 +11,7 @@ from loguru import logger
 
 from page_eyes.agent import WebAgent, AndroidAgent, PlanningAgent, HarmonyAgent, IOSAgent
 from page_eyes.util.platform import Platform
+from pydantic_ai_skills import SkillsToolset
 
 logger.remove()
 logger.add(sys.stdout, level="INFO")
@@ -53,7 +54,7 @@ async def harmony_agent():
 
 @pytest_asyncio.fixture(scope="session")
 async def ios_agent():
-    return await IOSAgent.create(wda_url=wda_url,debug=debug)
+    return await IOSAgent.create(wda_url=wda_url, debug=debug, toolsets=[SkillsToolset()])
 
 
 

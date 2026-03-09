@@ -177,12 +177,13 @@ async def test_ios_19(ios_agent):
         """
     )
 
-
+#测试异常场景（测试skills命中）
 async def test_ios_20(ios_agent):
     """测试在相对元素中输入"""
     await ios_agent.run(
         """
         - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        - 点击日榜，不准点‘榜单Tab’
         - 点击"搜索"
         - 在"搜索历史"上方的元素中输入"任素汐"
         """

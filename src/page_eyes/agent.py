@@ -23,8 +23,10 @@ from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AgentDepsType, WebAgentTool, AndroidAgentTool, HarmonyAgentTool, IOSAgentTool
 from .util.platform import Platform
+from pydantic_ai_skills import SkillsToolset
 
 
+skills_toolset = SkillsToolset(directories=[str(Path(__file__).parent.parent.parent / "skills")])
 @dataclass
 class PlanningAgent:
     """PlanningAgent class for planning tasks."""
@@ -284,6 +286,7 @@ class IOSAgent(UiAgent):
             tool_cls: Optional[type[IOSAgentTool]] = None,
             app_name_map: Optional[dict[str, str]] = None,
             debug: Optional[bool] = None,
+            toolsets: Optional[list[SkillsToolset]] = None,
     ):
         settings = cls.merge_settings(Settings(
             model=model,
@@ -304,6 +307,12 @@ class IOSAgent(UiAgent):
             model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
+            toolsets=toolsets or [],
             retries=2
         )
+
+        @agent.instructions
+        async def add_skills_instructions(ctx: RunContext)-> str | None:
+            return await skills_toolset.get_instructions(ctx)
+
         return cls(model, deps, agent)
