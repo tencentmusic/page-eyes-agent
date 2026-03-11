@@ -54,9 +54,44 @@ uv sync  # 安装依赖
 ```
 
 ## 快速开始
-
 配置环境变量，可在项目根目录下创建一个 `.env` 文件，配置项可参考 [.env.example](.env.example)
 
+### 一、使用 VLM 快速体验
+`.env` 中配置模型，以 qwen3-vl-plus 为例
+```shell
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
+AGENT_MODEL_TYPE=vlm
+AGENT_MODEL=openai:qwen3-vl-plus
+```
+编写测试脚本，以 Android 端为例（需先安装好 adb）
+```python
+import asyncio
+
+from page_eyes.agent import AndroidAgent
+
+
+async def main():
+    # 移动端
+    ui_agent = await AndroidAgent.create()
+
+    report = await ui_agent.run( "打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 二、使用 OmniParser + LLM (视觉小模型+大模型)
+`.env` 中配置模型，以 deepseek v3 为例, OmiParser 需提前[部署](docs/getting-started/installation.md)
+```shell
+OPENAI_BASE_URL=https://api.deepseek.com/v1
+OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
+AGENT_MODEL=openai:deepseek-chat
+OMNI_BASE_URL=http://127.0.0.1:8000
+```
+测试脚本参考上面已有示例
+
+### 三、更多配置
 | 环境变量             | 默认值                         | 说明                                   |
 |:-----------------|-----------------------------|--------------------------------------|
 | AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat          |
