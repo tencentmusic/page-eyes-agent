@@ -56,8 +56,8 @@ uv sync  # 安装依赖
 ## 快速开始
 配置环境变量，可在项目根目录下创建一个 `.env` 文件，配置项可参考 [.env.example](.env.example)
 
-### 一、使用 VLM 快速体验
-`.env` 中配置模型，以 qwen3-vl-plus 为例
+### 一、轻量化部署: 配好模型, 插上手机就能跑
+`.env` 中配置VLM模型，以 qwen3-vl-plus 为例
 ```shell
 OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
@@ -81,7 +81,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### 二、使用 OmniParser + LLM (视觉小模型+大模型)
+### 二、多源融合(视觉小模型+大模型)部署
+OmniParser + LLM
+
 `.env` 中配置模型，以 deepseek v3 为例, OmiParser 需提前[部署](docs/getting-started/installation.md)
 ```shell
 OPENAI_BASE_URL=https://api.deepseek.com/v1
