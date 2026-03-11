@@ -83,7 +83,8 @@ class AgentDeps(Generic[DeviceT, ToolT]):
 
 
 class ToolParams(BaseModel):
-    instruction: str = Field(description='用户指令，描述该步骤要做什么', exclude=True)
+    # instruction: str = Field(description='用户指令，描述该步骤要做什么', exclude=True)
+    instruction: str = Field(description='用户指令，描述该步骤要做什么')
     action: str = Field(description='要执行的动作名称，如 click、input、swipe、open_app 等, 操作调用的工具名称')
 
 
@@ -187,12 +188,19 @@ class SwipeToolParams(ToolParams):
     """
     示例：
     向上滑动 2 次 -> to='top', repeat_times=2
-    向上滑动最多 5 次，直到页面中出现 "确定" 元素 -> to='top', repeat_times=5, expect_keywords=['确定']
-    向上滑动，直到出现"胡广生"元素 -> to='top', repeat_times=None, expect_keywords=['胡广生']
     """
     to: Literal['left', 'right', 'top', 'bottom'] = Field(description='滑动方向')
     repeat_times: Optional[int] = Field(default=1, description='重复次数或最多重复次数，默认为1次')
-    expect_keywords: Optional[list[str]] = Field(description='期望出现的关键字列表')
+
+
+class SwipeForKeywordsToolParams(SwipeToolParams):
+    """
+    示例：
+    向上滑动 2 次 -> to='top', repeat_times=2
+    向上滑动最多 5 次，直到页面中出现 "确定" 元素 -> to='top', repeat_times=5, expect_keywords=['确定']
+    向上滑动，直到出现"胡广生"元素 -> to='top', repeat_times=None, expect_keywords=['胡广生']
+    """
+    expect_keywords: Optional[list[str]] = Field(default=None, description='期望出现的关键字列表')
 
 
 class SwipeFromCoordinateToolParams(ToolParams):
@@ -226,7 +234,7 @@ class AssertNotContainsParams(ToolParams):
 
 
 class MarkFailedParams(BaseModel):
-    reason: str = Field(description='操作失败原因')
+    reason: str = Field(description='失败原因描述')
 
 
 class ToolResult(BaseModel, Generic[T]):

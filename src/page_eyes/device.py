@@ -65,6 +65,7 @@ class WebDevice(Device[Playwright, Page]):
             channel='chrome',
             headless=headless,
             # devtools=True,
+            ignore_default_args=['--enable-automation'],
             **context_params
         )
 

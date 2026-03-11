@@ -10,14 +10,13 @@ from typing import TypeAlias
 from loguru import logger
 from pydantic_ai import RunContext, Agent
 
+from ._base import tool
 from ._mobile import MobileAgentTool
 from ..deps import (
     AgentDeps, ToolParams, ToolResult, ToolResultWithOutput,
-    ClickToolParams, InputToolParams, SwipeToolParams,
-    SwipeFromCoordinateToolParams, OpenUrlToolParams
+    ClickToolParams, InputToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, SwipeForKeywordsToolParams
 )
 from ..device import IOSDevice
-from ._base import tool
 
 AgentDepsType: TypeAlias = AgentDeps[IOSDevice, 'IOSAgentTool']
 
@@ -80,8 +79,7 @@ class IOSAgentTool(MobileAgentTool):
 
         return ToolResult.success()
 
-    @tool(after_delay=1)
-    async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
+    async def _swipe_for_keywords(self, ctx: RunContext[AgentDepsType], params: SwipeForKeywordsToolParams) -> ToolResult:
         """
         滑动屏幕
         iOS使用WDA的swipe方法

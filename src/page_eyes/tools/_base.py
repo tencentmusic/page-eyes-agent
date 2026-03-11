@@ -17,13 +17,13 @@ from loguru import logger
 # noinspection PyProtectedMember
 from loguru._logger import context as logger_context
 from pydantic import TypeAdapter
-from pydantic_ai import ModelRetry, RunContext, ToolReturn, ImageUrl
+from pydantic_ai import ModelRetry, RunContext, ToolReturn, ImageUrl, Tool
 
 from ..config import default_settings
 from ..deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolParams, ClickToolParams, \
     InputToolParams, SwipeToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
     WaitForKeywordsToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput, \
-    WaitToolParams, LLMLocationToolParams
+    WaitToolParams, LLMLocationToolParams, SwipeForKeywordsToolParams
 from ..device import AndroidDevice, WebDevice, HarmonyDevice, IOSDevice
 from ..util.js_tool import JSTool
 from ..util.storage import Base64Strategy
@@ -128,6 +128,7 @@ def tool(f=None, *, after_delay=0, before_delay=0, llm=True, vlm=True):
 
 
 class AgentTool(ABC):
+    """VLM 模型使用的工具可以以 _vl 结尾, 如 click_vl -> click"""
     OMNI_BASE_URL = default_settings.omni_parser.base_url
     OMNI_KEY = default_settings.omni_parser.key
 
@@ -143,8 +144,8 @@ class AgentTool(ABC):
                     continue
                 if default_settings.model_type == 'vlm' and not getattr(value, 'vlm'):
                     continue
-
-                result.append(value)
+                # 移除 _vl 后缀，让工具名称保持一致
+                result.append(Tool(value, name=value.__name__.removesuffix('_vl')))
 
         return result
 
@@ -187,7 +188,7 @@ class AgentTool(ABC):
         )
         return ScreenInfo(image_url=image_url, screen_elements=parsed_elements)
 
-    async def get_screen_(self, ctx: RunContext[AgentDepsType]) -> ScreenInfo:
+    async def get_screen_vl(self, ctx: RunContext[AgentDepsType]) -> ScreenInfo:
         """获取当前屏幕信息，仅用于VLm模型"""
         image_buffer = await self.screenshot(ctx)
         image_url = Base64Strategy().upload_file(image_buffer, suffix='.png')
@@ -222,13 +223,13 @@ class AgentTool(ABC):
         return ToolResultWithOutput.success(parsed_elements)
 
     @tool(llm=False)
-    async def get_screen_info_(self, ctx: RunContext[AgentDepsType]) -> ToolReturn:
+    async def get_screen_info_vl(self, ctx: RunContext[AgentDepsType]) -> ToolReturn:
         """
         获取当前屏幕截图
         """
-        screen_info = await self.get_screen_(ctx)
+        screen_info = await self.get_screen_vl(ctx)
         return ToolReturn(
-            return_value='success',
+            return_value='当前屏幕截图：',
             content=[ImageUrl(url=screen_info.image_url)]
         )
 
@@ -254,7 +255,7 @@ class AgentTool(ABC):
                 return ToolResult.failed()
 
     @tool(llm=False)
-    async def wait_(self, ctx: RunContext[AgentDepsType], params: WaitToolParams) -> ToolResult:
+    async def wait_vl(self, ctx: RunContext[AgentDepsType], params: WaitToolParams) -> ToolResult:
         """
         在任务中等待或停留指定的超时时间（timeout），单位：秒
         """
@@ -331,8 +332,8 @@ class AgentTool(ABC):
         ctx.deps.context.set_step_failed(params.reason)
         return ToolResult.success()
 
-    @tool(llm=False)
-    async def mark_failed_(
+    @tool(llm=False, vlm=False)
+    async def set_task_failed(
             self,
             ctx: RunContext[AgentDepsType],
             params: MarkFailedParams
@@ -343,6 +344,20 @@ class AgentTool(ABC):
         logger.info(f'Mark task failed, reason: {params.reason}')
         ctx.deps.context.set_step_failed(params.reason)
         return ToolResult.success()
+
+    @tool(vlm=False)
+    async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeForKeywordsToolParams) -> ToolResult:
+        """
+        在设备屏幕中滑动或滚动
+        """
+        return await self._swipe_for_keywords(ctx, params)
+
+    @tool(llm=False)
+    async def swipe_vl(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
+        """
+        在设备屏幕中滑动或滚动
+        """
+        return await self._swipe_for_keywords(ctx, SwipeForKeywordsToolParams(**params.model_dump()))
 
     @staticmethod
     @abstractmethod
@@ -362,9 +377,14 @@ class AgentTool(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
+    async def _swipe_for_keywords(self, ctx: RunContext[AgentDepsType], params: SwipeForKeywordsToolParams) -> ToolResult:
         raise NotImplementedError
 
     @abstractmethod
     async def tear_down(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
         raise NotImplementedError
+
+    # TODO: 所有端实现返回上一页
+    # @abstractmethod
+    # async def go_back(self, ctx: RunContext[AgentDepsType], params: ToolParams) -> ToolResult:
+    #     raise NotImplementedError

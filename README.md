@@ -55,18 +55,24 @@ uv sync  # 安装依赖
 
 ## 快速开始
 
-配置环境变量
+配置环境变量，可在项目根目录下创建一个 `.env` 文件，配置项可参考 [.env.example](.env.example)
 
-| 环境变量             | 默认值                         | 说明                          |
-|:-----------------|-----------------------------|-----------------------------|
-| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat |
-| AGENT_DEBUG      | False                       | 是否启用调试模式                    |
-| BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式     |
-| OMNI_BASE_URL    | http://127.0.0.1:8000       | OmniParser API的服务端点         |
-| OPENAI_BASE_URL  | https://api.deepseek.com/v1 | DeepSeek API的服务端点           |
-| OPENAI_API_KEY   | xxx-xxx-xxx                 | 调用DeepSeek API所需的认证密钥       |
+| 环境变量             | 默认值                         | 说明                                   |
+|:-----------------|-----------------------------|--------------------------------------|
+| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat          |
+| AGENT_DEBUG      | False                       | 是否启用调试模式                             |
+| BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式              |
+| AGENT_MODEL_TYPE | llm                         | Agent 使用的模型类型，支持 llm 和 vlm           |
+| OMNI_BASE_URL    | http://127.0.0.1:8000       | OmniParser API的服务端点, vlm 不需要配置该项     |
+| OPENAI_BASE_URL  | https://api.deepseek.com/v1 | 模型 API 的服务端点                         |
+| OPENAI_API_KEY   | xxx-xxx-xxx                 | 模型 API 所需的认证密钥                       |
+| IOS_WDA_URL      | -                           | iOS WebDriverAgent 服务地址（仅 iOS 自动化需要） |
 
-使用腾讯云COS服务（与MinIO二选一）
+> vlm 模型支持：`glm-4.6v`  `qwen3-vl-plus` 等
+>
+> 如：AGENT_MODEL=openai:qwen3-vl-plus 
+
+使用腾讯云COS服务（与MinIO二选一），可选，不配置则会使用 base64 保存图片
 
 | 环境变量           | 默认值 | 说明                  |
 |:---------------|-----|---------------------|
@@ -75,7 +81,7 @@ uv sync  # 安装依赖
 | COS_ENDPOINT   | -   | 腾讯云COS服务的 endpoint  |
 | COS_BUCKET     | -   | 腾讯云COS服务的 bucket    |
 
-使用MinIO服务（与腾讯云COS二选一）
+使用MinIO服务（与腾讯云COS二选一），可选，不配置则会使用 base64 保存图片
 
 | 环境变量             | 默认值 | 说明                            |
 |:-----------------|-----|-------------------------------|

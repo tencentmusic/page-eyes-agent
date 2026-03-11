@@ -25,6 +25,20 @@ from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AgentDepsType, WebAgentTool, AndroidAgentTool, HarmonyAgentTool, IOSAgentTool
 from .util.platform import Platform
 
+from openai.types import chat
+
+# pydantic ai 新版本，service_tier 为空字符串会报错，这里先打个补丁
+_original_validate = chat.ChatCompletion.model_validate
+
+@classmethod
+def _patched_validate(cls, obj, *args, **kwargs):
+    if isinstance(obj, dict) and obj.get('service_tier') == '':
+        obj['service_tier'] = None
+    return _original_validate(obj, *args, **kwargs)
+
+
+chat.ChatCompletion.model_validate = _patched_validate
+
 
 @dataclass
 class PlanningAgent:
@@ -74,13 +88,13 @@ class UiAgent:
                     ]
 
             # 每一步请求主动携带当前截图
-            screen: ScreenInfo = await ctx.deps.tool.get_screen(ctx=ctx)
-            messages[-1].parts.append(
-                ImageUserPromptPart(content=[
-                    '当前屏幕截图：',
-                    ImageUrl(url=screen.image_url)
-                ])
-            )
+            # screen: ScreenInfo = await ctx.deps.tool.get_screen(ctx=ctx)
+            # messages[-1].parts.append(
+            #     ImageUserPromptPart(content=[
+            #         '当前屏幕截图：',
+            #         ImageUrl(url=screen.image_url)
+            #     ])
+            # )
 
         return messages
 
@@ -232,6 +246,7 @@ class WebAgent(UiAgent):
             model_settings=settings.model_settings,
             deps_type=AgentDeps,
             tools=tool.tools,
+            # history_processors=[cls.history_processor],
             retries=3
         )
         return cls(model, deps, agent)

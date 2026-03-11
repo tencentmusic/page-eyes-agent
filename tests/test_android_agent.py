@@ -60,3 +60,10 @@ async def test_mobile_04(android_agent):
         - 点击"全部播放"左侧的播放按钮
         """
     )
+
+
+async def test_mobile_05(android_agent):
+    """测试多个交互"""
+    await android_agent.run(
+        """打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜"""
+    )

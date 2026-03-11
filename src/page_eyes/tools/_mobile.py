@@ -12,7 +12,8 @@ from pydantic_ai import RunContext, Agent
 
 from ._base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
-    InputToolParams, SwipeToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
+    InputToolParams, SwipeFromCoordinateToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps, \
+    SwipeForKeywordsToolParams
 from ..device import AndroidDevice, HarmonyDevice, IOSDevice
 from ..util.adb_tool import AdbDeviceProxy
 from ..util.platform import get_client_url_schema
@@ -82,15 +83,7 @@ class MobileAgentTool(AgentTool):
             ctx.deps.device.target.keyevent('KEYCODE_ENTER')
         return ToolResult.success()
 
-    @tool
-    async def swipe(
-            self,
-            ctx: RunContext[AgentDepsType],
-            params: SwipeToolParams,
-    ):
-        """
-        在设备屏幕中滑动或滚动，参数 to 表示目标方向
-        """
+    async def _swipe_for_keywords(self, ctx: RunContext[AgentDepsType], params: SwipeForKeywordsToolParams) -> ToolResult:
         logger.info(f'swipe to {params.to}')
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         if params.to == 'top':
