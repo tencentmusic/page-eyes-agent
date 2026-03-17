@@ -1,0 +1,2376 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="一个轻量级 UI Agent，通过自然语言指令驱动，无需编写脚本既可实现Web、Android平台的UI自动化任务">
+      
+      
+      
+        <link rel="canonical" href="https://tencentmusic.github.io/page-eyes-agent/article/%E8%AE%A9%E5%9B%BE%E6%A0%87%E8%AF%86%E5%88%AB%E2%80%9C%E5%8F%AF%E4%BA%A4%E4%BB%98%E2%80%9D%EF%BC%9AFlorence-2%20%E6%A8%A1%E5%9E%8B%E5%9C%A8GUI%20Agent%E4%B8%AD%E7%9A%84%E5%BE%AE%E8%B0%83%E5%AE%9E%E8%B7%B5/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../img/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>Index - PageEyes Agent</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-gray">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="PageEyes Agent" class="md-header__button md-logo" aria-label="PageEyes Agent" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PageEyes Agent
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Index
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="light-gray"  aria-label="切换为夜间模式"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="切换为夜间模式" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="lime"  aria-label="切换为日间模式"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="切换为日间模式" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="分享" aria-label="分享" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/tencentmusic/page-eyes-agent" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    page-eyes-agent
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="PageEyes Agent" class="md-nav__button md-logo" aria-label="PageEyes Agent" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    PageEyes Agent
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/tencentmusic/page-eyes-agent" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    page-eyes-agent
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    主页
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../getting-started/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速开始
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    快速开始
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安装指南
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/demo/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    第一个Demo
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    指南
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/core-concepts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    核心概念
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/use-cases/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    使用场景
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../guides/best-practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    最佳实践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../api/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API参考
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API参考
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/module-a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块A
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/module-b/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    模块B
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/advanced/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    高级接口
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    教程
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    教程
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    快速上手
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    实战案例
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    关联项目
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    关联项目
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../related/tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    相关工具
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../related/integrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    集成方案
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    常见问题
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    常见问题
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../faq/troubleshooting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    故障排查
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../contributing/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    贡献指南
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_8" id="__nav_8_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    贡献指南
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/code-style/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    代码规范
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/dev-env/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    开发环境
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    版本信息
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    版本信息
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    更新日志
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    安全策略
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    规划
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    关于
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    关于
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/team/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    团队
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/license/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    许可证
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../about/acknowledgements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    致谢
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一、前情提要：我们面临的质量问题
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="一、前情提要：我们面临的质量问题">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-gui-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 GUI Agent的引入
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 图标语义识别为什么成为“质量交付”的瓶颈？
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        二、图标映射业务语义：用什么方式解决？
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#florence-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        三、Florence-2训练集构建：如何实现高质量训练集？
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="三、Florence-2训练集构建：如何实现高质量训练集？">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 痛点：业务核心图标收集成本高
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 痛点：如何解决“开放集友好”问题
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 痛点：“误报率”居高不下
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lora" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        四、训练框架选择：为什么使用LoRA？
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="四、训练框架选择：为什么使用LoRA？">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#lora_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        LoRA 核心原理
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        五、训练痛点：过拟合与欠拟合中间如何平衡？
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="五、训练痛点：过拟合与欠拟合中间如何平衡？">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 分层微调：语义映射
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-loss" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Loss 权重差异化设置：明确告诉模型"哪些错误更不可接受"
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.2 Loss 权重差异化设置：明确告诉模型&#34;哪些错误更不可接受&#34;">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        权重配置的业务逻辑
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 梯度处理：小数据集的精细化训练策略
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-warmup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Warmup 策略：平滑启动避免震荡
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#55-wandb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5 早停/断点续训/Wandb：让训练过程可控可恢复
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5.5 早停/断点续训/Wandb：让训练过程可控可恢复">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#551" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5.1 早停机制
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#552" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5.2 断点续训
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#553-wandb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.5.3 Wandb 指标上报：让训练过程可观测
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        六、把微调纳入质量体系：训练只是中间环节
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="六、把微调纳入质量体系：训练只是中间环节">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-benchmark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 可度量：基于业务图标集对训练做Benchmark
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 可灰度：避免大范围影响
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 可回流：失败样本收集形成回流
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#demo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        七、总结：从"Demo"到"可交付"
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+  <h1>Index</h1>
+
+<blockquote>
+<p>在GUI Agent的使用过程中，从 OmniParser 落地，走向 Florence-2模型微调：我们如何把“能看懂UI”变成“能稳定交付”。</p>
+</blockquote>
+<h3 id="_1">一、前情提要：我们面临的质量问题</h3>
+<h4 id="11-gui-agent">1.1 GUI Agent的引入</h4>
+<p>在测试领域，长期以来，提到UI自动化测试，我们自然会想到开发效率低、维护成本高、可扩展性低这些痛点，因此借助大模型飞速发展的加持，测试领域也迎来
+新的范式，GUI Agent，即：像人一样能够看懂屏幕(Web端/移动端)，操作UI的Agent。</p>
+<p>过去一年里，我们在实际业务中落地了<strong>PageEyes Agent</strong>，它是一个基于<a href="https://github.com/pydantic/pydantic-ai">Pydantic AI</a> 开发的<strong>Python UI自动化 Agent</strong> 框架。
+其中，测试人员只需要输入自然语言指令，<a href="https://github.com/microsoft/OmniParser">OmniParser</a> 负责页面感知，Agent负责解析指令执行UI自动化测试。</p>
+<p><strong>更多详见:</strong>
+- <a href="../基于AI的UI自动化提效：PageEyes%20Agent应用探索">基于AI的UI自动化提效：PageEyes Agent应用探索</a> 
+- <a href="../LLM%20下半场是“行动”：基于%20Pydantic%20AI%20+%20OmniParser%20从零打造%20GUI%20Agent">基于 Pydantic AI + OmniParser 从零打造 GUI Agent</a></p>
+<p>如果只看 Demo，OmniParser的 “屏幕理解”方案非常完备：</p>
+<ul>
+<li>截一张图，它能解析界面结构；</li>
+<li>元素有框、有文本、有图标描述；</li>
+<li>再配合大模型，测试指令就能被翻译成点击、输入、滚动。</li>
+</ul>
+<p>但是进入真实业务场景，我们的配置是小时级别的任务巡检，随着各业务的交互用例持续录入，很快迎来新的挑战：<strong>回归核心长用例、高频连续运行、token成本飙升</strong>。
+而从Demo到质量保障工程化的路上，我们面临一个残酷但合理的要求：</p>
+<blockquote>
+<p>你可以偶尔聪明，但你必须长期稳定。</p>
+</blockquote>
+<p>OmniParser中，用于图像识别的模块为<a href="https://huggingface.co/microsoft/Florence-2-base-ft">Florence-2</a>模型，OmniParserV2版本提供了官方微调后的Florence-2-base-ft模型，
+应用这个版本后发现，它提供的视觉感知能力并不足以满足目前的业务诉求：<strong>缺乏图标的语义识别</strong>。</p>
+<h4 id="12">1.2 图标语义识别为什么成为“质量交付”的瓶颈？</h4>
+<p>在 UI 自动化测试中，文本可见时很好办：OCR + 语义匹配即可。</p>
+<p>但真实业务尤其是移动端业务中，有部分操作并不靠文字，举个例子，下图是QQ音乐客户端内的腾讯音乐榜单页面：
+<img alt="Q音端内的腾讯音乐榜" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_ed335bd42e28df4c9a77650587d68e832390e552.jpg" /></p>
+<p>使用OmniParser进行解析后，放大来看元素分布，顶部导航栏、页面顶部栏、底部播放bar这几个位置可交互但无文字：
+<img alt="解析后Q音端内的腾讯音乐榜" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_2887f03fc5b979e43a2a1d997d40e92d697ccc68.png" /></p>
+<p>具体到它给出的识别结果，如下所示：</p>
+<table>
+<thead>
+<tr>
+<th>元素索引</th>
+<th>人眼看到的</th>
+<th>OminiParser看到的</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>元素2</td>
+<td>充电中</td>
+<td>A green and white sign with the number 73.</td>
+</tr>
+<tr>
+<td>元素5</td>
+<td>菜单按钮</td>
+<td>Three black horizontal stripes on a pink background.</td>
+</tr>
+<tr>
+<td>元素6</td>
+<td>分享按钮</td>
+<td>A circle with an arrow pointing to the left.</td>
+</tr>
+<tr>
+<td>元素11</td>
+<td>用户头像按钮</td>
+<td>picture girl wearing flower on her head.</td>
+</tr>
+<tr>
+<td>元素28</td>
+<td>歌曲播放按钮</td>
+<td>A circle with a triangle in the middle.</td>
+</tr>
+<tr>
+<td>元素30</td>
+<td>搜索按钮</td>
+<td>A black circle with a letter Q in it.</td>
+</tr>
+<tr>
+<td>元素58</td>
+<td>歌曲播放封面</td>
+<td>A group of women sitting in a pool posing for a photo.</td>
+</tr>
+<tr>
+<td>元素63</td>
+<td>播放菜单按钮</td>
+<td>A black arrow pointing to the left with three horizontal lines.</td>
+</tr>
+</tbody>
+</table>
+<p>根据在真实业务场景统计，基于Florence-2模型原始输出，在约20个业务核心图标的识别中，仅有约<strong>30%</strong>的输出结果能够被下游Agent映射为正确的业务语义动作。</p>
+<p>大量交互图标给出的是基础形态描述，对于模型来说提升了理解难度，对于强依赖无文字图标的交互用例来说，用例基本无法执行！</p>
+<p>从 OmniParser 的完整链路来看，页面感知通常包含 元素定位 → 区域裁剪 → 图像语义描述 → 语义到动作映射 等多个阶段。
+在我们的问题定位中，元素框定位和裁剪整体是稳定的，失败主要集中在 “图像语义描述 → 业务语义映射” 这一环节。
+也就是说，系统能够稳定找到“这是一个可交互区域”，但 无法稳定回答“它在业务上代表什么”。</p>
+<p>该问题在无文字图标场景下被显著放大，最终成为影响自动化用例长期稳定运行的主要瓶颈。带来的问题有：</p>
+<p>1、错报：把图标A当成图标B，点错地方，流程跑偏，导致“用例执行成功但校验无效”。
+2、漏报：认不出关键按钮，用例中断，产生大量噪声失败。</p>
+<p>所以，问题来到如何让Florence-2的视觉感知更贴近质量交付：</p>
+<blockquote>
+<p>如何让系统稳定建立 <strong>视觉符号</strong> --&gt; <strong>业务语义</strong> 的映射？</p>
+</blockquote>
+<hr />
+<h3 id="_2">二、图标映射业务语义：用什么方式解决？</h3>
+<p>在决定微调之前，我们首先尝试了成本更低的 <strong>Prompt Engineering</strong> 。
+Florence-2 支持多任务 Prompt（如 <code>&lt;CAPTION&gt;</code>, <code>&lt;MORE_DETAILED_CAPTION&gt;</code>）。
+但是实际测试表明，问题并不在于描述是否足够“详细”，而在于<strong>描述越详细 并不等同于 越方便Agent理解</strong>，自由文本描述本身并不是一个适合高频自动化执行系统的表示。</p>
+<p>对于 GUI Agent 而言，下游系统需要的是 短、稳定、可枚举的语义信号，而非开放式的自然语言描述。
+即便通过 Prompt Engineering 能在个别样例上生成更贴近业务的描述，也难以保证在长期、高频运行中保持一致性和可控性。</p>
+<p>此外，受限于视觉模型的上下文长度，通过塞入大量示例的 Few-shot方案也根本不现实。</p>
+<p>既然 Prompt 优化走不通，考虑了其他替代方案：
+*   <strong>换模型</strong>：简单粗暴的方式，换一个更强大的视觉模型或者多模态模型。
+*   <strong>图标库匹配</strong>：收集业务语境所需的icon，维护自己的图标库，在页面感知时通过CV的方式进行匹配。</p>
+<p>但是，从质量保障工程角度，这些方案同样面临新的挑战：</p>
+<ul>
+<li><strong>可解释</strong>：失败时是否能知道它为什么失败？</li>
+<li><strong>可控</strong>：成本有限，能否通过数据或配置让它稳定变好？</li>
+<li><strong>可回归</strong>：改动后，能用标准化评估判断模型真的有变好吗？</li>
+<li><strong>可演进</strong>：业务迭代、页面主题变化、新 icon 出现时，系统能否持续自我修复？</li>
+</ul>
+<p>很明显，换多模态模型或许省事，但对于需要权衡成本与用例高频运行的团队来说不行。</p>
+<p>而对于图标的特征匹配，也存在一些问题，例如：
+图标在深色模式、浅色模式、描边/填充风格之间切换时，视觉差异可能远大于直觉。</p>
+<p>业务上线新的icon时，能否识别是未知的，需要不断对匹配图标库更新。</p>
+<p>在UI里，可能存在相似图标， 比如：关闭（X） vs 清除输入（X），分享 vs 转发，这类icon差异小、语义却不一样，图形特征信息不足以区分它们。</p>
+<p>最后，回到微调Florence-2模型上来，结合质量保障的要求，可以提炼出几点需求：
+- 输出可控的短文本，便于大模型理解
+- 应具备表达“不是图标”的能力，对于不认识的图标应当拒绝
+- 对开放集友好，对于新icon也应当具备一定泛化能力</p>
+<hr />
+<h3 id="florence-2">三、Florence-2训练集构建：如何实现高质量训练集？</h3>
+<p>正所谓"Garbage in, garbage out"，高质量的训练集是关键。</p>
+<p>在 Florence-2 中，图像首先经视觉编码器提取高层视觉特征，再由任务 token（如 <code>&lt;CAPTION&gt;</code>）驱动文本解码过程生成对应描述。
+我们在微调中关注的并非模型的底层视觉感知能力，而是如何让已有视觉特征在解码阶段更稳定地对齐到业务可用的语义空间。</p>
+<p><img alt="Florence-2架构" src="https://arineo.com/wp-content/uploads/2024/08/architektur.jpg" /></p>
+<p>微调格式上，Florence-2训练集构建的思路是：<strong>给定任务 token，生成一段文本</strong>。
+OmniParser使用的是<code>&lt;CAPTION&gt;</code>任务，所以微调时采用同样指令。对于图像和文本描述组成的任务token，从三个类型入手：
+- 业务核心图标
+- 通用图标
+- 负样本（各种“不是图标”的图片）</p>
+<h4 id="31">3.1 痛点：业务核心图标收集成本高</h4>
+<p>作为业务里最关键、最常见、最需要稳定的语义映射图标，这类数据是最高优保障集。核心图标收集主要来自两个渠道：实际业务截图、视觉设计稿，由于
+人工裁剪小图标加标注费时费力，我们采用了yolo数据集构建的方式，利用工具labelimg对少量业务图片打标，维护原始图片集、YOLO标签集、图标位置集，并建立起YOLO标签集--&gt;Florence-2 Caption集的映射。</p>
+<p>如果仅仅收集核心图标，训练素材量级是不够的。为了丰富训练集，使用了常规的图像增强方式，比如亮度、对比度、分辨率、旋转、裁剪等（慎用旋转，可能导致模型分不清方向），</p>
+<p>此外，我们先后尝试过更复杂的增强，比如图标进行二值化、图标轮廓提取，
+本地测试了批量图标后发现效果不佳，可能出现图片纹理丢失等情况，无法作为训练样本使用。</p>
+<p>因此建立了三类增强流水线，简单随机增强、自适应阈值增强、Canny边缘增强。</p>
+<p><strong>简单随机增强</strong>：模拟真实场景中的显示亮度、轻微形变、背景干扰和遮挡。
+- <strong>色彩扰动</strong>：对亮度、对比度、饱和度进行随机调整，模拟不同屏幕显示效果。
+- <strong>几何微调</strong>：进行轻微的平移、缩放和旋转（严格限制角度，避免方向混淆），模拟不同分辨率和布局下的图标形态。
+- <strong>质感模拟</strong>：引入高斯模糊或噪声，模拟低质量图片或压缩失真。
+- <strong>遮挡模拟</strong>：随机挖孔，强迫模型关注图标的局部特征，提高抗遮挡能力。</p>
+<p><strong>自适应阈值增强</strong>：针对颜色复杂的图标，模拟二值化渲染效果。
+- <strong>局部自适应</strong>：根据局部像素分布提取纹理细节，更贴近 UI 渲染逻辑。
+- <strong>特征互补</strong>：保留了更多面状特征而非仅线条特征，丰富了模型的视觉输入空间。</p>
+<p><strong>Canny边缘增强</strong>：让模型学习形状特征，提高对简笔画或线稿的泛化能力。
+- <strong>边缘提取</strong>：使用Canny算法提取图标轮廓，并合并双重轮廓，保留核心线条。
+- <strong>轻微扰动</strong>：辅以轻微的几何变换和色彩抖动，防止模型对特定线条形态过拟合。</p>
+<p><strong>样本增强实战经验</strong></p>
+<p>实际上，Canny边缘增强提取的线条并不流畅，可能包含断裂或噪点。我们期望此类样本类似 Dropout 的作用，可以引入特征噪声来防止过拟合。
+但如果噪声过大可能导致整张图片失去形态特征，因此，Canny边缘增强设置了最小概率，绝大部分增强样本将通过前两个场景生成。</p>
+<p>这三类增强策略：简单增强增加场景多样性，自适应阈值模拟渲染逻辑，Canny辅助强化形态特征，共同提升核心图标的丰富度。以下为增强后图标示例：</p>
+<p><img alt="增强后效果样本实例" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_3b01613e36a1f2bd3c7b4219d29924ac85a226c3.png" /></p>
+<h4 id="32">3.2 痛点：如何解决“开放集友好”问题</h4>
+<p>如何在核心业务图标之外，让模型能识别出新的icon呢？
+在调研当中发现，实际业务图标的设计风格和一些通用图标库接近，比如<a href="https://fonts.google.com/icons?selected=Material+Icons+Outlined:navigate_before:&amp;icon.size=24&amp;icon.color=%23e3e3e3&amp;icon.platform=android&amp;icon.category=image&amp;icon.set=Material+Icons">Google Fonts</a>  、[<a href="https://www.flaticon.com/icon-fonts-most-downloaded/4">Flaticon Design</a> 等。</p>
+<p>这些图标库语义丰富，素材经过了大量使用场景的验证，是优质素材。</p>
+<p>由于发现实际工程内的文件名基本覆盖图标代表含义，采用了基于文件名的弱监督标注方法进行处理，从文件名中提取描述作为Florence-2 Caption。</p>
+<p>同样地，为了丰富训练素材，我们进行背景颜色替换，构建了light、dark两类成对变体，匹配实际业务中可能出现的UI结构变化，
+比如深色/浅色模式的主题切换、iOS/Android/Web的多端视觉规范差异。 
+这相当于提前为模型做了“视觉分布漂移”训练，让它适应变化。</p>
+<h4 id="33">3.3 痛点：“误报率”居高不下</h4>
+<p>在初期训练中发现，如果只用核心图标训练，模型会倾向于“误报”，即把非图标识别成图标。
+尤其是移动端业务中存在复杂图标，比如歌曲封面、专辑封面、视频封面、平台logo等。</p>
+<p>此类图标往往背景复杂且可能包含文字，模型会将其识别成核心图标库中的图标，从而误报率较高。
+因此，训练使用负样本的目标是让模型学会拒绝：当它不确定或确实不是图标时，应该稳定地落到“非图标”表述上，避免错误成功。</p>
+<p>去哪里获取这样的负样本呢？CV中的负样本概念一般来自于“不是这个类别的东西”，比如“不是狗”，“不是猫”，“不是桌子”，“不是椅子”等。</p>
+<p>具体到Florence-2数据集的困难负样本挖掘，我们首先想到<a href="https://cocodataset.org/#home">COCO数据集</a> 。作为业界权威计算机视觉库，
+里面包含大量复杂自然图像，我们从中随机挑选了部分图片，用Florence-2模型本身进行推理，输出的结果作为负样本，构建起Florence-2 Caption。</p>
+<p>需要注意的是，自然图像与我们当前业务UI 场景在分布上存在显著差异，因此负样本仅用于抑制“过度自信”，
+而非学习具体类别边界。实际训练数据集构建中，我们设置了<strong>较低比例的负样本</strong>，其作用更接近“拒绝校准”而非分类训练。
+从使用效果来看，尽管不能完全消除误报，但对于降低误报率十分有效。</p>
+<p>最终，完整的Florence-2数据集，包含核心图标、通用图标、负样本三类，共计约1w+张图片，对应1w+条Caption。示例如下：
+<div class="highlight"><pre><span></span><code>{
+    &quot;image&quot;: &quot;a3093s.png&quot;,
+    &quot;caption&quot;: &quot;filled heart like icon&quot;,
+    &quot;task_type&quot;: &quot;&lt;CAPTION&gt;&quot;,
+    &quot;loss_weight&quot;: 1.0
+  },
+{
+    &quot;image&quot;: &quot;action_arrow_circle_right_dark.png&quot;,
+    &quot;caption&quot;: &quot;an icon of arrow circle right&quot;,
+    &quot;task_type&quot;: &quot;&lt;CAPTION&gt;&quot;,
+    &quot;loss_weight&quot;: 0.9
+  },
+  {
+    &quot;image&quot;: &quot;000000005032.jpg&quot;,
+    &quot;caption&quot;: &quot;Not an icon. It is A woman standing next to a child on skis.&quot;,
+    &quot;task_type&quot;: &quot;&lt;CAPTION&gt;&quot;,
+    &quot;loss_weight&quot;: 1.2
+  }
+</code></pre></div></p>
+<hr />
+<h3 id="lora">四、训练框架选择：为什么使用LoRA？</h3>
+<p>有了训练数据集，下一步就是训练流程。相比其他大模型而言，Florence-2-base是个小模型，参数量为230M。但是，全参数微调在实际工程中仍然意味着 
+显著更高的显存占用和更复杂的训练状态管理，
+尤其是在需要频繁迭代、快速回滚和多版本对比的场景下，工程成本和风险都会被放大。</p>
+<p>因此优先考虑<strong>参数高效微调</strong>，在参数高效微调的各类方式中，LoRA（Low-Rank Adaptation）是应用最广泛、最高效的方式。
+相比之下，LoRA 将可训练参数限制在一个明确可控的增量范围内，更符合我们对低风险、可回退的质量保障要求。</p>
+<h4 id="lora_1">LoRA 核心原理</h4>
+<p>LoRA 的核心思想是：<strong>不直接修改预训练权重，而是在旁边增加一个低秩分解的增量矩阵</strong>。
+<img alt="lora" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_41f988e1ab70638ef0beaa018d84b916033d4d48.png" />
+以下简单说明它的核心优势：</p>
+<p>假设有一个原始权重矩阵 W ，维度是 d×d（例如 100×100）：</p>
+<p><strong>全参数微调</strong>：
+- 更新方式：<code>W' = W + ΔW</code>， 需要训练的参数：d×d = 100×100 = <strong>10000</strong></p>
+<p><strong>LoRA 微调</strong>：
+- 更新方式：<code>W' = W + B×A</code>（W 保持冻结）
+- 低秩分解：
+  - B 矩阵：d×r（例如 100×8）
+  - A 矩阵：r×d（例如 8×100）
+  - r 是秩（rank），通常取 4~16，远小于 d
+- 需要训练的参数：d×r×2 = 100×8×2 = <strong>1600</strong></p>
+<p>对比下来，假定<code>d=100, r=8</code>, 参数量降低倍数：10000 / 1600 ≈ <strong>6.25 倍</strong></p>
+<p>LoRA 相关知识详见： https://github.com/microsoft/LoRA </p>
+<p>因此，采用 LoRA 的优势可以总结为：
+- <strong>小杠杆撬动大调整</strong>：把变化限制在一小块可训练增量里，基座能力不受破坏
+- <strong>回滚可控友好</strong>：LoRA适配器可以独立加载/卸载，出现问题时秒级回退</p>
+<hr />
+<h3 id="_3">五、训练痛点：过拟合与欠拟合中间如何平衡？</h3>
+<p>确定了数据集、使用框架，已知的LoRA超参也不多，看起来有手有机器，启动训练后调一调参数坐等结果就行了。</p>
+<p>但大多数时候得到的推理效果并不理想，要么过拟合，要么欠拟合，明明损失已经降到很低了为什么实际推理起来大量对不上。
+距离图标识别可交付仍有差距，为什么呢？</p>
+<p>早期训练时我们也遇到过这种情况，为了提升识别准确率，我们从训练参数、损失计算、训练过程等方面展开系列治理。</p>
+<hr />
+<h4 id="51">5.1 分层微调：语义映射</h4>
+<p>在常规的多模态指令微调中，针对 target_modules 的选择，大部分工作优先对语言模型 Attention 层的 qkv 参数进行训练。
+这一点较好理解：有监督学习通过构建“图像 + 指令 → 目标描述”的训练样本，使语言模型在 Attention 机制中学习如何对齐视觉 token 与指令语义，从而避免在生成阶段出现随意或偏离指令的输出。</p>
+<p>然而，在仅微调语言模型 Attention 层的初期实验中，我们发现该策略在业务核心图标识别任务上存在明显瓶颈。具体表现为以下典型失败模式：</p>
+<table>
+<thead>
+<tr>
+<th>失败类型</th>
+<th>case</th>
+<th>现象</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>相似形状混淆</td>
+<td>播放 vs 下一首</td>
+<td>均被识别为 "media play icon"</td>
+</tr>
+<tr>
+<td>品牌 Logo 混淆</td>
+<td>酷狗 LOGO vs 酷我 LOGO</td>
+<td>均被识别为 "KuWo Music App icon"</td>
+</tr>
+</tbody>
+</table>
+<p>在该阶段，核心图标识别准确率仅约 50%–60% 区间，相似图标之间存在显著混淆，甚至视觉上差异较大的图标也会被误识别。</p>
+<p>进一步分析发现，预训练视觉塔（如 ViT / DaViT）主要基于自然图像数据（人物、动物、场景）进行训练，其底层与中层特征更偏向连续色调、自然纹理和复杂结构；而 UI 图标则具有高对比度、扁平化、强几何结构、符号化语义等明显不同的分布特性。</p>
+<p>因此，我们在保持视觉 Attention 冻结的前提下，引入了对视觉 FFN 层的微调。
+在这一过程中，关键问题不在于“关注图像的哪个区域”，而在于<strong>如何将已有的自然图像特征，重新映射到高度抽象、符号化的 UI 语义空间中</strong>。</p>
+<p>FFN 承担了视觉表征的非线性变换与重参数化角色。通过在视觉模型全层 FFN 中引入 LoRA，可以在不破坏预训练注意力结构的前提下，实现对 UI 域特有视觉模式（如高对比度、几何结构、符号化形状）的有效适配。</p>
+<p>在<strong>当前阶段的配置</strong>中：</p>
+<p>语言模型：全量微调 Attention 与 FFN，以确保指令理解与跨模态生成能力；</p>
+<p>视觉模型：对所有层的 FFN（fc1 / fc2）施加 LoRA，用于完成视觉特征到语义空间的重映射。</p>
+<p>在这一阶段，模型主要完成从
+“A circle with a triangle in the middle” → “play button icon”
+的初步语义映射学习。</p>
+<p>为配合分层策略，不同模块采用不同学习率：</p>
+<p>语言模型层：<code>lr = 2e-5</code></p>
+<p>视觉模型层：<code>lr = 2e-6</code></p>
+<p>比例约 1:10</p>
+<p>控制这一学习率差异，并非假设视觉特征“无需调整”，而是控制其更新幅度，使模型优先收敛于稳定的语义对齐路径。</p>
+<hr />
+<h4 id="52-loss">5.2 Loss 权重差异化设置：明确告诉模型"哪些错误更不可接受"</h4>
+<p>前文给出的训练集示例中，不同类型的图片对应设置了不同的 <code>loss_weight</code>，这里对应不同的训练策略。</p>
+<h6 id="_4">权重配置的业务逻辑</h6>
+<p>根据图标优先级和风险等级，我们设置了三档权重：</p>
+<table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>loss_weight</th>
+<th>设计出发点</th>
+<th>风险控制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>核心图标</strong></td>
+<td>1.0</td>
+<td>最重要，不能出错</td>
+<td>误识别会导致用例失败</td>
+</tr>
+<tr>
+<td><strong>通用图标</strong></td>
+<td>0.9</td>
+<td>供泛化，但不能主导，影响主链路</td>
+<td>防止海量通用数据淹没核心业务特征</td>
+</tr>
+<tr>
+<td><strong>负样本</strong></td>
+<td>1.2</td>
+<td>降低误报的关键</td>
+<td>误报会导致"错误成功"，质量风险更高</td>
+</tr>
+</tbody>
+</table>
+<p>基于权重的损失计算，首先计算 token 级别的 CrossEntropy 损失，然后应用样本权重进行广播乘法，最后只对非 padding 部分计算加权平均。这种设计明确告诉优化器"哪些错误更不可接受"。</p>
+<p><img alt="基于权重的损失计算主流程" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_71deb5bc7fbdc512f43b1b9e38f6c1506e0fd072.png" /></p>
+<p>高权重样本的错误会产生更大的梯度，驱动优化器更积极地修正这些样本的预测，从而降低误报率。</p>
+<p><strong>权重调整的实战经验</strong></p>
+<p>实际上，Precision（查准率）和 Recall（查全率）往往是跷跷板。
+将负样本权重设为最高的 1.2，提高 Precision，极力压制误报，必然会带来漏报（降低 Recall）增加的风险。</p>
+<p>在自动化测试场景下，两者的代价是不对称的：</p>
+<p><strong>误报（False Positive)</strong> 带来的是“阻断性”： 比如模型把一个“歌曲详情按钮”识别为“歌曲推荐按钮”。 Agent 执行点击操作后，本应拉起弹窗却跳转到了歌曲详情。
+带来的后果是：<strong>测试流程跑偏，后续步骤全部失效，最终断言失败。</strong></p>
+<p><strong>漏报（False Negative)</strong> 的代价是“可处理”的： 比如模型没认出某个图标，Agent 无法执行点击。</p>
+<p>在实际业务使用中，OmniParser的解析逻辑会优先对图像OCR处理，在此之外的图标才会进入Florence-2图标识别，就目前使用经历来看，漏报问题基本不存在，风险可控。</p>
+<p>初期训练中误报较多，对于复杂图标或非图标，模型倾向于"过度自信"，通通识别成训练图标。
+引入负样本权重后，误报率降至5%，对于复杂图像，模型会在输出 "Not an icon"后进一步展开图形描述，仍具备官方模型的描述能力。</p>
+<h4 id="53">5.3 梯度处理：小数据集的精细化训练策略</h4>
+<p>batch_size参数为物理批次大小，可以简单视为训练速度控制器，考虑到设备MPS的训练环境，我们采用了参数组合：
+- <code>batch_size: 2</code> - 物理批次大小
+- <code>gradient_accumulation_steps: 2</code> - 梯度累积步数
+- 有效 batch_size = 2 × 2 = 4</p>
+<p>Florence-2-base (230M参数) + LoRA (5.3M可训练参数) + 384×384 图像，batch_size=2 内存友好。
+而小 batch 带来的梯度噪声可以避免过早收敛到局部最优。</p>
+<p>在训练循环中，采用：
+1. <strong>损失缩放</strong>：将每个 batch 的损失除以累积步数后再反向传播（<code>loss = loss / accumulation_steps; loss.backward()</code>），确保累积后的梯度幅度与直接使用大 batch 一致
+2. <strong>梯度裁剪</strong>：使用 <code>max_norm=1.0</code> 防止异常样本导致的梯度爆炸
+3. <strong>跳过无效批次</strong>：当某个 batch 返回空答案或无效数据时，不计入累积计数，避免污染梯度</p>
+<h4 id="54-warmup">5.4 Warmup 策略：平滑启动避免震荡</h4>
+<p>采用 <code>warmup_ratio = 0.05</code>，即前 5% 步数用于预热，配合 Cosine 衰减调度器：</p>
+<ul>
+<li><strong>避免初期震荡</strong>：从 0 线性增长到目标学习率，防止大梯度破坏预训练权重</li>
+<li><strong>Cosine 衰减</strong>：后期平滑降低学习率，帮助模型收敛到更优解</li>
+</ul>
+<p>以 10873 样本为例，从训练效果来看已经足够避免初期震荡：
+- 总训练步数：约 40785 步（15 epochs）
+- Warmup 步数：约 2039 步</p>
+<hr />
+<h4 id="55-wandb">5.5 早停/断点续训/Wandb：让训练过程可控可恢复</h4>
+<p>除了核心的训练参数，实际训练流程也考虑稳定性和可恢复性。</p>
+<h5 id="551">5.5.1 早停机制</h5>
+<p>为了避免过拟合和资源浪费，参数<code>patience</code>很有必要，
+一般基于经验值设定，修改为3~5轮，核心原理为在每个 epoch 结束后，计算验证集loss，如果验证loss 连续 <code>patience</code> 个 epoch 没有改善，自动停止训练
+在我们的训练中，通常在第 10+ epoch 达到最佳验证 loss，早停机制有效避免了后续的性能退化。</p>
+<h5 id="552">5.5.2 断点续训</h5>
+<p>训练过程中可能因为各种原因中断（如机器重启、手动停止等）。我们实现了完整的断点续训机制：</p>
+<p><strong>保存内容</strong>：
+1. <strong>LoRA 适配器权重</strong>：<code>adapter_model.bin</code>
+2. <strong>优化器状态</strong>：<code>optimizer_scheduler.pt</code>
+3. <strong>训练状态</strong>：<code>training_state.json</code>
+   - 当前 epoch
+   - 最佳验证 loss
+   - patience 计数器
+   - wandb run_id</p>
+<p>整体上，基于最佳模型目录判断是否续训练 → 加载 LoRA 适配器权重 → 恢复优化器和调度器状态、计算剩余训练轮数 → 重新初始化学习率调度 → 继续训练</p>
+<h5 id="553-wandb">5.5.3 Wandb 指标上报：让训练过程可观测</h5>
+<p>在微调场景中，训练的可观测性有助于辅助判断训练是否成功，最直观的就是训练/验证损失下降曲线，比如常见的过拟合判断。
+我们使用<a href="https://wandb.ai/site/">Wandb</a> 进行指标追踪，确保每次训练都有据可查。 
+<img alt="wandb指标看板示例" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_b0cd312515cfa6aa366b3aac61542a5d06c360b7.png" /></p>
+<p>通过上报损失、学习率等指标， 在Wandb Dashboard 可以直观看到：
+- 训练/验证损失曲线是否平滑收敛
+- 学习率调度是否符合预期
+- 不同参数组的梯度分布是否健康</p>
+<p>同时，看板内记录多次训练的指标留存，也有助于事后分析<strong>解释为什么成功或失败</strong>，为参数调优提供数据支撑。</p>
+<p>整体训练流程如图：
+<img alt="训练流程" src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_8a84639c4aecf537d9072d0afb317c41aaeeab28.png" /></p>
+<hr />
+<h3 id="_5">六、把微调纳入质量体系：训练只是中间环节</h3>
+<p>如果站在训练视角，训练完成，OminiParser逻辑改造一下，整体流程就结束了。</p>
+<p>但这只是一个里程碑，距离真正可交付还需要三件事：度量、灰度、回流。</p>
+<h4 id="61-benchmark">6.1 可度量：基于业务图标集对训练做Benchmark</h4>
+<p>结合训练集样本与实际业务，我们建设了评估集：从不同主题变化（深色/浅色）、不同颜色背景覆盖核心业务图标、通用图标，
+明确 <strong>In-Domain</strong>（训练集出现过的图标变体）和 <strong>Out-of-Domain</strong>（完全没见过的全新图标）图标，
+相似图标对、非图标干扰。</p>
+<p>评估指标也不仅仅是“准确率”，包括：
+- 准确率：识别重点
+- 误报率：对应错误成功风险。
+- 稳定性：同一输入多次推理输出是否一致。</p>
+<p>这些指标形成“准出关卡”，每次训练产物才认为是可交付的。</p>
+<h4 id="62">6.2 可灰度：避免大范围影响</h4>
+<p>从服务角度，灰度能力的作用无须赘述。我们对OmniParser服务部署做了改造，新训练产物不会直接全量上线，而是：</p>
+<ul>
+<li><strong>小流量验证</strong>：先在一台机器上试运行，观察误报率、识别准确率等核心指标</li>
+<li><strong>快速回滚</strong>：LoRA 适配器的加载/卸载是秒级操作，一旦发现问题可立即切回基线版本</li>
+</ul>
+<p>这种灰度能力让我们免于担心"一次更新，全盘皆输"。</p>
+<h4 id="63">6.3 可回流：失败样本收集形成回流</h4>
+<p>从一个训练系统的长期演进过程来看，训练绝非定期更新训练素材，更新LoRA适配器。收集巡检中的失败用例，分析错误原因，
+形成回流，才能有效解决我们实际业务中的问题。</p>
+<p>措施包括：</p>
+<ul>
+<li>把"误报的非图标"加入负样本。</li>
+<li>把"新出现的图标风格"加入通用图标。</li>
+<li>把"业务关键但经常混淆的图标对"提升为核心样本。</li>
+</ul>
+<hr />
+<h3 id="demo">七、总结：从"Demo"到"可交付"</h3>
+<p>近两年模型的快速迭代，容易给人一种错觉：<strong>模型足够强，接入即可解决问题</strong>。</p>
+<p>但在真实落地中我们发现，这种Demo 幻象往往掩盖了系统层面的复杂性。</p>
+<p>借助 OmniParser，我们确实跨过了“看见 UI 结构”的门槛；但在随后的图标识别实践中逐渐意识到：</p>
+<p><strong>模型不再是黑盒能力，而只是系统能力的一部分。</strong></p>
+<p>要实现可交付的效果，必须围绕模型构建完整的系统能力，包括稳定性、可控性、可回归性与可演进性。</p>
+<p>这种方法并不局限于 GUI Agent，任何高频、多模态、且要求稳定语义输出的场景（如告警归因、日志治理等），本质上都面临同样的问题：</p>
+<p><strong>模型并非越强越好，而是越可控，系统才越可交付。</strong></p>
+<p>最终交付的并不是一个更大的模型，而是一条可以持续迭代的质量闭环。</p>
+<hr />
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright (c) 2025 Tencent Music Entertainment Group
+    </div>
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.expand", "navigation.sections", "navigation.instant", "navigation.tracking", "navigation.indexes", "content.code.copy", "content.tabs.link", "search.highlight", "search.share"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
