@@ -39,7 +39,7 @@ class MinioConfig(BaseSettings):
 class BrowserConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='browser_', extra='ignore')
 
-    headless: Optional[bool] = True
+    headless: Optional[bool] = False
     simulate_device: Optional[Literal['iPhone 15', 'iPhone 15 Pro', 'iPhone 15 Pro Max', 'iPhone 6'] | str] = None
 
 
@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='agent_', extra='ignore')
 
     model: Optional[str] = 'openai:deepseek-chat'
+    model_type: Optional[Literal['vlm', 'llm']] = 'llm'
+
     model_settings: ModelSettings = ModelSettings(max_tokens=20000, temperature=0.2)
 
     browser: BrowserConfig = BrowserConfig()

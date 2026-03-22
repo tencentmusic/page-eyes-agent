@@ -14,7 +14,7 @@ from pydantic_ai import RunContext
 
 from ._base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
-    InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps
+    InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps, SwipeForKeywordsToolParams
 from ..device import WebDevice
 from ..util.js_tool import JSTool
 
@@ -140,11 +140,7 @@ class WebAgentTool(AgentTool):
         logger.info(f'Scroll delta_x={delta_x}, delta_y={delta_y}')
         await ctx.deps.device.target.mouse.wheel(delta_x, delta_y)
 
-    @tool(after_delay=1)
-    async def swipe(self, ctx: RunContext[AgentDepsType], params: SwipeToolParams) -> ToolResult:
-        """
-        在设备屏幕中滑动或滚动
-        """
+    async def _swipe_for_keywords(self, ctx: RunContext[AgentDepsType], params: SwipeForKeywordsToolParams) -> ToolResult:
         width, height = ctx.deps.device.device_size.width, ctx.deps.device.device_size.height
         has_scroll_bar = await JSTool.has_scrollbar(ctx.deps.device.target, params.to)
 

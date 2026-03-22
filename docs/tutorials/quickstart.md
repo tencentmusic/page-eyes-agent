@@ -46,10 +46,6 @@ AGENT_HEADLESS=False
 AGENT_LOG_GRAPH_NODE=True
 
 # --- 必填: 服务依赖配置 ---
-# 你的 OmniParser 服务 API Key
-AGENT_OMNI_KEY="your_omni_parser_api_key_here"
-
-
 # 你的大模型服务基础 URL (例如 LiteLLM 代理地址或云服务商提供的地址)
 OPENAI_BASE_URL="https://your.llm.provider.com/v1/"
 # 你的大模型服务 API Key

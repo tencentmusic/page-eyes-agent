@@ -54,19 +54,62 @@ uv sync  # 安装依赖
 ```
 
 ## 快速开始
+配置环境变量，可在项目根目录下创建一个 `.env` 文件，配置项可参考 [.env.example](.env.example)
 
-配置环境变量
+### 一、轻量化部署: 配好模型, 插上手机就能跑
+`.env` 中配置VLM模型，以 qwen3-vl-plus 为例
+```shell
+OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
+AGENT_MODEL_TYPE=vlm
+AGENT_MODEL=openai:qwen3-vl-plus
+```
+编写测试脚本，以 Android 端为例（需先安装好 adb）
+```python
+import asyncio
 
-| 环境变量             | 默认值                         | 说明                          |
-|:-----------------|-----------------------------|-----------------------------|
-| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat |
-| AGENT_DEBUG      | False                       | 是否启用调试模式                    |
-| BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式     |
-| OMNI_BASE_URL    | http://127.0.0.1:8000       | OmniParser API的服务端点         |
-| OPENAI_BASE_URL  | https://api.deepseek.com/v1 | DeepSeek API的服务端点           |
-| OPENAI_API_KEY   | xxx-xxx-xxx                 | 调用DeepSeek API所需的认证密钥       |
+from page_eyes.agent import AndroidAgent
 
-使用腾讯云COS服务（与MinIO二选一）
+
+async def main():
+    # 移动端
+    ui_agent = await AndroidAgent.create()
+
+    report = await ui_agent.run( "打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 二、多源融合(视觉小模型+大模型)部署
+OmniParser + LLM
+
+`.env` 中配置模型，以 deepseek v3 为例, OmiParser 需提前[部署](docs/getting-started/installation.md)
+```shell
+OPENAI_BASE_URL=https://api.deepseek.com/v1
+OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
+AGENT_MODEL=openai:deepseek-chat
+OMNI_BASE_URL=http://127.0.0.1:8000
+```
+测试脚本参考上面已有示例
+
+### 三、更多配置
+| 环境变量             | 默认值                         | 说明                                   |
+|:-----------------|-----------------------------|--------------------------------------|
+| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat          |
+| AGENT_DEBUG      | False                       | 是否启用调试模式                             |
+| BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式              |
+| AGENT_MODEL_TYPE | llm                         | Agent 使用的模型类型，支持 llm 和 vlm           |
+| OMNI_BASE_URL    | http://127.0.0.1:8000       | OmniParser API的服务端点, vlm 不需要配置该项     |
+| OPENAI_BASE_URL  | https://api.deepseek.com/v1 | 模型 API 的服务端点                         |
+| OPENAI_API_KEY   | xxx-xxx-xxx                 | 模型 API 所需的认证密钥                       |
+| IOS_WDA_URL      | -                           | iOS WebDriverAgent 服务地址（仅 iOS 自动化需要） |
+
+> vlm 模型支持：`glm-4.6v`  `qwen3-vl-plus` 等
+>
+> 如：AGENT_MODEL=openai:qwen3-vl-plus 
+
+使用腾讯云COS服务（与MinIO二选一），可选，不配置则会使用 base64 保存图片
 
 | 环境变量           | 默认值 | 说明                  |
 |:---------------|-----|---------------------|
@@ -75,7 +118,7 @@ uv sync  # 安装依赖
 | COS_ENDPOINT   | -   | 腾讯云COS服务的 endpoint  |
 | COS_BUCKET     | -   | 腾讯云COS服务的 bucket    |
 
-使用MinIO服务（与腾讯云COS二选一）
+使用MinIO服务（与腾讯云COS二选一），可选，不配置则会使用 base64 保存图片
 
 | 环境变量             | 默认值 | 说明                            |
 |:-----------------|-----|-------------------------------|
@@ -142,5 +185,3 @@ if __name__ == "__main__":
 ## 如有需要，加入我们的交流群
 
 ![](./docs/about/contact_qr.png)
-
-[![Star History Chart](https://api.star-history.com/svg?repos=tencentmusic/page-eyes-agent&type=date&legend=top-left)](https://www.star-history.com/#tencentmusic/page-eyes-agent&type=date&legend=top-left)
