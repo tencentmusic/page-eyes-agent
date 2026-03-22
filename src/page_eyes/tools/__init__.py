@@ -5,8 +5,16 @@
 # @Time : 2026/2/11 15:23
 from ._base import AgentDepsType
 from .android import AndroidAgentTool
-from .web import WebAgentTool
-from .ios import IOSAgentTool
+from .electron import ElectronAgentTool
 from .harmony import HarmonyAgentTool
+from .ios import IOSAgentTool
+from .web import WebAgentTool
 
-__all__ = ["AgentDepsType", "WebAgentTool", "AndroidAgentTool", "HarmonyAgentTool", "IOSAgentTool"]
+__all__ = [
+    "AgentDepsType",
+    "WebAgentTool",
+    "AndroidAgentTool",
+    "HarmonyAgentTool",
+    "IOSAgentTool",
+    "ElectronAgentTool",
+]
