@@ -10,26 +10,26 @@ from random import randint
 from typing import Optional, Union
 
 from loguru import logger
+from openai.types import chat
 from pydantic import TypeAdapter
 from pydantic_ai import Agent, UserPromptNode, ModelRequestNode, CallToolsNode, RunContext, UnexpectedModelBehavior, \
     ModelMessage
 from pydantic_ai.agent import AgentRunResult
-from pydantic_ai.messages import ToolReturnPart, ToolCallPart, ModelRequest, UserPromptPart, ImageUrl
+from pydantic_ai.messages import ToolReturnPart, ToolCallPart, ModelRequest, UserPromptPart
 from pydantic_ai.usage import Usage
+from pydantic_ai_skills import SkillsToolset
 
 from .config import default_settings, Settings, BrowserConfig
 from .deps import AgentDeps, SimulateDeviceType, PlanningOutputType, PlanningStep, ToolParams, StepInfo, \
-    MarkFailedParams, ScreenInfo
+    MarkFailedParams
 from .device import WebDevice, AndroidDevice, HarmonyDevice, IOSDevice
 from .prompt import SYSTEM_PROMPT, PLANNING_SYSTEM_PROMPT
 from .tools import AgentDepsType, WebAgentTool, AndroidAgentTool, HarmonyAgentTool, IOSAgentTool
 from .util.platform import Platform
-from pydantic_ai_skills import SkillsToolset
-
-from openai.types import chat
 
 # pydantic ai 新版本，service_tier 为空字符串会报错，这里先打个补丁
 _original_validate = chat.ChatCompletion.model_validate
+
 
 @classmethod
 def _patched_validate(cls, obj, *args, **kwargs):
@@ -40,8 +40,9 @@ def _patched_validate(cls, obj, *args, **kwargs):
 
 chat.ChatCompletion.model_validate = _patched_validate
 
-
 skills_toolset = SkillsToolset(directories=[str(Path(__file__).parent.parent.parent / "skills")])
+
+
 @dataclass
 class PlanningAgent:
     """PlanningAgent class for planning tasks."""
@@ -357,7 +358,7 @@ class IOSAgent(UiAgent):
         )
 
         @agent.instructions
-        async def add_skills_instructions(ctx: RunContext)-> str | None:
+        async def add_skills_instructions(ctx: RunContext) -> str | None:
             return await skills_toolset.get_instructions(ctx)
 
         return cls(model, deps, agent)
