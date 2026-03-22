@@ -182,6 +182,24 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+#### 交互效果
+
+<video
+    controls
+    preload="metadata"
+    style="width: 100%; max-width: 640px; border: 1px solid #ccc; display: block; margin-top: 10px;">
+    <source src="../video/实战案例_Xmind.mov" type="video/mp4">
+    抱歉，您的浏览器不支持播放此视频。
+</video>
+
+---
+
+#### 步骤报告
+
+<img src="../img/实战案例_Xmind_报告.png" alt="Electron 步骤报告示例" style="width: 800px; border: 1px solid #ccc; margin-top: 10px; margin-bottom: 10px;">
+
+---
+
 #### 说明
 
 - ElectronAgent 通过 CDP（Chrome DevTools Protocol）接入已运行的 Electron 进程
