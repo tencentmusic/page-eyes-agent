@@ -139,6 +139,77 @@ iOS 端的交互效果与 Android 端类似，通过 WebDriverAgent 实现对 iO
 
 
 
+## Electron 桌面应用自动化
+
+#### 目标
+在 XMind 桌面应用中，使用一键生成功能创建思维导图
+
+> 首先确认 Electron 应用已带调试端口启动
+```bash
+# 启动 XMind 并开启 CDP 远程调试
+open -a "Xmind" --args --remote-debugging-port=9222
+
+# 验证 CDP 连接
+curl http://127.0.0.1:9222/json
+```
+
+#### 脚本
+
+```Python
+import asyncio
+
+from page_eyes.agent import ElectronAgent
+
+
+async def main():
+    # Electron 桌面应用，通过 CDP 接入已运行的进程
+    ui_agent = await ElectronAgent.create(cdp_url='http://127.0.0.1:9222')
+
+    report = await ui_agent.run(
+        """
+        - 点击左侧栏的"一键生成"按钮
+        - 检查弹窗是否出现，弹窗中应包含输入框和"生成"按钮
+        - 在一键生成面板中输入"AI agent 技术架构"
+        - 点击"生成"按钮
+        - 等待10秒，直到页面中出现新生成的思维导图
+        - 检查屏幕中出现"AI agent 技术架构"
+        - 最后关闭新建思维导图的窗口
+        """
+    )
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+#### 交互效果
+
+<video
+    controls
+    preload="metadata"
+    style="width: 100%; max-width: 640px; border: 1px solid #ccc; display: block; margin-top: 10px;">
+    <source src="../video/实战案例_Xmind.mov" type="video/mp4">
+    抱歉，您的浏览器不支持播放此视频。
+</video>
+
+---
+
+#### 步骤报告
+
+<img src="../img/实战案例_Xmind_报告.png" alt="Electron 步骤报告示例" style="width: 800px; border: 1px solid #ccc; margin-top: 10px; margin-bottom: 10px;">
+
+---
+
+#### 说明
+
+- ElectronAgent 通过 CDP（Chrome DevTools Protocol）接入已运行的 Electron 进程
+- 继承自 WebAgentTool，可直接使用 click、input、swipe、assert 等全部工具
+- 支持多窗口自动切换和关闭，内置页面栈管理
+- macOS Retina 屏幕下自动处理 DPR 坐标缩放
+- Agent 结束后不会关闭 Electron 应用，进程由外部管理
+
+---
+
 ## Web浏览器自动化用例
 
 #### 目标

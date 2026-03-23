@@ -215,7 +215,44 @@ export IOS_WDA_URL="http://localhost:8100"
 export IOS_WDA_URL="http://YOUR_DEVICE_IP:8100"
 ```
 
-### 5. MinIO（可选，用于报告存储）
+### 5. Electron 桌面应用（仅 Electron 自动化需要）
+
+如果计划对 Electron 桌面应用（如 VS Code、XMind、Slack、Notion 等）进行自动化，需要以携带远程调试端口的方式启动被测应用。
+
+#### 步骤 1：启动 Electron 应用
+
+```bash
+# macOS 通用方式（大多数 Electron 应用支持）
+open -a "应用名称" --args --remote-debugging-port=9222
+
+# 以 XMind 为例
+open -a "Xmind" --args --remote-debugging-port=9222
+```
+
+#### 步骤 2：验证 CDP 连接
+
+在浏览器中访问以下地址，能看到页面列表即表示连接成功：
+
+```
+http://127.0.0.1:9222/json
+```
+
+或使用命令行验证：
+
+```bash
+curl http://127.0.0.1:9222/json
+```
+
+!!! tip
+    如果应用不支持 `--remote-debugging-port` 参数，可能需要通过修改应用的启动脚本或快捷方式来添加该参数。
+
+#### 注意事项
+
+- Electron 自动化复用 Playwright 浏览器驱动，无需额外安装依赖
+- Agent 通过 CDP 接入已运行的进程，不会启动或关闭 Electron 应用
+- macOS Retina 屏幕下已自动处理 DPR 坐标缩放（`scale='css'`）
+
+### 6. MinIO（可选，用于报告存储）
 
 如果您需要存储和共享测试报告，可以配置 MinIO：
 
@@ -423,13 +460,25 @@ AGENT_LOG_GRAPH_NODE=True
    # 如果服务未运行，在 Xcode 中重新运行 Test
    ```
 
-5. **iOS 设备信任问题**
+5. **Electron CDP 连接失败**
+   ```bash
+   # 确认应用已带调试端口启动
+   curl http://127.0.0.1:9222/json
+
+   # 如果无响应，重新启动应用
+   open -a "AppName" --args --remote-debugging-port=9222
+
+   # 确认端口未被占用
+   lsof -i :9222
+   ```
+
+7. **iOS 设备信任问题**
     - 在设备上打开 **设置 > 通用 > VPN与设备管理**
     - 信任开发者证书
     - 在 **设置 > 隐私与安全性 > 开发者模式** 中启用开发者模式
     - 重启设备
 
-6. **Xcode 签名错误**
+8. **Xcode 签名错误**
     - 确保已登录 Apple ID（Xcode > Preferences > Accounts）
     - 选择正确的开发团队
     - 修改 Bundle Identifier 确保唯一性

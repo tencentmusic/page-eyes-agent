@@ -82,6 +82,35 @@ if __name__ == "__main__":
 ```
 
 
+## Electron 桌面应用
+
+```Python
+import asyncio
+
+from page_eyes.agent import ElectronAgent
+
+
+async def main():
+    # 被测应用需先以 --remote-debugging-port=9222 启动
+    # 例如: open -a "Xmind" --args --remote-debugging-port=9222
+    electron_agent = await ElectronAgent.create(cdp_url='http://127.0.0.1:9222')
+
+    await electron_agent.run(
+        """
+        - 点击左侧栏的"一键生成"按钮
+        - 在一键生成面板中输入"AI agent 技术架构"
+        - 点击"生成"按钮
+        - 等待10秒，直到页面中出现新生成的思维导图
+        - 检查屏幕中出现"AI agent 技术架构"
+        """
+    )
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+
 ## PC Web端
 
 ```Python

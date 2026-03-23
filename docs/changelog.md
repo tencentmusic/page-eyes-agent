@@ -2,6 +2,18 @@
 
 本文档记录 PageEyes Agent 项目的所有重要变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## 2026-03-22
+### 新增
+  - 支持 Electron 桌面应用自动化（VS Code、XMind、Slack 等）
+  - 新增 ElectronDevice：通过 CDP 接入已运行的 Electron 进程，支持多窗口切换和页面栈管理
+  - 新增 ElectronAgentTool：继承 WebAgentTool，覆写 screenshot（scale='css' 修复 Retina 坐标偏移）、click、close_window、tear_down
+  - 新增 ElectronAgent：异步工厂方法创建实例
+  - 新增 electron_agent 测试 fixture 及测试用例
+
+### 优化
+  - 全局 Black/isort 代码格式化
+  - flake8 修复：移除未使用导入、修复空 f-string、修复超长行
+
 ## 2026-02-13
 ### 新增
   - 支持 HarmonyOS NEXT UI自动化

@@ -9,24 +9,32 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Generic, TypeVar
+from typing import Generic, List, Optional, TypeVar
 
 import wda
 from adbutils import AdbClient, AdbDevice
 from loguru import logger
-from playwright.async_api import async_playwright, Playwright, Page, BrowserContext, ViewportSize
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Page,
+    Playwright,
+    ViewportSize,
+    async_playwright,
+)
 from pydantic import BaseModel
 
 from .util.hdc_tool import HdcClient, HdcDevice
 from .util.platform import Platform
 from .util.wda_tool import WdaClient
 
-ClientT = TypeVar('ClientT')
-DeviceT = TypeVar('DeviceT')
+ClientT = TypeVar("ClientT")
+DeviceT = TypeVar("DeviceT")
 
 
 class DeviceSize(BaseModel):
     """当前设备尺寸"""
+
     width: int
     height: int
 
@@ -49,24 +57,28 @@ class WebDevice(Device[Playwright, Page]):
     is_mobile: Optional[bool] = None
 
     @classmethod
-    async def create(cls, headless: bool = False, simulate_device: Optional[str] = None) -> "WebDevice":
+    async def create(
+        cls, headless: bool = False, simulate_device: Optional[str] = None
+    ) -> "WebDevice":
         """异步工厂方法用于创建实例"""
         playwright = await async_playwright().start()
-        context_params = {'viewport': ViewportSize(width=1600, height=900)}
+        context_params = {"viewport": ViewportSize(width=1600, height=900)}
         is_mobile = False
         if simulate_device and simulate_device in playwright.devices:
             is_mobile = True
             context_params.update(playwright.devices[simulate_device])
-            del context_params['has_touch']  # fix swipe scene
-            del context_params['default_browser_type']  # launch_persistent_context not support default_browser_type
+            del context_params["has_touch"]  # fix swipe scene
+            del context_params[
+                "default_browser_type"
+            ]  # launch_persistent_context not support default_browser_type
 
         context = await playwright.chromium.launch_persistent_context(
-            user_data_dir=Path(tempfile.gettempdir()) / 'playwright',
-            channel='chrome',
+            user_data_dir=Path(tempfile.gettempdir()) / "playwright",
+            channel="chrome",
             headless=headless,
             # devtools=True,
-            ignore_default_args=['--enable-automation'],
-            **context_params
+            ignore_default_args=["--enable-automation"],
+            **context_params,
         )
 
         page = context.pages[0]
@@ -75,7 +87,9 @@ class WebDevice(Device[Playwright, Page]):
         return cls(playwright, page, device_size, context, simulate_device, is_mobile)
 
     @classmethod
-    async def from_page(cls, page: Page, simulate_device: Optional[str] = None) -> "WebDevice":
+    async def from_page(
+        cls, page: Page, simulate_device: Optional[str] = None
+    ) -> "WebDevice":
         """通过page对象创建实例"""
         playwright = None
         context = page.context
@@ -90,14 +104,16 @@ class AndroidDevice(Device[AdbClient, AdbDevice]):
     platform: Platform
 
     @classmethod
-    async def create(cls, serial: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
+    async def create(
+        cls, serial: Optional[str] = None, platform: Optional[Platform] = Platform.QY
+    ):
         """异步工厂方法用于创建实例"""
         client = AdbClient()
         current_devices = client.device_list()
         if serial:
             if serial not in [item.serial for item in current_devices]:
                 output = client.connect(serial, timeout=10)
-                if 'connected' not in output:
+                if "connected" not in output:
                     raise Exception(f"adb connect failed: {output}")
             adb_device: AdbDevice = client.device(serial=serial)
         elif current_devices:
@@ -115,14 +131,18 @@ class HarmonyDevice(Device[HdcClient, HdcDevice]):
     platform: Platform
 
     @classmethod
-    async def create(cls, connect_key: Optional[str] = None, platform: Optional[Platform] = Platform.QY):
+    async def create(
+        cls,
+        connect_key: Optional[str] = None,
+        platform: Optional[Platform] = Platform.QY,
+    ):
         """异步工厂方法用于创建实例"""
         client = HdcClient()
         current_devices = client.device_list()
         if connect_key:
             if connect_key not in [item.connect_key for item in current_devices]:
                 output = client.connect(connect_key)
-                if 'Connect failed' in output:
+                if "Connect failed" in output:
                     raise Exception(f"hdc connect failed: {output}")
             hdc_device: HdcDevice = client.device(connect_key=connect_key)
         elif current_devices:
@@ -138,10 +158,16 @@ class HarmonyDevice(Device[HdcClient, HdcDevice]):
 @dataclass
 class IOSDevice(Device[WdaClient, wda.Session]):
     """iOS 设备连接类，通过 WebDriverAgent 连接"""
+
     platform: Platform
 
     @classmethod
-    async def create(cls, wda_url: str, platform: Optional[Platform] = Platform.QY, auto_start_wda: bool = True):
+    async def create(
+        cls,
+        wda_url: str,
+        platform: Optional[Platform] = Platform.QY,
+        auto_start_wda: bool = True,
+    ):
         """
         创建iOS设备连接
         Args:
@@ -158,7 +184,9 @@ class IOSDevice(Device[WdaClient, wda.Session]):
             device_size = DeviceSize(width=window_size.width, height=window_size.height)
             status = wda_client.status()
             if not status:
-                raise Exception(f"Failed to get device status from WebDriverAgent at {wda_url}")
+                raise Exception(
+                    f"Failed to get device status from WebDriverAgent at {wda_url}"
+                )
 
             logger.info("✅ 成功连接到WebDriverAgent")
             session = wda_client.session()
@@ -181,7 +209,9 @@ class IOSDevice(Device[WdaClient, wda.Session]):
                             logger.info(f"第 {i + 1}/{max_retries} 次尝试连接...")
                             wda_client = WdaClient(wda_url)
                             window_size = wda_client.window_size()
-                            device_size = DeviceSize(width=window_size.width, height=window_size.height)
+                            device_size = DeviceSize(
+                                width=window_size.width, height=window_size.height
+                            )
                             status = wda_client.status()
                             if status:
                                 logger.info("✅ 成功连接到WebDriverAgent")
@@ -192,10 +222,108 @@ class IOSDevice(Device[WdaClient, wda.Session]):
                                 raise Exception(f"启动WDA后仍无法连接: {retry_error}")
                             logger.debug(f"连接失败，继续重试... {retry_error}")
 
-            raise Exception(f"Failed to connect to WebDriverAgent at {wda_url}: {first_error}")
+            raise Exception(
+                f"Failed to connect to WebDriverAgent at {wda_url}: {first_error}"
+            )
 
 
-async def start_wda_if_needed(udid: str = None, wda_project_path: str = None, timeout: int = 30) -> bool:
+@dataclass
+class ElectronDevice(Device[Browser, Page]):
+    """Electron 桌面应用设备，通过 CDP 接入已运行的 Electron 进程。
+
+    被测应用需在启动时携带 --remote-debugging-port 参数：
+        open -a "AppName" --args --remote-debugging-port=9222
+    验证：访问 http://127.0.0.1:9222/json 能看到页面列表即可。
+    """
+
+    context: BrowserContext
+    is_mobile: bool = False
+    _page_stack: Optional[List[Page]] = None  # 页面栈，用于窗口切换和回退
+
+    @classmethod
+    async def create(cls, cdp_url: str = "http://127.0.0.1:9222") -> "ElectronDevice":
+        """通过 CDP 接入已运行的 Electron 进程。
+
+        Args:
+            cdp_url: Electron app 的远程调试 CDP 地址
+
+        Returns:
+            连接成功后的 ElectronDevice 实例
+        """
+        logger.info(f"正在通过 CDP 连接 Electron 进程：{cdp_url}")
+        playwright = await async_playwright().start()
+        browser = await playwright.chromium.connect_over_cdp(cdp_url)
+        context = browser.contexts[0]
+        page = context.pages[0]
+        # CDP 接入的 Electron 页面 viewport_size 可能为 None，改用 JS 获取实际窗口尺寸
+        viewport = page.viewport_size
+        if viewport:
+            device_size = DeviceSize(**viewport)
+        else:
+            size = await page.evaluate(
+                "() => ({ width: window.innerWidth," " height: window.innerHeight })"
+            )
+            device_size = DeviceSize(**size)
+        logger.info(
+            f"✅ 成功连接 Electron，"
+            f"页面尺寸：{device_size.width}x{device_size.height}"
+        )
+
+        instance = cls(browser, page, device_size, context, False, [page])
+
+        # 监听窗口关闭事件，自动回退到上一个窗口
+        def _on_page_close(closed_page: Page):
+            if closed_page in instance._page_stack:
+                instance._page_stack.remove(closed_page)
+            if instance._page_stack and instance.target == closed_page:
+                instance.target = instance._page_stack[-1]
+                logger.info(
+                    f"🔙 窗口已关闭，回退到上一个窗口"
+                    f"（共 {len(instance._page_stack)} 个）"
+                )
+
+        context.on(
+            "page",
+            lambda new_page: new_page.on("close", lambda: _on_page_close(new_page)),
+        )
+        # 也给初始页面注册
+        page.on("close", lambda: _on_page_close(page))
+
+        return instance
+
+    async def switch_to_latest_page(self) -> bool:
+        """切换到最新打开的窗口，并更新 device_size。
+
+        Returns:
+            如果切换了新窗口则返回 True，否则返回 False。
+        """
+        pages = self.context.pages
+        if pages and pages[-1] != self.target:
+            new_page = pages[-1]
+            if new_page not in self._page_stack:
+                self._page_stack.append(new_page)
+            self.target = new_page
+            # 更新 device_size
+            viewport = new_page.viewport_size
+            if viewport:
+                self.device_size = DeviceSize(**viewport)
+            else:
+                size = await new_page.evaluate(
+                    "() => ({ width: window.innerWidth,"
+                    " height: window.innerHeight })"
+                )
+                self.device_size = DeviceSize(**size)
+            logger.info(
+                f"🔀 切换到新窗口（共 {len(pages)} 个），"
+                f"尺寸：{self.device_size.width}x{self.device_size.height}"
+            )
+            return True
+        return False
+
+
+async def start_wda_if_needed(
+    udid: str = None, wda_project_path: str = None, timeout: int = 30
+) -> bool:
     """
     尝试启动WebDriverAgent
 
@@ -215,7 +343,9 @@ async def start_wda_if_needed(udid: str = None, wda_project_path: str = None, ti
 
     # 如果没有配置UDID或项目路径，跳过自动启动
     if not udid or not wda_project_path:
-        logger.warning("未配置IOS_UDID或IOS_WDA_PROJECT_PATH，跳过自动启动WebDriverAgent")
+        logger.warning(
+            "未配置IOS_UDID或IOS_WDA_PROJECT_PATH，跳过自动启动WebDriverAgent"
+        )
         return False
 
     try:
@@ -223,19 +353,19 @@ async def start_wda_if_needed(udid: str = None, wda_project_path: str = None, ti
 
         cmd = [
             "xcodebuild",
-            "-project", f"{wda_project_path}/WebDriverAgent.xcodeproj",
-            "-scheme", "WebDriverAgentRunner",
-            "-destination", f"id={udid}",
-            "test"
+            "-project",
+            f"{wda_project_path}/WebDriverAgent.xcodeproj",
+            "-scheme",
+            "WebDriverAgentRunner",
+            "-destination",
+            f"id={udid}",
+            "test",
         ]
 
         logger.debug(f"执行命令: {' '.join(cmd)}")
 
         process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=wda_project_path
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=wda_project_path
         )
 
         logger.info(f"等待WebDriverAgent启动... (超时: {timeout}秒)")
@@ -243,7 +373,7 @@ async def start_wda_if_needed(udid: str = None, wda_project_path: str = None, ti
         await asyncio.sleep(3)
         if process.poll() is not None:
             stdout, stderr = process.communicate()
-            logger.error(f"WebDriverAgent启动失败")
+            logger.error("WebDriverAgent启动失败")
             logger.error(f"stdout: {stdout.decode('utf-8', errors='ignore')}")
             logger.error(f"stderr: {stderr.decode('utf-8', errors='ignore')}")
             return False

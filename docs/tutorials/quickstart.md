@@ -107,6 +107,57 @@ python my_first_test.py
 
 ---
 
+---
+
+## Electron 桌面应用快速上手
+
+除了 Web 自动化，PageEyes Agent 同样支持 Electron 桌面应用（如 VS Code、XMind、Slack 等）的自动化。
+
+### 第 1 步：启动被测应用
+
+Electron 应用需要携带 `--remote-debugging-port` 参数启动：
+
+```bash
+# 以 XMind 为例
+open -a "Xmind" --args --remote-debugging-port=9222
+
+# 验证连接（浏览器访问能看到页面列表即可）
+curl http://127.0.0.1:9222/json
+```
+
+### 第 2 步：编写脚本
+
+```python
+import asyncio
+from page_eyes.agent import ElectronAgent
+
+async def main():
+    agent = await ElectronAgent.create(cdp_url='http://127.0.0.1:9222')
+
+    report = await agent.run(
+        """
+        - 点击左侧栏的"一键生成"按钮
+        - 在输入框中输入"项目规划"
+        - 点击"生成"按钮
+        - 等待10秒，检查屏幕中出现"项目规划"
+        """
+    )
+    print("任务完成！", report)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 第 3 步：运行
+
+```bash
+python my_electron_test.py
+```
+
+与 Web 自动化不同，Electron 自动化通过 CDP 接入已运行的应用进程，Agent 结束后不会关闭应用。
+
+---
+
 ### 接下来做什么？
 
 恭喜你！你已经掌握了 PageEyes Agent 的基本用法。
