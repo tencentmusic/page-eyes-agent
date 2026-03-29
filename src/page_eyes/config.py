@@ -3,6 +3,7 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/6/24 12:18
+from pathlib import Path
 from typing import Literal, Optional
 
 from loguru import logger
@@ -53,10 +54,11 @@ class OmniParserConfig(BaseSettings):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='agent_', extra='ignore')
 
+    root: Path = Field(default=Path(__file__).parent, exclude=True, repr=False)
     model: Optional[str] = 'openai:deepseek-chat'
     model_type: Optional[Literal['vlm', 'llm']] = 'llm'
 
-    model_settings: ModelSettings = ModelSettings(max_tokens=20000, temperature=0.2)
+    model_settings: ModelSettings = ModelSettings(max_tokens=100000, temperature=0.2)
 
     browser: BrowserConfig = BrowserConfig()
 
@@ -64,7 +66,6 @@ class Settings(BaseSettings):
 
     storage_client: StorageClient = StorageClient.create_from_config(CosConfig(), MinioConfig())
 
-    enable_cos: Optional[bool] = True
     debug: Optional[bool] = False
 
 

@@ -24,14 +24,14 @@ from ..deps import AgentDeps, ToolParams, ToolResult, StepInfo, LocationToolPara
     InputToolParams, SwipeToolParams, OpenUrlToolParams, ScreenInfo, AgentContext, \
     WaitForKeywordsToolParams, AssertContainsParams, MarkFailedParams, AssertNotContainsParams, ToolResultWithOutput, \
     WaitToolParams, LLMLocationToolParams, SwipeForKeywordsToolParams
-from ..device import AndroidDevice, WebDevice, HarmonyDevice, IOSDevice
+from ..device import AndroidDevice, WebDevice, HarmonyDevice, IOSDevice, ElectronDevice
 from ..util.js_tool import JSTool
 from ..util.storage import Base64Strategy
 
 storage_client = default_settings.storage_client
 
 AgentDepsType: TypeAlias = AgentDeps[
-    Union[WebDevice, AndroidDevice, HarmonyDevice, IOSDevice],
+    Union[WebDevice, AndroidDevice, HarmonyDevice, IOSDevice, ElectronDevice],
     'AgentTool',
 ]
 

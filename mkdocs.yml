@@ -5,7 +5,7 @@ site_url: https://tencentmusic.github.io/page-eyes-agent/
 repo_name: page-eyes-agent
 repo_url: https://github.com/tencentmusic/page-eyes-agent
 
-copyright: Copyright (c) 2025 Tencent Music Entertainment Group
+copyright: Copyright (c) 2026 Tencent Music Entertainment Group
 
 theme:
   name: material
@@ -67,15 +67,15 @@ nav:
       - 介绍: getting-started/index.md
       - 安装指南: getting-started/installation.md
       - 第一个Demo: getting-started/demo.md
-  - 指南:
-      - 核心概念: guides/core-concepts.md
-      - 使用场景: guides/use-cases.md
-      - 最佳实践: guides/best-practices.md
-  - API参考:
-      - 概览: api/index.md
-      - 模块A: api/module-a.md
-      - 模块B: api/module-b.md
-      - 高级接口: api/advanced.md
+#  - 指南:
+#      - 核心概念: guides/core-concepts.md
+#      - 使用场景: guides/use-cases.md
+#      - 最佳实践: guides/best-practices.md
+#  - API参考:
+#      - 概览: api/index.md
+#      - 模块A: api/module-a.md
+#      - 模块B: api/module-b.md
+#      - 高级接口: api/advanced.md
   - 教程:
       - 快速上手: tutorials/quickstart.md
       - 实战案例: tutorials/examples.md

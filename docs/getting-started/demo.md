@@ -136,4 +136,22 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+## 使用自 Skills
+Agent 默认会加载当前 `./skills` 目录下的技能（如有），也可以自定义其他目录的skills
+```python
+import asyncio
+
+from page_eyes.agent import AndroidAgent
+
+
+async def main():
+    # 移动端
+    ui_agent = await AndroidAgent.create(skills_dirs=["./skills", "./more-skills"])
+
+    report = await ui_agent.run( "打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 

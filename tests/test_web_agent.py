@@ -196,3 +196,13 @@ async def test_web_mobile_08(web_agent_mobile):
         - 如果出现多个"周深"元素则点击第2个"周深"，否则标记为失败
         """
     )
+
+
+async def test_web_mobile_09(web_agent_mobile):
+    """测试弹窗处理skill"""
+    await web_agent_mobile.run(
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/rankList/"
+        - 点击"日榜"
+        """
+    )

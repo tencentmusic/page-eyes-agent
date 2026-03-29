@@ -188,7 +188,7 @@ if __name__ == "__main__":
     controls
     preload="metadata"
     style="width: 100%; max-width: 640px; border: 1px solid #ccc; display: block; margin-top: 10px;">
-    <source src="../video/实战案例_Xmind.mov" type="video/mp4">
+    <source src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_335039e3df8181f4bffe49721e253a52c88cc74e.mov" type="video/mp4">
     抱歉，您的浏览器不支持播放此视频。
 </video>
 
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
 #### 步骤报告
 
-<img src="../img/实战案例_Xmind_报告.png" alt="Electron 步骤报告示例" style="width: 800px; border: 1px solid #ccc; margin-top: 10px; margin-bottom: 10px;">
+<img src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_36f9531ee56464139315fc21c9c1a4ca2d3e96cb.png" alt="Electron 步骤报告示例" style="width: 800px; border: 1px solid #ccc; margin-top: 10px; margin-bottom: 10px;">
 
 ---
 

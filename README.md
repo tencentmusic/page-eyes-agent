@@ -12,6 +12,7 @@
 ![](https://img.shields.io/badge/Android-supported-brightgreen?logo=android&logoColor=white)
 ![](https://img.shields.io/badge/iOS-supported-brightgreen?logo=apple&logoColor=white)
 ![](https://img.shields.io/badge/HarmonyOS_Next-supported-brightgreen?logo=harmonyos&logoColor=white)
+![](https://img.shields.io/badge/Electron-supported-brightgreen?logo=electron&logoColor=white)
 
 ---
 
@@ -26,7 +27,7 @@
 PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydanticai) 框架开发的一个轻量级 UI Agent，
 其中元素信息感知能力依靠 [OmniParserV2](https://huggingface.co/microsoft/OmniParser-v2.0) 模型，整个 Agent
 的优势在于不依赖视觉语言大模型，
-即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android、HarmonyOS、iOS），目前主要包含以下功能：
+即使小参数的 LLM 也能胜任路径规划能力，同时支持多平台（Web、Android、HarmonyOS、iOS、Electron 桌面应用），目前主要包含以下功能：
 
 1. 完全由自然语言指令驱动，无需编写脚本，既可实现自动化测试，UI巡检等任务
 2. 跨平台、跨端支持，在 Python 环境中安装 page-eyes 库和配置 OmniParser 服务后即可开始多个平台的自动化任务
@@ -171,6 +172,25 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 ```
+
+### 四、使用自 Skills
+Agent 默认会加载当前 `./skills` 目录下的技能（如有），也可以自定义其他目录的skills
+```python
+import asyncio
+
+from page_eyes.agent import AndroidAgent
+
+
+async def main():
+    # 移动端
+    ui_agent = await AndroidAgent.create(skills_dirs=["./skills", "./more-skills"])
+
+    report = await ui_agent.run( "打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
 
 更多示例请参考[示例代码](https://github.com/tencentmusic/page-eyes-agent/tree/master/tests)
 
