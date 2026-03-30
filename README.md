@@ -135,7 +135,7 @@ OMNI_BASE_URL=http://127.0.0.1:8000
 根据需要操作的设备类型可以导入对应的 Agent 类
 
 ```python
-from page_eyes.agent import WebAgent, AndroidAgent, HarmonyAgent, IOSAgent
+from page_eyes.agent import WebAgent, AndroidAgent, HarmonyAgent, IOSAgent, ElectronAgent
 
 ...
 ```
