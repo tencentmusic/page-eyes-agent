@@ -173,7 +173,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-### 四、使用自 Skills
+### 四、使用 Skills
 Agent 默认会加载当前 `./skills` 目录下的技能（如有），也可以自定义其他目录的skills
 ```python
 import asyncio
