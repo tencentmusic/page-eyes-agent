@@ -319,27 +319,27 @@ class AgentTool(ABC):
         """
         return await self.expect_screen_not_contains(ctx, params.unexpect_keywords)
 
-    @tool(vlm=False)
+    @tool()
     async def mark_failed(
             self,
             ctx: RunContext[AgentDepsType],
             params: MarkFailedParams
     ) -> ToolResult:
         """
-        Mark the task as failed and terminate immediately if an element is not found or is not actionable.
+        任务失败时调用，包括元素找不到、工具调用失败等
         """
         logger.info(f'Mark task failed, reason: {params.reason}')
         ctx.deps.context.set_step_failed(params.reason)
         return ToolResult.success()
 
-    @tool(llm=False, vlm=False)
-    async def set_task_failed(
+    @tool(llm=False)
+    async def assert_failed(
             self,
             ctx: RunContext[AgentDepsType],
             params: MarkFailedParams
     ) -> ToolResult:
         """
-        仅任务失败或断言失败时调用，否则不允许调用
+        验证、断言失败时调用
         """
         logger.info(f'Mark task failed, reason: {params.reason}')
         ctx.deps.context.set_step_failed(params.reason)
