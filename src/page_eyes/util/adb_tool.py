@@ -26,8 +26,8 @@ class AdbDeviceProxy:
     def execute_command(self, *args: str):
         self._device.shell([
             'app_process',
-            f'-Djava.class.path={self.y_adb_path}',
-            f'{self.y_adb_path.parent}',
+            f'-Djava.class.path={self.y_adb_path.as_posix()}',
+            f'{self.y_adb_path.parent.as_posix()}',
             'com.ysbing.yadb.Main',
             *args
         ])

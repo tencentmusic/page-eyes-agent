@@ -78,6 +78,7 @@ class WebDevice(Device[Playwright, Page]):
             headless=headless,
             # devtools=True,
             ignore_default_args=["--enable-automation"],
+            # record_video_dir="videos",
             **context_params,
         )
 

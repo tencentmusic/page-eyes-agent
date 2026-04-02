@@ -57,8 +57,8 @@ class Settings(BaseSettings):
     root: Path = Field(default=Path(__file__).parent, exclude=True, repr=False)
     model: Optional[str] = 'openai:deepseek-chat'
     model_type: Optional[Literal['vlm', 'llm']] = 'llm'
-
-    model_settings: ModelSettings = ModelSettings(max_tokens=100000, temperature=0.2)
+    # max_tokens 限制模型输出的最大token数，数值越大，模型输出越长，越啰嗦，耗时也越长
+    model_settings: ModelSettings = ModelSettings(max_tokens=500, temperature=0.2)
 
     browser: BrowserConfig = BrowserConfig()
 
