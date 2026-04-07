@@ -1,6 +1,6 @@
 ---
 name: gui-popup-handler
-description: GUI 弹窗与遮罩层处理技能。当屏幕信息有遮罩层或出现"弹窗关闭按钮"、"X close button"内容时必须使用此技能
+description: GUI 弹窗与遮罩层处理技能。当屏幕信息有遮罩层或出现"弹窗关闭按钮"内容时必须使用此技能
 ---
 
 # GUI 弹窗处理技能
