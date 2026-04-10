@@ -15,7 +15,7 @@
 ![](https://img.shields.io/badge/Electron-supported-brightgreen?logo=electron&logoColor=white)
 
 ---
-
+ 
 **Documentation**: [PageEyes Agent](https://tencentmusic.github.io/page-eyes-agent/)
 
 ---
