@@ -66,4 +66,4 @@
   
   - 支持移动端 Agent 模式
   - 增加`click` `input` `open_url` 工具
-  - 支持接入 OmniParser 进行元素解析
+  - 支持接入 OmniParser 进行元素解析 
