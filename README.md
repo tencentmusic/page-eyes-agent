@@ -194,6 +194,9 @@ if __name__ == "__main__":
 
 更多示例请参考[示例代码](https://github.com/tencentmusic/page-eyes-agent/tree/master/tests)
 
+## 贡献者
+<img src="https://contrib.rocks/image?repo=tencentmusic/page-eyes-agent&anon=1&max=200&columns=20" />
+
 ## 贡献指南
 
 1. 检查现有 issues 或提交新 issue 来讨论功能想法或缺陷
@@ -201,6 +204,7 @@ if __name__ == "__main__":
 3. 编写测试用例：通过测试验证缺陷已修复或新功能符合预期
 4. 添加更新日志：按规范提交[更新日志](./CHANGELOG.md)
 5. 完善文档：优化文档（增强细节、提升可读性等）
+
 
 ## 如有需要，加入我们的交流群
 
