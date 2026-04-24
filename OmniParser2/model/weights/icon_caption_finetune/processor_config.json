@@ -1,0 +1,6 @@
+{
+  "auto_map": {
+    "AutoProcessor": "processing_florence2.Florence2Processor"
+  },
+  "processor_class": "Florence2Processor"
+}
