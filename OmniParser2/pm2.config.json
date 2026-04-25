@@ -1,0 +1,9 @@
+{
+  "apps": [
+    {
+      "name": "omniparser2",
+      "script": "uv run fastapi run --port 8000",
+      "log_file": "./info.log"
+    }
+  ]
+}

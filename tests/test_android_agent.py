@@ -43,7 +43,6 @@ async def test_mobile_03(android_agent):
         - 如果出现"close"元素，则点击"close"元素，否则跳过
         - 从 (350, 500) 滑动到 (350, 100)
         - 点击“看视频”按钮
-        - 如果出现出现“点击浏览15秒”则点击“点击浏览15秒”，否则跳过
         - 等待15秒。
         - 则点击媒体元素右侧的"close"元素
         - 如果出现2个"close"元素，则点击第2个"close"元素，否则点击第1个"close"元素
@@ -66,4 +65,15 @@ async def test_mobile_05(android_agent):
     """测试多个交互"""
     await android_agent.run(
         """打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜"""
+    )
+
+
+async def test_mobile_06(android_agent):
+    """测试多个交互"""
+    await android_agent.run(
+        """
+        - 打开 url "https://yobang.tencentmusic.com/chart/uni-chart/search/"
+        - 在搜索框中输入"周深"
+        - 检查是否包含"在腾讯音乐由你榜内相关歌曲"和"推荐"
+        """
     )

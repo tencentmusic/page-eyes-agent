@@ -1,0 +1,114 @@
+# OCR产线配置文件
+# 用于配置PaddleOCR的文字识别产线参数
+
+# 产线名称：定义当前产线的标识名称
+pipeline_name: OCR
+
+# 文本类型：指定识别的文本类型
+# general: 通用文本识别
+# 其他可选值: handwritten(手写体), seal(印章文字)等
+text_type: general
+visualize: False
+# 是否使用文档预处理器：对输入图像进行预处理以提高识别准确率
+# True: 启用文档预处理（包括方向校正、去畸变等）
+# False: 不使用预处理，直接进行OCR识别
+use_doc_preprocessor: False
+
+# 是否使用文本行方向识别：检测并校正文本行的方向（0°/90°/180°/270°）
+# True: 启用文本行方向识别，可处理旋转的文本
+# False: 不进行方向识别
+use_textline_orientation: False
+
+# 子产线配置：定义各个处理阶段的详细参数
+SubPipelines:
+  # 文档预处理器配置
+  DocPreprocessor:
+    # 预处理产线名称
+    pipeline_name: doc_preprocessor
+    
+    # 是否使用文档方向分类：识别整个文档的方向（正向/倒置/左转/右转）
+    use_doc_orientation_classify: True
+    
+    # 是否使用文档去畸变：矫正弯曲、扭曲的文档图像
+    use_doc_unwarping: True
+    
+    # 预处理子模块配置
+    SubModules:
+      # 文档方向分类模块
+      DocOrientationClassify:
+        # 模块名称：文档文本方向识别
+        module_name: doc_text_orientation
+        # 模型名称：使用PP-LCNet_x1_0作为文档方向分类的骨干网络
+        model_name: PP-LCNet_x1_0_doc_ori
+        # 模型路径：null表示使用默认路径，可指定自定义模型路径
+        model_dir: null
+      
+      # 文档去畸变模块
+      DocUnwarping:
+        # 模块名称：图像去畸变处理
+        module_name: image_unwarping
+        # 模型名称：使用UVDoc模型进行文档展平
+        model_name: UVDoc
+        # 模型路径：null表示使用默认路径
+        model_dir: null
+
+# 主要OCR模块配置
+SubModules:
+  # 文本检测模块：检测图像中的文本区域
+  TextDetection:
+    # 模块名称：文本检测
+    module_name: text_detection
+    # 模型名称：使用PP-OCRv5服务器版检测模型（精度更高但速度较慢）
+    # 可选模型：PP-OCRv5_server_det(最高精度), PP-OCRv4_mobile_det(更稳定), ch_PP-OCRv3_det(最快速度)
+    model_name: PP-OCRv5_server_det
+    # 模型路径：null表示使用默认路径
+    model_dir: null
+    
+    # 图像边长限制：对输入图像的尺寸进行限制
+    # 如果图像的最大边长超过 limit_side_len，则按比例缩小图像，确保图像最大边不超过指定值，默认 960
+    limit_side_len: 960
+    # 限制类型：min表示限制最小边，max表示限制最大边，默认 max
+    limit_type: max
+    # 最大边长限制：图像最大边不超过12000像素，防止内存溢出，默认 4000
+    max_side_limit: 4000
+    
+    # 二值化阈值：用于文本区域的初步分割（0-1之间）
+    # 值越小，检测越敏感，可能产生更多候选区域， 默认 0.3
+    thresh: 0.6
+    # 文本框阈值：过滤低置信度的文本框（0-1之间）
+    # 值越大，过滤越严格，只保留高置信度的检测结果，默认 0.6
+    box_thresh: 0.6
+    # 文本框扩展比例：扩大检测框以包含完整文本
+    # 1.5表示将检测框扩大1.5倍，确保不遗漏边缘文字， 默认 2.0
+    unclip_ratio: 1.5
+  
+  # 文本行方向识别模块：识别每个文本行的方向
+  TextLineOrientation:
+    # 模块名称：文本行方向识别
+    module_name: textline_orientation
+    # 模型名称：使用PP-LCNet_x1_0作为文本行方向分类的骨干网络
+    model_name: PP-LCNet_x1_0_textline_ori
+    # 模型路径：null表示使用默认路径
+    model_dir: null
+    # 批处理大小：一次处理6个文本行，提高处理效率
+    batch_size: 6    
+  
+  # 文本识别模块：识别文本区域中的具体文字内容
+  TextRecognition:
+    # 模块名称：文本识别
+    module_name: text_recognition
+    # 模型名称：使用PP-OCRv5服务器版识别模型,PP-OCRv4_mobile_rec(实测更快，更准)
+    model_name: PP-OCRv4_mobile_rec
+    # 模型路径：null表示使用默认路径
+    model_dir: null
+    # 批处理大小：平衡速度和内存占用, 默认 6
+    # 如果内存不足，可以减小 batch_size
+    batch_size: 6
+    # 识别分数阈值：过滤低置信度的识别结果（0-1之间）
+    # 0.0表示不过滤，保留所有识别结果
+    score_thresh: 0.8
+
+Serving:
+  # 如果请求体和配置文件中均未设置（或请求体传入null、配置文件中未设置），则默认返回图像。
+  # 配置默认不返回图像，通过请求体中的 visualize 参数可以覆盖默认行为。
+  visualize: False
