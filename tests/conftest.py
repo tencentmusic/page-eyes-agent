@@ -68,7 +68,7 @@ async def harmony_agent():
 
 @pytest_asyncio.fixture(scope="session")
 async def ios_agent():
-    return await IOSAgent.create(wda_url=wda_url, debug=debug, toolsets=[SkillsToolset()])
+    return await IOSAgent.create(wda_url=wda_url, debug=debug)
 
 
 def _is_port_open(host: str, port: int) -> bool:
