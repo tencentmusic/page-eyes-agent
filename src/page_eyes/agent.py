@@ -11,7 +11,7 @@ from typing import Optional, Union, cast
 
 from loguru import logger
 from openai.types import chat
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, field_validator, BaseModel
 from pydantic_ai import (
     Agent,
     CallToolsNode,
@@ -30,7 +30,7 @@ from pydantic_ai.messages import (
     ToolReturnPart,
     UserPromptPart,
 )
-from pydantic_ai.usage import Usage
+from pydantic_ai.usage import Usage, UsageLimits
 from pydantic_ai_skills import SkillsToolset, SkillsCapability
 
 from .config import BrowserConfig, Settings, default_settings
@@ -147,9 +147,11 @@ class UiAgent:
     def build_agent(cls, settings: Settings, tool: AgentTool, skills_dirs: list[str | Path], **kwargs):
         """Build the agent with the given arguments."""
         skills_dirs = skills_dirs or ['./skills']
+        if settings.popup_close:
+            skills_dirs.append(settings.root / 'skills')
         skills_capability = cast(
             AbstractCapability[AgentDeps],
-            SkillsCapability(directories=[settings.root / 'skills', *skills_dirs])
+            SkillsCapability(directories=skills_dirs)
         )
         toolset: SkillsToolset = skills_capability.get_toolset()
         if toolset.skills:
@@ -216,7 +218,10 @@ class UiAgent:
 
     async def _sub_agent_run(self, planning, usage) -> AgentRunResult:
         async with self.agent.iter(
-                user_prompt=planning.instruction, deps=self.deps, usage=usage
+                user_prompt=planning.instruction,
+                deps=self.deps,
+                usage=usage,
+                usage_limits=UsageLimits(request_limit=100)
         ) as agent_run:
             async for node in agent_run:
                 self.handle_graph_node(node)
@@ -326,6 +331,7 @@ class WebAgent(UiAgent):
             headless: Optional[bool] = None,
             tool: Optional[WebAgentTool] = None,
             skills_dirs: Optional[list[str | Path]] = None,
+            popup_close: bool = True,
             debug: Optional[bool] = None,
     ) -> "WebAgent":
         """异步工厂方法用于创建 WebAgent 实例。
@@ -337,6 +343,7 @@ class WebAgent(UiAgent):
             headless: 可选的无头模式标志，启用后浏览器不显示界面
             tool: 可选的自定义 WebAgentTool 实例
             skills_dirs: 可选的技能目录列表
+            popup_close: 自动关闭广告弹窗，默认 True
             debug: 可选的调试标志，启用后输出更多日志
 
         Returns:
@@ -349,6 +356,7 @@ class WebAgent(UiAgent):
                     headless=headless, simulate_device=simulate_device
                 ),
                 debug=debug,
+                popup_close=popup_close
             )
         )
 
@@ -374,6 +382,7 @@ class AndroidAgent(UiAgent):
             platform: Optional[str | Platform] = None,
             tool: Optional[AndroidAgentTool] = None,
             skills_dirs: Optional[list[str | Path]] = None,
+            popup_close: bool = True,
             debug: Optional[bool] = None,
     ) -> "AndroidAgent":
         """异步工厂方法用于创建 AndroidAgent 实例。
@@ -384,12 +393,13 @@ class AndroidAgent(UiAgent):
             platform: 可选的平台类型
             tool: 可选的自定义 AndroidAgentTool 实例
             skills_dirs: 可选的技能目录列表
+            popup_close: 自动关闭广告弹窗，默认 True
             debug: 可选的调试标志，启用后输出更多日志
 
         Returns:
             AndroidAgent 实例
         """
-        settings = cls.merge_settings(Settings(model=model, debug=debug))
+        settings = cls.merge_settings(Settings(model=model, debug=debug, popup_close=popup_close))
 
         device = await AndroidDevice.create(serial=serial, platform=platform)
 
@@ -412,6 +422,7 @@ class HarmonyAgent(UiAgent):
             platform: Optional[str | Platform] = None,
             tool: Optional[HarmonyAgentTool] = None,
             skills_dirs: Optional[list[str | Path]] = None,
+            popup_close: bool = True,
             debug: Optional[bool] = None,
     ) -> "HarmonyAgent":
         """异步工厂方法用于创建 HarmonyAgent 实例。
@@ -422,12 +433,13 @@ class HarmonyAgent(UiAgent):
             platform: 可选的平台类型
             tool: 可选的自定义 HarmonyAgentTool 实例
             skills_dirs: 可选的技能目录列表
+            popup_close: 自动关闭广告弹窗，默认 True
             debug: 可选的调试标志，启用后输出更多日志
 
         Returns:
             HarmonyAgent 实例
         """
-        settings = cls.merge_settings(Settings(model=model, debug=debug))
+        settings = cls.merge_settings(Settings(model=model, debug=debug, popup_close=popup_close))
 
         device = await HarmonyDevice.create(connect_key=connect_key, platform=platform)
 
@@ -440,6 +452,7 @@ class HarmonyAgent(UiAgent):
 
 class IOSAgent(UiAgent):
     """IOSAgent class for mobile device automation."""
+
     @classmethod
     async def create(
             cls,
@@ -450,6 +463,7 @@ class IOSAgent(UiAgent):
             tool: Optional[IOSAgentTool] = None,
             app_name_map: Optional[dict[str, str]] = None,
             skills_dirs: Optional[list[str | Path]] = None,
+            popup_close: bool = True,
             debug: Optional[bool] = None
     ) -> "IOSAgent":
         """异步工厂方法用于创建 IOSAgent 实例。
@@ -461,12 +475,13 @@ class IOSAgent(UiAgent):
             tool: 可选的自定义 IOSAgentTool 实例
             app_name_map: 可选的应用名称映射字典
             skills_dirs: 可选的技能目录列表
+            popup_close: 自动关闭广告弹窗，默认 True
             debug: 可选的调试标志，启用后输出更多日志
 
         Returns:
             IOSAgent 实例
         """
-        settings = cls.merge_settings(Settings(model=model, debug=debug))
+        settings = cls.merge_settings(Settings(model=model, debug=debug, popup_close=popup_close))
 
         device = await IOSDevice.create(wda_url=wda_url, platform=platform)
 
@@ -488,6 +503,7 @@ class ElectronAgent(UiAgent):
             cdp_url: str = "http://127.0.0.1:9222",
             tool: Optional[ElectronAgentTool] = None,
             skills_dirs: Optional[list[str | Path]] = None,
+            popup_close: bool = True,
             debug: Optional[bool] = None,
     ) -> "ElectronAgent":
         """异步工厂方法用于创建 ElectronAgent 实例。
@@ -497,12 +513,13 @@ class ElectronAgent(UiAgent):
             cdp_url: Electron 应用的 CDP 远程调试地址
             tool: 可选的自定义 ElectronAgentTool 实例
             skills_dirs: 可选的技能目录列表
+            popup_close: 自动关闭广告弹窗，默认 True
             debug: 可选的调试标志，启用后输出更多日志
 
         Returns:
             ElectronAgent 实例
         """
-        settings = cls.merge_settings(Settings(model=model, debug=debug))
+        settings = cls.merge_settings(Settings(model=model, debug=debug, popup_close=popup_close))
 
         device = await ElectronDevice.create(cdp_url=cdp_url)
 

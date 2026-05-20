@@ -66,6 +66,8 @@ class Settings(BaseSettings):
 
     storage_client: StorageClient = StorageClient.create_from_config(CosConfig(), MinioConfig())
 
+    popup_close: bool = True
+
     debug: Optional[bool] = False
 
 
