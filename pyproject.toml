@@ -63,7 +63,9 @@ build-backend = "hatchling.build"
 exclude = [
     "docs",
     "tests",
-    ".code.yml"
+    ".code.yml",
+    ".env*",
+    "OmniParser2"
 ]
 
 [[tool.uv.index]]
