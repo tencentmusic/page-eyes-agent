@@ -190,7 +190,7 @@ class SwipeToolParams(ToolParams):
     向上滑动 2 次 -> to='top', repeat_times=2
     """
     to: Literal['left', 'right', 'top', 'bottom'] = Field(description='滑动方向')
-    repeat_times: Optional[int] = Field(default=1, description='重复次数或最多重复次数，默认为1次')
+    repeat_times: int = Field(default=1, description='重复次数或最多重复次数，默认为1次')
 
 
 class SwipeForKeywordsToolParams(SwipeToolParams):
@@ -222,7 +222,7 @@ class WaitForKeywordsToolParams(ToolParams):
     等待5秒，直到出现"确定"按钮 -> timeout=5，expect_keywords=['确定']
     """
     timeout: int = Field(description='等待时间，单位为秒')
-    expect_keywords: Optional[list[str]] = Field(description='期望出现的关键字列表')
+    expect_keywords: Optional[list[str]] = Field(default=None, description='期望出现的关键字列表')
 
 
 class AssertContainsParams(ToolParams):
