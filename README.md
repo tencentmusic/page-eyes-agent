@@ -15,7 +15,7 @@
 ![](https://img.shields.io/badge/Electron-supported-brightgreen?logo=electron&logoColor=white)
 
 ---
- 
+
 **Documentation**: [PageEyes Agent](https://tencentmusic.github.io/page-eyes-agent/)
 
 ---
@@ -31,7 +31,7 @@ PageEyes Agent 是基于 [Pydantic AI](https://ai.pydantic.dev/#why-use-pydantic
 
 1. 完全由自然语言指令驱动，无需编写脚本，既可实现自动化测试，UI巡检等任务
 2. 跨平台、跨端支持，在 Python 环境中安装 page-eyes 库和配置 OmniParser 服务后即可开始多个平台的自动化任务
-3. 支持多种大模型接入，包括DeepSeek、OpenAI、千问等，默认使用 DeepSeek V3 模型，后续会支持更多大模型接入
+3. 支持多种大模型接入，包括DeepSeek、OpenAI、千问等，默认使用 deepseek-v4-flash 模型，后续会支持更多大模型接入
 4. 可通过自然语言进行断言，并生成详细的执行日志和报告，方便测试人员查看执行过程和结果
 
 <p align="center">
@@ -55,17 +55,22 @@ uv sync  # 安装依赖
 ```
 
 ## 快速开始
+
 配置环境变量，可在项目根目录下创建一个 `.env` 文件，配置项可参考 [.env.example](.env.example)
 
 ### 一、轻量化部署: 配好模型, 插上手机就能跑
+
 `.env` 中配置VLM模型，以 qwen3-vl-plus 为例
+
 ```shell
 OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
 OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
 AGENT_MODEL_TYPE=vlm
 AGENT_MODEL=openai:qwen3-vl-plus
 ```
+
 编写测试脚本，以 Android 端为例（需先安装好 adb）
+
 ```python
 import asyncio
 
@@ -76,28 +81,33 @@ async def main():
     # 移动端
     ui_agent = await AndroidAgent.create()
 
-    report = await ui_agent.run( "打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+    report = await ui_agent.run("打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
 ### 二、多源融合(视觉小模型+大模型)部署
+
 OmniParser + LLM
 
-`.env` 中配置模型，以 deepseek v3 为例, OmiParser 需提前[部署](docs/getting-started/installation.md)
+`.env` 中配置模型，以 deepseek-v4-flash 为例, OmiParser 需提前[部署](docs/getting-started/installation.md)
+
 ```shell
 OPENAI_BASE_URL=https://api.deepseek.com/v1
 OPENAI_API_KEY=xxx-xxx-xxx-xxx-xxx
-AGENT_MODEL=openai:deepseek-chat
+AGENT_MODEL=openai:deepseek-v4-flash
 OMNI_BASE_URL=http://127.0.0.1:8000
 ```
+
 测试脚本参考上面已有示例
 
 ### 三、更多配置
+
 | 环境变量             | 默认值                         | 说明                                   |
 |:-----------------|-----------------------------|--------------------------------------|
-| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat          |
+| AGENT_MODEL      | openai:deepseek-v4-flash    | 使用的AI模型，当前设置为 deepseek-v4-flash      |
 | AGENT_DEBUG      | False                       | 是否启用调试模式                             |
 | BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式              |
 | AGENT_MODEL_TYPE | llm                         | Agent 使用的模型类型，支持 llm 和 vlm           |
@@ -108,7 +118,7 @@ OMNI_BASE_URL=http://127.0.0.1:8000
 
 > vlm 模型支持：`glm-4.6v`  `qwen3-vl-plus` 等
 >
-> 如：AGENT_MODEL=openai:qwen3-vl-plus 
+> 如：AGENT_MODEL=openai:qwen3-vl-plus
 
 使用腾讯云COS服务（与MinIO二选一），可选，不配置则会使用 base64 保存图片
 
@@ -174,7 +184,9 @@ if __name__ == "__main__":
 ```
 
 ### 四、使用 Skills
+
 Agent 默认会加载当前 `./skills` 目录下的技能（如有），也可以自定义其他目录的skills
+
 ```python
 import asyncio
 
@@ -185,16 +197,17 @@ async def main():
     # 移动端
     ui_agent = await AndroidAgent.create(skills_dirs=["./skills", "./more-skills"])
 
-    report = await ui_agent.run( "打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+    report = await ui_agent.run("打开QQ音乐, 点击乐馆，点击排行，点击腾讯音乐榜，检测当前页面出现由你榜")
+
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-
 更多示例请参考[示例代码](https://github.com/tencentmusic/page-eyes-agent/tree/master/tests)
 
 ## 贡献者
+
 <img src="https://contrib.rocks/image?repo=tencentmusic/page-eyes-agent&anon=1&max=200&columns=20" />
 
 ## 贡献指南
@@ -204,7 +217,6 @@ if __name__ == "__main__":
 3. 编写测试用例：通过测试验证缺陷已修复或新功能符合预期
 4. 添加更新日志：按规范提交[更新日志](./CHANGELOG.md)
 5. 完善文档：优化文档（增强细节、提升可读性等）
-
 
 ## 如有需要，加入我们的交流群
 

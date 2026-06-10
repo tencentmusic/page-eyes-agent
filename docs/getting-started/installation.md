@@ -315,7 +315,7 @@ PageEyes Agent 采用灵活的配置管理系统，支持通过环境变量、`.
 
 | 环境变量             | 默认值                         | 说明                                   |
 |:-----------------|-----------------------------|--------------------------------------|
-| AGENT_MODEL      | openai:deepseek-chat        | 使用的AI模型，当前设置为 deepseek-chat          |
+| AGENT_MODEL      | openai:deepseek-v4-flash        | 使用的AI模型，当前设置为 deepseek-v4-flash          |
 | AGENT_DEBUG      | False                       | 是否启用调试模式                             |
 | BROWSER_HEADLESS | False                       | WebAgent 启动浏览器时是否使用无头模式              |
 | AGENT_MODEL_TYPE | llm                         | Agent 使用的模型类型，支持 llm 和 vlm           |

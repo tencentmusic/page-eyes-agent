@@ -55,7 +55,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', env_prefix='agent_', extra='ignore')
 
     root: Path = Field(default=Path(__file__).parent, exclude=True, repr=False)
-    model: Optional[str] = 'openai:deepseek-chat'
+    model: Optional[str] = 'openai:deepseek-v4-flash'
     model_type: Optional[Literal['vlm', 'llm']] = 'llm'
     # max_tokens 限制模型输出的最大token数，数值越大，模型输出越长，越啰嗦，耗时也越长
     model_settings: ModelSettings = ModelSettings(max_tokens=500, temperature=0.2, extra_body={"thinking": {"type": "disabled"}})
