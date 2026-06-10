@@ -3,12 +3,13 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 18:30
+import json
 from collections import OrderedDict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, TypeVar, Literal, Generic, TypeAlias, Union, Any
 
-from pydantic import BaseModel, Field, conlist, ConfigDict, computed_field
+from pydantic import BaseModel, Field, conlist, ConfigDict, computed_field, field_validator
 from pydantic_ai import RunContext
 
 from .config import Settings, default_settings
@@ -202,6 +203,13 @@ class SwipeForKeywordsToolParams(SwipeToolParams):
     """
     expect_keywords: Optional[list[str]] = Field(default=None, description='期望出现的关键字列表')
 
+    @field_validator('expect_keywords', mode='before')
+    @classmethod
+    def validate_expect_keywords(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
 
 class SwipeFromCoordinateToolParams(ToolParams):
     coordinates: conlist(item_type=tuple[int, int], min_length=2) = Field(description='滑动起始坐标列表')
@@ -219,10 +227,17 @@ class WaitForKeywordsToolParams(ToolParams):
     """
     示例：
     等待2秒 -> timeout=2，expect_keywords=None
-    等待5秒，直到出现"确定"按钮 -> timeout=5，expect_keywords=['确定']
+    等待5秒，直到出现"确定"按钮 -> timeout=5，expect_keywords=["确定"]
     """
     timeout: int = Field(description='等待时间，单位为秒')
     expect_keywords: Optional[list[str]] = Field(default=None, description='期望出现的关键字列表')
+
+    @field_validator('expect_keywords', mode='before')
+    @classmethod
+    def validate_expect_keywords(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
 
 
 class AssertContainsParams(ToolParams):

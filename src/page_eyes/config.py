@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     model: Optional[str] = 'openai:deepseek-chat'
     model_type: Optional[Literal['vlm', 'llm']] = 'llm'
     # max_tokens 限制模型输出的最大token数，数值越大，模型输出越长，越啰嗦，耗时也越长
-    model_settings: ModelSettings = ModelSettings(max_tokens=500, temperature=0.2)
+    model_settings: ModelSettings = ModelSettings(max_tokens=500, temperature=0.2, extra_body={"thinking": {"type": "disabled"}})
 
     browser: BrowserConfig = BrowserConfig()
 
