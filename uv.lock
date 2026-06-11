@@ -2209,7 +2209,7 @@ wheels = [
 
 [[package]]
 name = "page-eyes"
-version = "1.3.3"
+version = "1.3.6"
 source = { editable = "." }
 dependencies = [
     { name = "adbutils" },

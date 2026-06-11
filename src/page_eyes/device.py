@@ -58,7 +58,7 @@ class WebDevice(Device[Playwright, Page]):
 
     @classmethod
     async def create(
-        cls, headless: bool = False, simulate_device: Optional[str] = None
+        cls, headless: Optional[bool] = False, simulate_device: Optional[str] = None
     ) -> "WebDevice":
         """异步工厂方法用于创建实例"""
         playwright = await async_playwright().start()

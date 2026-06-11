@@ -3,15 +3,16 @@
 # @Author : aidenmo
 # @Email : aidenmo@tencent.com
 # @Time : 2025/5/23 15:31
+import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from random import randint
-from typing import Optional, Union, cast
+from typing import Optional, Union
 
 from loguru import logger
 from openai.types import chat
-from pydantic import TypeAdapter, field_validator, BaseModel
+from pydantic import TypeAdapter
 from pydantic_ai import (
     Agent,
     CallToolsNode,
@@ -22,8 +23,6 @@ from pydantic_ai import (
     UserPromptNode,
 )
 from pydantic_ai.agent import AgentRunResult
-from pydantic_ai.capabilities import AbstractCapability
-from pydantic_ai.messages import ToolReturnPart, ToolCallPart, ModelRequest, UserPromptPart
 from pydantic_ai.messages import (
     ModelRequest,
     ToolCallPart,
@@ -31,7 +30,7 @@ from pydantic_ai.messages import (
     UserPromptPart,
 )
 from pydantic_ai.usage import Usage, UsageLimits
-from pydantic_ai_skills import SkillsToolset, SkillsCapability
+from pydantic_ai_skills import SkillsCapability
 
 from .config import BrowserConfig, Settings, default_settings
 from .deps import (
@@ -95,7 +94,7 @@ class ImageUserPromptPart(UserPromptPart):
 
 @dataclass
 class UiAgent:
-    model: str
+    model: str | None
     deps: AgentDepsType
     agent: Agent[AgentDepsType]
 
@@ -144,17 +143,14 @@ class UiAgent:
         raise NotImplementedError
 
     @classmethod
-    def build_agent(cls, settings: Settings, tool: AgentTool, skills_dirs: list[str | Path], **kwargs):
+    def build_agent(cls, settings: Settings, tool: AgentTool, skills_dirs: list[str | Path] | None, **kwargs):
         """Build the agent with the given arguments."""
-        skills_dirs = skills_dirs or ['./skills']
+        skills_dirs: list[str | Path] = skills_dirs or ['./skills']
         if settings.popup_close:
             skills_dirs.append(settings.root / 'skills')
-        skills_capability = cast(
-            AbstractCapability[AgentDeps],
-            SkillsCapability(directories=skills_dirs)
-        )
-        toolset: SkillsToolset = skills_capability.get_toolset()
-        if toolset.skills:
+        skills_capability = SkillsCapability(directories=skills_dirs)
+        toolset = skills_capability.get_toolset()
+        if toolset and toolset.skills:
             logger.info(f"add skills: {set(toolset.skills.keys())}")
 
         agent = Agent[AgentDeps](
@@ -211,9 +207,15 @@ class UiAgent:
             self.deps.context.current_step.parallel_tool_calls = False
             self.deps.context.current_step.parallel_tool_calls = len(tool_parts) > 1
             for part in tool_parts:
-                args = part.args.replace("{}", "-")
+                if isinstance(part.args, str):
+                    try:
+                        args = json.loads(part.args)
+                    except json.JSONDecodeError:
+                        args = part.args
+                else:
+                    args = part.args
                 logger.info(
-                    f"🤖Agent tool call: {part.tool_name}, args: {args}"
+                    f"🤖Agent tool call: {part.tool_name}, args: {args or '-'}"
                 )
 
     async def _sub_agent_run(self, planning, usage) -> AgentRunResult:
@@ -363,11 +365,11 @@ class WebAgent(UiAgent):
         device = device or await WebDevice.create(
             settings.browser.headless, settings.browser.simulate_device
         )
-        tool = tool or WebAgentTool()
+        tool: WebAgentTool = tool or WebAgentTool()
         deps: AgentDeps[WebDevice, WebAgentTool] = AgentDeps(settings, device, tool)
 
         agent = cls.build_agent(settings, tool, skills_dirs)
-        return cls(model, deps, agent)
+        return cls(settings.model, deps, agent)
 
 
 class AndroidAgent(UiAgent):
@@ -403,7 +405,7 @@ class AndroidAgent(UiAgent):
 
         device = await AndroidDevice.create(serial=serial, platform=platform)
 
-        tool = tool or AndroidAgentTool()
+        tool: AndroidAgentTool = tool or AndroidAgentTool()
         deps: AgentDeps[AndroidDevice, AndroidAgentTool] = AgentDeps(settings, device, tool)
 
         agent = cls.build_agent(settings, tool, skills_dirs)
@@ -443,7 +445,7 @@ class HarmonyAgent(UiAgent):
 
         device = await HarmonyDevice.create(connect_key=connect_key, platform=platform)
 
-        tool = tool or HarmonyAgentTool()
+        tool: HarmonyAgentTool = tool or HarmonyAgentTool()
         deps: AgentDeps[HarmonyDevice, HarmonyAgentTool] = AgentDeps(settings, device, tool)
 
         agent = cls.build_agent(settings, tool, skills_dirs)
@@ -485,7 +487,7 @@ class IOSAgent(UiAgent):
 
         device = await IOSDevice.create(wda_url=wda_url, platform=platform)
 
-        tool = tool or IOSAgentTool()
+        tool: IOSAgentTool = tool or IOSAgentTool()
         deps: AgentDeps[IOSDevice, IOSAgentTool] = AgentDeps(settings, device, tool, app_name_map=app_name_map or {})
 
         agent = cls.build_agent(settings, tool, skills_dirs)
@@ -523,7 +525,7 @@ class ElectronAgent(UiAgent):
 
         device = await ElectronDevice.create(cdp_url=cdp_url)
 
-        tool = tool or ElectronAgentTool()
+        tool: ElectronAgentTool = tool or ElectronAgentTool()
         deps: AgentDeps[ElectronDevice, ElectronAgentTool] = AgentDeps(settings, device, tool)
 
         agent = cls.build_agent(settings, tool, skills_dirs)
