@@ -116,9 +116,12 @@ OMNI_BASE_URL=http://127.0.0.1:8000
 | OPENAI_API_KEY   | xxx-xxx-xxx                 | 模型 API 所需的认证密钥                       |
 | IOS_WDA_URL      | -                           | iOS WebDriverAgent 服务地址（仅 iOS 自动化需要） |
 
+> llm 模型支持：`deepseek-v4-flash` `deepseek-v4-pro` `deepseek-v3.1-terminus` `deepseek-v3` `glm-4.7` `glm-4.6v`  `qwen3-vl-plus` 等  
 > vlm 模型支持：`glm-4.6v`  `qwen3-vl-plus` 等
->
-> 如：AGENT_MODEL=openai:qwen3-vl-plus
+
+> 如：  
+> AGENT_MODEL=openai:deepseek-v4-flash  
+> AGENT_MODEL=openai:qwen3-vl-plus  
 
 使用腾讯云COS服务（与MinIO二选一），可选，不配置则会使用 base64 保存图片
 
@@ -205,6 +208,10 @@ if __name__ == "__main__":
 ```
 
 更多示例请参考[示例代码](https://github.com/tencentmusic/page-eyes-agent/tree/master/tests)
+
+<a href="https://cdn-y.tencentmusic.com/uni/commonPic/cos_a11ada74ed44812322bed7fd9bd68bba70dcbda0.html" target="_blank" title="点击查看完整报告">
+    <img src="https://cdn-y.tencentmusic.com/uni/commonPic/cos_81580d06dbdc357ee702e74577e2462a7d4b693c.png" alt="步骤报告示例" style="width: 800px; border: 1px solid #ccc; cursor: pointer; vertical-align: middle; margin-top: 10px; margin-bottom: 10px;">
+</a>
 
 ## 贡献者
 
