@@ -185,6 +185,14 @@ class InputToolParams(LocationToolParams):
     send_enter: bool = Field(default=True, description='是否发送回车键')
 
 
+class SelectDropDownItemToolParams(ToolParams):
+    """
+    示例：在"选择城市"下拉框中选择"深圳" -> select_input_name="选择城市", text="深圳"
+    """
+    select_input_name: str = Field(description='下拉框的名称，如 "选择城市"')
+    text: str = Field(description='要选择的文本项')
+
+
 class SwipeToolParams(ToolParams):
     """
     示例：

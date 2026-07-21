@@ -111,6 +111,28 @@ async def test_web_pc_09(web_agent_pc):
         """
     )
 
+async def test_web_pc_11(web_agent_pc):
+    """测试等待"""
+    await web_agent_pc.run(
+        """
+        - 打开 url "https://wma.wavecommittee.com/"
+        - 等待3秒，直到出现"查看浪潮评委会"
+        - 向上滑动，直到出现"胡广生"元素
+        """
+    )
+
+async def test_web_pc_12(web_agent_pc):
+    await web_agent_pc.run(
+        """
+        - 打开 url "https://yxsit.woa.com/content/song"
+        - 在"歌曲名"输入框中输入"测试"
+        - 在"版权公司"下拉框中选择"华声时代"
+        - 在"付费模式"下拉框中选择"免费"
+        - 在"曲库AI状态"下拉框中选择"AI歌曲"
+        - 点击"查询"按钮
+        - 检查页面包含"测试修改录音名称"元素
+        """
+    )
 
 async def test_web_pc_10(web_agent_pc):
     """测试点击上传文件"""

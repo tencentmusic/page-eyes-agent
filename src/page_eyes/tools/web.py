@@ -14,7 +14,8 @@ from pydantic_ai import RunContext
 
 from ._base import AgentTool, tool
 from ..deps import ToolParams, ToolResult, ClickToolParams, \
-    InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps, SwipeForKeywordsToolParams
+    InputToolParams, SwipeToolParams, OpenUrlToolParams, ToolResultWithOutput, AgentDeps, SwipeForKeywordsToolParams, \
+    SelectDropDownItemToolParams, MarkFailedParams
 from ..device import WebDevice
 from ..util.js_tool import JSTool
 
@@ -88,6 +89,36 @@ class WebAgentTool(AgentTool):
         await ctx.deps.device.target.keyboard.type(params.text)
         if params.send_enter:
             await ctx.deps.device.target.keyboard.press('Enter')
+        return ToolResult.success()
+
+    @tool(after_delay=1)
+    async def select_drop_down_item(self, ctx: RunContext[AgentDepsType], params: SelectDropDownItemToolParams) -> ToolResult:
+        """
+        操作下拉选择框快捷方法，可以在下拉框中选择指定文本项
+        """
+        input_el = ctx.deps.device.target.get_by_placeholder(params.select_input_name)
+        if not await input_el.is_visible():
+            input_el = ctx.deps.device.target.locator(f'//label[contains(text(),"{params.select_input_name}")]/ancestor::div[contains(@class,"form-item")]//input')
+        if not await input_el.is_visible():
+            await ctx.deps.tool.mark_failed(
+                ctx,
+                MarkFailedParams(
+                    reason=str(f'Input element not found: {params.select_input_name}'),
+                ),
+            )
+            return ToolResult.failed()
+        await input_el.click()
+        select_option_el = ctx.deps.device.target.locator(f'//div[contains(@class,"select-item-option") and text()="{params.text}"]')
+        if not await select_option_el.is_visible():
+            await ctx.deps.tool.mark_failed(
+                ctx,
+                MarkFailedParams(
+                    reason=str(f'Select option element not found: {params.text}'),
+                ),
+            )
+            return ToolResult.failed()
+        await select_option_el.click()
+
         return ToolResult.success()
 
     @staticmethod
