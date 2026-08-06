@@ -84,6 +84,7 @@ class PlanningAgent:
             system_prompt=PLANNING_SYSTEM_PROMPT,
             output_type=PlanningOutputType,
             model_settings=default_settings.model_settings,
+            retries=3,
         )
         return await agent.run(prompt.strip(), deps=self.deps)
 
@@ -161,7 +162,7 @@ class UiAgent:
             tools=tool.tools,
             capabilities=[skills_capability],
             # history_processors=[cls.history_processor],
-            retries=2,
+            retries=3,
             **kwargs,
         )
         return agent
